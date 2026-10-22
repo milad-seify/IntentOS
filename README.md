@@ -210,7 +210,7 @@ GitHub Actions runs the suite on Python 3.11, 3.12, and 3.13 plus a CLI smoke te
 
 The initial Phase 0–6 roadmap is implemented. The project is now in **stabilization and real-world dogfooding** before locking a stable v1 contract.
 
-Current baseline: **43 unit tests + CLI smoke**, verified by GitHub Actions on Python 3.11, 3.12, and 3.13.
+Current baseline: **45 unit tests + CLI smoke**, verified by GitHub Actions on Python 3.11, 3.12, and 3.13.
 
 See [`docs/STATUS.md`](docs/STATUS.md) for the concise handoff, [`docs/DOGFOODING.md`](docs/DOGFOODING.md) for real-world findings, [`docs/HUGGINGFACE_RESEARCH.md`](docs/HUGGINGFACE_RESEARCH.md) for the ecosystem research pass, [`docs/INDEPENDENT_AUDIT.md`](docs/INDEPENDENT_AUDIT.md) for the external review package, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for the roadmap.
 
