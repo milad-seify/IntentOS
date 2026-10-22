@@ -264,7 +264,8 @@ def _looks_like_documentation_edit(text: str) -> bool:
 def is_documentation_only(intent: NormalizedIntent) -> bool:
     # Documentation scope is a property of the requested action. Background
     # context must never be able to weaken a mutation-risk decision.
-    return _has_unnegated_documentation_scope(_action_text(intent))
+    action = _action_text(intent)
+    return _has_unnegated_documentation_scope(action) or _looks_like_documentation_edit(action)
 
 
 def has_devops_signals(intent: NormalizedIntent) -> bool:
@@ -279,11 +280,8 @@ def classify_task(intent: NormalizedIntent) -> tuple[TaskType, RiskLevel]:
     action = _action_text(intent)
     all_text = _all_text(intent)
     docs_only = is_documentation_only(intent)
-    docs_edit = _looks_like_documentation_edit(action)
 
-    if docs_edit:
-        task = TaskType.GENERAL
-    elif _contains_any(action, _SECURITY_TERMS):
+    if _contains_any(action, _SECURITY_TERMS):
         task = TaskType.SECURITY
     elif _contains_any(action, _DEVOPS_TERMS):
         task = TaskType.DEVOPS
@@ -291,6 +289,8 @@ def classify_task(intent: NormalizedIntent) -> tuple[TaskType, RiskLevel]:
         task = TaskType.ARCHITECTURE
     elif _contains_any(action, _REFACTOR_TERMS):
         task = TaskType.REFACTOR
+    elif _looks_like_documentation_edit(action):
+        task = TaskType.GENERAL
     elif _contains_any(action, _BUGFIX_TERMS):
         task = TaskType.BUGFIX
     elif _contains_any(action, _CODING_TERMS):
@@ -298,7 +298,7 @@ def classify_task(intent: NormalizedIntent) -> tuple[TaskType, RiskLevel]:
     else:
         task = TaskType.GENERAL
 
-    if docs_only or docs_edit:
+    if docs_only:
         risk = RiskLevel.LOW
     elif _contains_any(all_text, _HIGH_RISK_TERMS) or task is TaskType.SECURITY:
         risk = RiskLevel.HIGH
