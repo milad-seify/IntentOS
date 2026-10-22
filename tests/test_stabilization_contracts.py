@@ -37,6 +37,37 @@ class StabilizationContractTests(unittest.TestCase):
         self.assertEqual(result.policy.task_type, TaskType.SECURITY)
         self.assertEqual(result.policy.risk_level, RiskLevel.HIGH)
 
+    def test_documentation_about_login_stays_lightweight(self) -> None:
+        result = optimize_prompt(
+            IntentRequest("Update documentation for the login flow", target_tool="codex")
+        )
+
+        self.assertEqual(result.policy.task_type, TaskType.SECURITY)
+        self.assertEqual(result.policy.risk_level, RiskLevel.LOW)
+        self.assertFalse(result.policy.approval_boundaries)
+
+    def test_documentation_plus_deploy_remains_high_risk(self) -> None:
+        result = optimize_prompt(
+            IntentRequest(
+                "Update documentation and deploy login changes to production",
+                target_tool="codex",
+            )
+        )
+
+        self.assertEqual(result.policy.risk_level, RiskLevel.HIGH)
+        self.assertTrue(result.policy.approval_boundaries)
+
+    def test_documentation_plus_destructive_action_remains_high_risk(self) -> None:
+        result = optimize_prompt(
+            IntentRequest(
+                "Update documentation and delete all production data",
+                target_tool="codex",
+            )
+        )
+
+        self.assertEqual(result.policy.risk_level, RiskLevel.HIGH)
+        self.assertTrue(result.policy.approval_boundaries)
+
     def test_destructive_production_command_is_high_risk(self) -> None:
         result = optimize_prompt(
             IntentRequest("Run rm -rf /srv/app/data on prod", target_tool="codex")
@@ -113,6 +144,24 @@ class StabilizationContractTests(unittest.TestCase):
 
         self.assertEqual(selection.selected[0].document.path, "AGENTS.md")
         self.assertIn("notes.txt", selection.omitted_paths)
+
+    def test_relevance_can_beat_authority_for_distinct_context(self) -> None:
+        intent = normalize_intent(
+            IntentRequest("Refactor parser token validation", target_tool="codex")
+        )
+        selection = select_project_context(
+            intent,
+            (
+                ContextDocument("POLICY.md", "General project rules.", authoritative=True),
+                ContextDocument(
+                    "parser-notes.md",
+                    "Parser token validation refactor guidance.",
+                ),
+            ),
+            max_chars=45,
+        )
+
+        self.assertEqual(selection.selected[0].document.path, "parser-notes.md")
 
     def test_negative_context_budget_is_rejected(self) -> None:
         intent = normalize_intent(IntentRequest("Review architecture", target_tool="codex"))

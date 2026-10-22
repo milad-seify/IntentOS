@@ -85,24 +85,44 @@ def select_project_context(
             continue
         candidates.append(ScoredContext(document=document, score=score, reasons=tuple(reasons)))
 
-    # Rank first, then deduplicate so the strongest/authoritative representative
-    # survives even when an identical lower-value copy appeared earlier.
-    candidates.sort(
+    # Deduplicate identical content without letting source authority globally
+    # outrank relevance. Authority decides which duplicate copy survives; the
+    # resulting distinct documents are then ranked primarily by relevance score.
+    representatives: dict[str, ScoredContext] = {}
+    for item in candidates:
+        normalized = _normalize_content(item.document.content)
+        existing = representatives.get(normalized)
+        if existing is None:
+            representatives[normalized] = item
+            continue
+
+        item_better = (
+            item.document.authoritative and not existing.document.authoritative
+        ) or (
+            item.document.authoritative == existing.document.authoritative
+            and (
+                item.score > existing.score
+                or (
+                    item.score == existing.score
+                    and _canonical_path(item.document.path).casefold()
+                    < _canonical_path(existing.document.path).casefold()
+                )
+            )
+        )
+        if item_better:
+            omitted.append(existing.document.path)
+            representatives[normalized] = item
+        else:
+            omitted.append(item.document.path)
+
+    scored = list(representatives.values())
+    scored.sort(
         key=lambda item: (
-            not item.document.authoritative,
             -item.score,
+            not item.document.authoritative,
             _canonical_path(item.document.path).casefold(),
         )
     )
-    seen_content: set[str] = set()
-    scored: list[ScoredContext] = []
-    for item in candidates:
-        normalized = _normalize_content(item.document.content)
-        if normalized in seen_content:
-            omitted.append(item.document.path)
-            continue
-        seen_content.add(normalized)
-        scored.append(item)
 
     selected: list[ScoredContext] = []
     used = 0

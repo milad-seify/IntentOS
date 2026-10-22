@@ -159,6 +159,61 @@ _DOCUMENTATION_SURFACE_TERMS = (
     "کامنت",
 )
 
+_DOCUMENTATION_ACTION_TERMS = (
+    "update",
+    "edit",
+    "write",
+    "fix",
+    "typo",
+    "correct",
+    "document",
+    "به روز",
+    "به‌روز",
+    "ویرایش",
+    "اصلاح",
+    "بنویس",
+)
+
+# Documentation can discuss technical or high-risk topics without mutating them.
+# A second explicit action keeps the request on the normal technical/risk path.
+_NON_DOCUMENTATION_ACTION_TERMS = (
+    "and deploy",
+    "then deploy",
+    "and implement",
+    "then implement",
+    "and refactor",
+    "then refactor",
+    "and change",
+    "then change",
+    "and modify",
+    "then modify",
+    "and run",
+    "then run",
+    "and apply",
+    "then apply",
+    "and execute",
+    "then execute",
+    "and delete",
+    "then delete",
+    "and drop",
+    "then drop",
+    "and truncate",
+    "then truncate",
+    "and wipe",
+    "then wipe",
+    "rm -rf",
+    "و استقرار",
+    "و دیپلوی",
+    "و پیاده سازی",
+    "و پیاده‌سازی",
+    "و ریفکتور",
+    "و تغییر",
+    "و اجرا",
+    "و اعمال",
+    "و حذف",
+    "و پاک",
+)
+
 _NEGATION_TERMS = (
     "not",
     "never",
@@ -201,31 +256,16 @@ def _has_unnegated_documentation_scope(text: str) -> bool:
 def _looks_like_documentation_edit(text: str) -> bool:
     if not _contains_any(text, _DOCUMENTATION_SURFACE_TERMS):
         return False
-    if _contains_any(text, _SECURITY_TERMS + _DEVOPS_TERMS + _CODING_TERMS + _REFACTOR_TERMS):
+    if not _contains_any(text, _DOCUMENTATION_ACTION_TERMS):
         return False
-    return _contains_any(
-        text,
-        (
-            "update",
-            "edit",
-            "write",
-            "fix",
-            "typo",
-            "correct",
-            "document",
-            "به روز",
-            "به‌روز",
-            "ویرایش",
-            "اصلاح",
-            "بنویس",
-        ),
-    )
+    return not _contains_any(text, _NON_DOCUMENTATION_ACTION_TERMS)
 
 
 def is_documentation_only(intent: NormalizedIntent) -> bool:
     # Documentation scope is a property of the requested action. Background
     # context must never be able to weaken a mutation-risk decision.
-    return _has_unnegated_documentation_scope(_action_text(intent))
+    action = _action_text(intent)
+    return _has_unnegated_documentation_scope(action) or _looks_like_documentation_edit(action)
 
 
 def has_devops_signals(intent: NormalizedIntent) -> bool:
