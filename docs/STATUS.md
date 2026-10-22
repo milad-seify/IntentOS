@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 3 — Project Context + Agent Workspace
+Phase 4 — AI / Model Routing
 
 ## Implemented
 
@@ -10,14 +10,15 @@ Phase 3 — Project Context + Agent Workspace
 - Phase 1: prompt engineering core and target profiles
 - Phase 2: task/risk classification and contextual engineering/DevOps policies
 - Phase 3: bounded project-context selection and proposal-first agent workspace maintenance
+- Phase 4: capability/cost/effort routing with replaceable model metadata and deterministic fallback
 
 ## Current verification baseline
 
-17 standard-library unit tests passing locally.
+22 standard-library unit tests passing locally.
 
 ## Next
 
-Phase 4 — AI / Model Routing.
+Phase 5 — Evaluation and Learning.
 
 ## Constraints carried forward
 
@@ -26,3 +27,4 @@ Phase 4 — AI / Model Routing.
 - minimal sufficient context
 - contextual engineering rules, not dogmatic injection
 - proposal/approval boundaries before destructive or persistent changes
+- no hardcoded volatile model names in core routing logic
