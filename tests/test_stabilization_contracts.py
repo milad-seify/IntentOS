@@ -42,7 +42,7 @@ class StabilizationContractTests(unittest.TestCase):
             IntentRequest("Update documentation for the login flow", target_tool="codex")
         )
 
-        self.assertEqual(result.policy.task_type, TaskType.GENERAL)
+        self.assertEqual(result.policy.task_type, TaskType.SECURITY)
         self.assertEqual(result.policy.risk_level, RiskLevel.LOW)
         self.assertFalse(result.policy.approval_boundaries)
 
