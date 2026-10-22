@@ -70,21 +70,83 @@ Goal: replace subjective prompt quality with evidence.
 - regression evaluation
 - reusable lessons promoted into profiles/policies
 
-## Phase 6 — Integrations and Ecosystem
+## Phase 6 — Initial Integrations and OSS Surface
 
-Goal: let the community extend IntentOS without bloating the core.
+Goal: make the core usable and contributable without bloating it.
 
-Possible directions:
+Implemented foundation:
 
 - CLI
-- IDE/agent integrations
-- GitHub workflows
-- profile/plugin registry
-- CI evaluation
-- community-contributed AI and domain profiles
+- Python package/API
+- GitHub Actions CI
+- portable Agent Skill artifacts
+- contributor guidance
+- versioned run/evaluation records
 
-These are candidates, not commitments.
+## Stabilization — Dogfooding + Independent Audit
+
+Goal: validate the product and public boundaries before freezing a stable v1 contract.
+
+- real Codex / Claude Code / ChatGPT workflows
+- regression fixtures from real failures
+- multilingual/context edge cases
+- external architecture/quality audit
+- verify that product scope, core APIs, and integration boundaries remain coherent
+
+## Phase 7 — Access and Agent Interoperability
+
+Goal: make IntentOS easy to use across environments while preserving one shared core.
+
+Preferred delivery order:
+
+### 7A — MCP adapter
+
+- expose bounded IntentOS operations to compatible agents
+- optimize/prepare task
+- task/risk/context/policy access
+- verification contract access
+- portable Skill and run-record helpers
+- no generic MCP runtime or autonomous orchestration
+
+### 7B — VS Code extension
+
+- editor-native task preparation
+- selected-text/request refinement
+- task/risk/context preview
+- approval and verification visualization
+- workspace proposal review
+- copy/send handoff to connected agents
+- thin adapter over core/MCP/API rather than duplicated decision logic
+
+### 7C — Simple user interface
+
+- outcome-first workflow for non-expert users
+- no prompt-engineering prerequisite
+- safe defaults
+- advanced controls through progressive disclosure
+- validate whether this should be standalone desktop/web or another low-friction surface based on real usage
+
+### 7D — Additional adapters
+
+- other IDEs and agent surfaces
+- community integrations
+- provider/model metadata adapters where real usage requires them
+
+Add these only from demonstrated demand; do not build broad shallow integrations for their own sake.
+
+## Later ecosystem directions
+
+Potential extension points, not current core commitments:
+
+- profile/plugin registry
+- provider latency/failover policy adapters
+- telemetry/OpenTelemetry adapters
+- execution trace adapters
+- MCP tool contracts for external systems
+- hosted collaboration features where local-first workflows are insufficient
 
 ## Product discipline
 
 Each phase should prefer the smallest usable slice, real-world dogfooding, tests before expansion, and documented decisions. Features should not enter the core solely because one AI vendor currently exposes them.
+
+Ease of use is part of product quality: common workflows should become simpler as integrations improve, while advanced control remains available without forcing complexity on everyday users.

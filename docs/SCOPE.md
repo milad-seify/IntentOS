@@ -1,6 +1,6 @@
 # Scope
 
-This document defines what IntentOS accepts, improves, and returns.
+This document defines what IntentOS accepts, improves, returns, and how users or agents may access it.
 
 ## Inputs
 
@@ -30,7 +30,8 @@ IntentOS may:
 8. generate execution workflow and approval boundaries
 9. generate verification and Definition of Done
 10. create or propose updates to agent-facing context files
-11. collect evaluation metadata for future improvement
+11. compile portable Agent Skill artifacts
+12. collect versioned evaluation/run metadata for future improvement
 
 ## Initial domains
 
@@ -48,11 +49,38 @@ These are decision principles, not mandatory patterns. Small tasks must remain s
 
 Contextual guidance may include reproducibility, idempotency, infrastructure as code, CI/CD, secrets handling, least privilege, observability, rollback, deployment safety, configuration management, and operational verification.
 
+## Access surfaces
+
+IntentOS is one core with multiple access surfaces for different users and environments.
+
+### CLI and Python API
+
+These are first-class interfaces for developers, scripts, CI, automation, and integrations. They should remain deterministic and machine-readable where practical.
+
+### MCP adapter
+
+A future MCP adapter may expose bounded IntentOS capabilities to compatible AI agents. MCP is an interoperability surface; IntentOS does not become a general MCP runtime.
+
+### VS Code extension
+
+A future VS Code extension may provide editor-native task preparation, risk/context preview, workspace proposals, and handoff to connected agents. It must remain a thin UI/integration layer over the core.
+
+### Simple user interface
+
+A future simple UI may expose outcome-first workflows for users who do not know prompt engineering, model routing, or agent internals. Advanced settings should be optional through progressive disclosure.
+
+### Agent Skills
+
+Portable `SKILL.md` artifacts provide reusable, on-demand agent guidance without coupling the core to one IDE or vendor.
+
+No access surface should independently reimplement core policy, routing, context selection, or verification logic.
+
 ## Outputs
 
 Depending on the request, IntentOS may return:
 
 - optimized prompt
+- portable Agent Skill artifact
 - recommended AI/tool/model family or effort class
 - task/risk classification
 - selected context summary
@@ -62,7 +90,7 @@ Depending on the request, IntentOS may return:
 - verification commands/checks
 - Definition of Done
 - agent context-file creation/update plan
-- evaluation metadata
+- versioned evaluation/run metadata
 
 Not every request needs every output.
 
@@ -86,10 +114,12 @@ IntentOS is not intended to become:
 - an IDE
 - an autonomous coding agent
 - a model hosting platform
+- a general MCP runtime
 - a CI/CD service
 - a project-management suite
 - a replacement for source control
 - a mandatory software architecture framework
 - a universal orchestration platform for arbitrary autonomous agents
+- a mandatory hosted/cloud service
 
 Integrations may connect to these systems later without moving their responsibilities into the core.

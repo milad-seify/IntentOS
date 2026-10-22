@@ -109,3 +109,15 @@ Reusable agent guidance should be compilable into an Agent Skills-compatible `SK
 **Status:** Accepted
 
 IntentOS exposes a compact, versioned run record for reproducible evaluation across agents and models. The record stores a prompt fingerprint and routing/context provenance plus externally supplied quality, token, latency, and retry metrics. Raw prompts, tool outputs, storage, telemetry backends, and dataset publishing remain executor/integration concerns.
+
+## D-019 — One core, multiple access surfaces
+
+**Status:** Accepted
+
+CLI, Python API, MCP, VS Code, Agent Skills, and future simple user interfaces are adapters around one shared IntentOS core. They must not independently reimplement task/risk classification, context selection, engineering policy, routing, approval, or verification logic. Surface-specific code may adapt presentation, transport, editor context, or interaction flow only.
+
+## D-020 — Ease of use uses progressive disclosure
+
+**Status:** Accepted
+
+IntentOS must be usable without prompt-engineering, model-routing, or MCP expertise. Common workflows should expose outcome-first actions and safe defaults; advanced users may inspect or override deeper context, routing, policy, cost, and verification details through progressive disclosure. Simplicity must not weaken high-risk approval or safety boundaries.

@@ -53,3 +53,11 @@ External writes, destructive actions, purchases, production-impacting changes, m
 ## 13. Learn from outcomes, not preferences alone
 
 Prompt and workflow improvements should eventually be evaluated against measurable outcomes such as success rate, retries, tokens, latency, defects, and reviewer corrections.
+
+## 14. Powerful for experts, simple enough for everyone
+
+Ease of use is a product requirement. Everyday users should be able to describe an outcome in ordinary language without learning prompt engineering, model routing, MCP, or internal architecture. Advanced controls should be available through progressive disclosure rather than required up front.
+
+## 15. One core, many access surfaces
+
+CLI, Python API, MCP, VS Code, Agent Skills, and future simple user interfaces should adapt the same core decisions rather than reimplement task classification, context selection, policy, routing, or verification independently.

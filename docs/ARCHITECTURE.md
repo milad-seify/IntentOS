@@ -1,8 +1,8 @@
 # Architecture
 
-Phase 0 defines a conceptual architecture only. Implementation technology is intentionally deferred until the interfaces and first use cases are validated.
+IntentOS uses a small vendor-neutral core with replaceable profiles and integration surfaces. Product access may expand, but core decision logic should remain shared.
 
-## Pipeline
+## Core pipeline
 
 ```text
 User Intent
@@ -17,14 +17,36 @@ Policy Engine
    ↓
 AI / Model Router
    ↓
-Prompt + Workflow Compiler
+Prompt / Skill + Workflow Compiler
    ↓
 Verification Contract
    ↓
 Output / Agent Handoff
    ↓
-Evaluation Feedback
+Evaluation + Run Record
 ```
+
+## Usage architecture
+
+IntentOS should expose the same core through multiple user-appropriate surfaces:
+
+```text
+                         IntentOS Core
+                              │
+          ┌───────────────────┼───────────────────┐
+          │                   │                   │
+       Simple UI          VS Code UX          CLI / API
+          │                   │                   │
+          └───────────────────┼───────────────────┘
+                              │
+                             MCP
+                              │
+                  Compatible AI agents/tools
+```
+
+The diagram describes responsibility, not process topology. CLI, VS Code, MCP, and UI layers are adapters around the core. They must not fork task classification, context selection, engineering policy, routing, or verification behavior.
+
+Agent Skills are another portable output/interface: the core may compile reusable `SKILL.md` guidance that agent surfaces can load on demand.
 
 ## Core components
 
@@ -48,9 +70,9 @@ Applies domain profiles such as software engineering and DevOps. Policies are co
 
 Adapts behavior to the target tool/model family and may recommend an appropriate capability/cost class. Provider-specific facts belong in replaceable profiles, not the core.
 
-### Prompt + Workflow Compiler
+### Prompt / Skill + Workflow Compiler
 
-Produces the execution contract: optimized instructions, scope, constraints, allowed actions, approval boundaries, workflow, and expected reporting.
+Produces execution artifacts such as optimized instructions, portable Skills, scope, constraints, allowed actions, approval boundaries, workflow, and expected reporting.
 
 ### Verification Contract
 
@@ -62,7 +84,25 @@ Creates or proposes bounded updates to agent-facing context files. It should pre
 
 ### Evaluation Layer
 
-Captures comparable outcome signals so prompts, profiles, and routing decisions can improve based on evidence.
+Captures comparable outcome signals and versioned provenance so prompts, profiles, routing decisions, and workflows can improve based on evidence.
+
+## Integration components
+
+### CLI / Python API
+
+The baseline portable interfaces. These provide deterministic access for users, scripts, CI systems, and other integrations.
+
+### MCP adapter
+
+A bounded interoperability adapter for compatible AI agents. It may expose IntentOS operations as tools but should not own generic agent orchestration, transport policy, or MCP runtime responsibilities beyond the adapter.
+
+### VS Code extension
+
+An editor-native thin client over the same core. It may visualize task type, risk, selected context, approval boundaries, model/capability recommendations, verification, and workspace proposals, and may hand prepared tasks to connected agents.
+
+### Simple UI
+
+A low-friction surface for users who should not need CLI, prompt-engineering, or MCP knowledge. It should use outcome-first language and progressive disclosure of advanced details.
 
 ## Extensibility
 
@@ -77,15 +117,22 @@ profiles/
 workflows/
 evaluators/
 integrations/
+  cli/
+  mcp/
+  vscode/
+  ui/
 ```
 
-This is a direction, not a committed filesystem or implementation language.
+This is a conceptual responsibility split, not a committed filesystem layout.
 
 ## Architectural constraints
 
-- Core logic must not depend on one AI vendor.
+- Core logic must not depend on one AI vendor, IDE, transport, or UI surface.
+- All access surfaces should produce semantically consistent core decisions.
+- UI/IDE/MCP adapters must not duplicate core policy or routing logic.
 - Project files must remain human-readable and reviewable.
 - Generated context should be bounded and traceable.
 - High-risk recommendations must expose assumptions and approval boundaries.
 - Routing must have deterministic fallbacks when tool/model metadata is unavailable.
-- The first implementation should be a modular monolith or similarly simple structure unless evidence requires more complexity.
+- Ease of use should be achieved through adapters and progressive disclosure, not by weakening safety or duplicating logic.
+- The implementation should remain a modular monolith or similarly simple structure unless evidence requires more complexity.
