@@ -159,6 +159,46 @@ _DOCUMENTATION_SURFACE_TERMS = (
     "کامنت",
 )
 
+_DOCUMENTATION_ACTION_TERMS = (
+    "update",
+    "edit",
+    "write",
+    "fix",
+    "typo",
+    "correct",
+    "document",
+    "به روز",
+    "به‌روز",
+    "ویرایش",
+    "اصلاح",
+    "بنویس",
+)
+
+# A documentation request may discuss security, DevOps, or architecture without
+# mutating those systems. Only explicit combined implementation/execution phrases
+# disqualify the request from the lightweight documentation path.
+_NON_DOCUMENTATION_ACTION_TERMS = (
+    "and deploy",
+    "then deploy",
+    "deploy changes",
+    "and implement",
+    "then implement",
+    "implement changes",
+    "implement feature",
+    "and refactor",
+    "then refactor",
+    "refactor code",
+    "change code",
+    "modify code",
+    "update code",
+    "و استقرار",
+    "و دیپلوی",
+    "و پیاده سازی",
+    "و پیاده‌سازی",
+    "کد را تغییر",
+    "کد رو تغییر",
+)
+
 _NEGATION_TERMS = (
     "not",
     "never",
@@ -201,25 +241,9 @@ def _has_unnegated_documentation_scope(text: str) -> bool:
 def _looks_like_documentation_edit(text: str) -> bool:
     if not _contains_any(text, _DOCUMENTATION_SURFACE_TERMS):
         return False
-    if _contains_any(text, _SECURITY_TERMS + _DEVOPS_TERMS + _CODING_TERMS + _REFACTOR_TERMS):
+    if not _contains_any(text, _DOCUMENTATION_ACTION_TERMS):
         return False
-    return _contains_any(
-        text,
-        (
-            "update",
-            "edit",
-            "write",
-            "fix",
-            "typo",
-            "correct",
-            "document",
-            "به روز",
-            "به‌روز",
-            "ویرایش",
-            "اصلاح",
-            "بنویس",
-        ),
-    )
+    return not _contains_any(text, _NON_DOCUMENTATION_ACTION_TERMS)
 
 
 def is_documentation_only(intent: NormalizedIntent) -> bool:
@@ -240,8 +264,11 @@ def classify_task(intent: NormalizedIntent) -> tuple[TaskType, RiskLevel]:
     action = _action_text(intent)
     all_text = _all_text(intent)
     docs_only = is_documentation_only(intent)
+    docs_edit = _looks_like_documentation_edit(action)
 
-    if _contains_any(action, _SECURITY_TERMS):
+    if docs_edit:
+        task = TaskType.GENERAL
+    elif _contains_any(action, _SECURITY_TERMS):
         task = TaskType.SECURITY
     elif _contains_any(action, _DEVOPS_TERMS):
         task = TaskType.DEVOPS
@@ -249,8 +276,6 @@ def classify_task(intent: NormalizedIntent) -> tuple[TaskType, RiskLevel]:
         task = TaskType.ARCHITECTURE
     elif _contains_any(action, _REFACTOR_TERMS):
         task = TaskType.REFACTOR
-    elif _looks_like_documentation_edit(action):
-        task = TaskType.GENERAL
     elif _contains_any(action, _BUGFIX_TERMS):
         task = TaskType.BUGFIX
     elif _contains_any(action, _CODING_TERMS):
@@ -258,7 +283,7 @@ def classify_task(intent: NormalizedIntent) -> tuple[TaskType, RiskLevel]:
     else:
         task = TaskType.GENERAL
 
-    if docs_only:
+    if docs_only or docs_edit:
         risk = RiskLevel.LOW
     elif _contains_any(all_text, _HIGH_RISK_TERMS) or task is TaskType.SECURITY:
         risk = RiskLevel.HIGH
