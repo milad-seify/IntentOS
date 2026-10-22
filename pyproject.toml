@@ -12,5 +12,8 @@ license = {text = "MIT"}
 authors = [{name = "Milad Seify"}]
 dependencies = []
 
+[project.scripts]
+intentos = "intentos.cli:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]
