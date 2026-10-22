@@ -34,11 +34,32 @@ def _load_documents(paths: Sequence[str]) -> tuple[ContextDocument, ...]:
 def _result_dict(result) -> dict[str, object]:
     policy = result.policy
     selection = result.context_selection
+    selected_context = (
+        [
+            {
+                "path": item.document.path,
+                "score": item.score,
+                "reasons": list(item.reasons),
+                "chars": len(item.document.content),
+            }
+            for item in selection.selected
+        ]
+        if selection
+        else []
+    )
     return {
         "schema_version": _CLI_SCHEMA_VERSION,
         "status": "clarification" if result.needs_clarification else "ready",
         "needs_clarification": result.needs_clarification,
         "questions": list(result.questions),
+        "intent": {
+            "goal": result.intent.goal,
+            "target_tool": result.intent.target_tool,
+            "output_format": result.intent.output_format,
+            "constraints": list(result.intent.constraints),
+            "audience": result.intent.audience,
+            "success_criteria": list(result.intent.success_criteria),
+        },
         "prompt": result.prompt,
         "task_type": policy.task_type.value if policy else None,
         "risk_level": policy.risk_level.value if policy else None,
@@ -58,12 +79,13 @@ def _result_dict(result) -> dict[str, object]:
             else None
         ),
         "context": {
-            "selected_paths": [item.document.path for item in selection.selected] if selection else [],
+            "selected": selected_context,
+            "selected_paths": [item["path"] for item in selected_context],
             "omitted_paths": list(selection.omitted_paths) if selection else [],
             "total_chars": selection.total_chars if selection else 0,
         },
         # Compatibility alias for the current pre-v1 CLI consumers.
-        "context_paths": [item.document.path for item in selection.selected] if selection else [],
+        "context_paths": [item["path"] for item in selected_context],
     }
 
 
