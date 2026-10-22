@@ -12,7 +12,7 @@ Load only context that can materially change the result. Avoid dumping entire re
 
 ## 3. Smallest coherent change
 
-Prefer the smallest change that fully solves the task. Avoid opportunistic refactors, speculative abstractions, and unrelated cleanup.
+Prefer the smallest change that fully solves the task. Before adding new code or dependencies, use the first sufficient option: skip unnecessary work, reuse existing project code, use standard-library or platform capabilities, reuse an already-installed dependency, then add only the minimum new code. Avoid opportunistic refactors, speculative abstractions, code golf, and unrelated cleanup.
 
 ## 4. Contextual engineering quality
 

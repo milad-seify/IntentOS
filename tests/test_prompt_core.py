@@ -80,7 +80,11 @@ class PromptCoreTests(unittest.TestCase):
         self.assertEqual(result.policy.task_type, TaskType.REFACTOR)
         self.assertEqual(result.policy.risk_level, RiskLevel.MEDIUM)
         prompt = result.prompt or ""
-        self.assertIn("KISS and YAGNI", prompt)
+        self.assertIn("smallest coherent change", prompt)
+        self.assertIn("reuse existing project code", prompt)
+        self.assertIn("standard-library or platform capabilities", prompt)
+        self.assertIn("already-installed dependency", prompt)
+        self.assertIn("minimum new code", prompt)
         self.assertIn("SOLID, DRY, and Clean Code", prompt)
         self.assertIn("observable behavior stable", prompt)
 
@@ -117,6 +121,7 @@ class PromptCoreTests(unittest.TestCase):
         self.assertEqual(result.policy.task_type, TaskType.GENERAL)
         prompt = result.prompt or ""
         self.assertNotIn("SOLID", prompt)
+        self.assertNotIn("reuse existing project code", prompt)
         self.assertNotIn("Approval boundaries:", prompt)
 
     def test_readme_typo_stays_lightweight(self) -> None:
@@ -128,6 +133,7 @@ class PromptCoreTests(unittest.TestCase):
         self.assertEqual(result.policy.risk_level, RiskLevel.LOW)
         prompt = result.prompt or ""
         self.assertNotIn("SOLID", prompt)
+        self.assertNotIn("reuse existing project code", prompt)
         self.assertNotIn("Approval boundaries:", prompt)
 
 
