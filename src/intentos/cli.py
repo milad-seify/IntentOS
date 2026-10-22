@@ -12,6 +12,7 @@ from .skills import build_skill_artifact
 from .workspace import plan_agent_workspace
 
 
+_CLI_SCHEMA_VERSION = "1"
 _AUTHORITATIVE_NAMES = {"AGENTS.md", "STATUS.md", "DECISIONS.md", "ARCHITECTURE.md"}
 
 
@@ -31,12 +32,19 @@ def _load_documents(paths: Sequence[str]) -> tuple[ContextDocument, ...]:
 
 
 def _result_dict(result) -> dict[str, object]:
+    policy = result.policy
+    selection = result.context_selection
     return {
+        "schema_version": _CLI_SCHEMA_VERSION,
+        "status": "clarification" if result.needs_clarification else "ready",
         "needs_clarification": result.needs_clarification,
         "questions": list(result.questions),
         "prompt": result.prompt,
-        "task_type": result.policy.task_type.value if result.policy else None,
-        "risk_level": result.policy.risk_level.value if result.policy else None,
+        "task_type": policy.task_type.value if policy else None,
+        "risk_level": policy.risk_level.value if policy else None,
+        "engineering_rules": list(policy.engineering_rules) if policy else [],
+        "approval_boundaries": list(policy.approval_boundaries) if policy else [],
+        "done_criteria": list(policy.done_criteria) if policy else [],
         "routing": (
             {
                 "target_tool": result.routing.target_tool,
@@ -49,20 +57,35 @@ def _result_dict(result) -> dict[str, object]:
             if result.routing
             else None
         ),
-        "context_paths": (
-            [item.document.path for item in result.context_selection.selected]
-            if result.context_selection
-            else []
-        ),
+        "context": {
+            "selected_paths": [item.document.path for item in selection.selected] if selection else [],
+            "omitted_paths": list(selection.omitted_paths) if selection else [],
+            "total_chars": selection.total_chars if selection else 0,
+        },
+        # Compatibility alias for the current pre-v1 CLI consumers.
+        "context_paths": [item.document.path for item in selection.selected] if selection else [],
+    }
+
+
+def _error_dict(error: Exception) -> dict[str, object]:
+    return {
+        "schema_version": _CLI_SCHEMA_VERSION,
+        "status": "error",
+        "error": {
+            "type": error.__class__.__name__,
+            "message": str(error),
+        },
     }
 
 
 def _add_intent_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("text", help="Raw user intent.")
-    parser.add_argument("--target", required=True, help="Target tool, e.g. codex, chatgpt, claude-code.")
+    parser.add_argument("--target", help="Target tool, e.g. codex, chatgpt, claude-code. Omit to detect from the request.")
     parser.add_argument("--constraint", action="append", default=[], help="Constraint; repeatable.")
     parser.add_argument("--success", action="append", default=[], help="Success criterion; repeatable.")
     parser.add_argument("--context-file", action="append", default=[], help="Project context file; repeatable.")
+    parser.add_argument("--output-format", help="Required output format, e.g. JSON or Markdown.")
+    parser.add_argument("--audience", help="Intended audience for the generated result.")
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -94,7 +117,9 @@ def _request_and_documents(args: argparse.Namespace) -> tuple[IntentRequest, tup
     request = IntentRequest.from_values(
         args.text,
         target_tool=args.target,
+        output_format=args.output_format,
         constraints=args.constraint,
+        audience=args.audience,
         success_criteria=args.success,
     )
     return request, _load_documents(args.context_file)
@@ -120,14 +145,17 @@ def _run_optimize(args: argparse.Namespace) -> int:
                 f"effort={result.routing.effort.value}"
             )
         print(result.prompt or "")
-    return 0
+    return 2 if result.needs_clarification else 0
 
 
 def _run_skill(args: argparse.Namespace) -> int:
     result = _optimize_from_args(args)
     if result.needs_clarification or result.policy is None:
-        for question in result.questions:
-            print(f"? {question}")
+        if args.json:
+            print(json.dumps(_result_dict(result), indent=2, ensure_ascii=False))
+        else:
+            for question in result.questions:
+                print(f"? {question}")
         return 2
 
     artifact = build_skill_artifact(
@@ -140,6 +168,8 @@ def _run_skill(args: argparse.Namespace) -> int:
         print(
             json.dumps(
                 {
+                    "schema_version": _CLI_SCHEMA_VERSION,
+                    "status": "ready",
                     "name": artifact.name,
                     "description": artifact.description,
                     "content": artifact.content,
@@ -157,6 +187,8 @@ def _run_workspace(args: argparse.Namespace) -> int:
     documents = _load_documents(args.document)
     plan = plan_agent_workspace(documents, current_phase=args.phase)
     payload = {
+        "schema_version": _CLI_SCHEMA_VERSION,
+        "status": "ready",
         "changes": [
             {
                 "action": change.action.value,
@@ -180,12 +212,19 @@ def _run_workspace(args: argparse.Namespace) -> int:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
-    if args.command == "optimize":
-        return _run_optimize(args)
-    if args.command == "skill":
-        return _run_skill(args)
-    if args.command == "workspace":
-        return _run_workspace(args)
+    try:
+        if args.command == "optimize":
+            return _run_optimize(args)
+        if args.command == "skill":
+            return _run_skill(args)
+        if args.command == "workspace":
+            return _run_workspace(args)
+    except (OSError, ValueError) as error:
+        if getattr(args, "json", False):
+            print(json.dumps(_error_dict(error), indent=2, ensure_ascii=False))
+        else:
+            print(f"ERROR: {error}")
+        return 2
     return 2
 
 
