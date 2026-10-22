@@ -5,7 +5,9 @@ import re
 from .models import ContextDocument, ContextSelection, NormalizedIntent, ScoredContext
 
 
-_WORD = re.compile(r"[A-Za-z0-9_./-]{3,}")
+# Python's Unicode-aware \w keeps deterministic lexical matching while allowing
+# Persian and other scripts to participate in context relevance scoring.
+_WORD = re.compile(r"[\w./-]{3,}", re.UNICODE)
 _PRIORITY_NAMES = {
     "AGENTS.md": 8,
     "STATUS.md": 7,
