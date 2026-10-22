@@ -174,29 +174,44 @@ _DOCUMENTATION_ACTION_TERMS = (
     "بنویس",
 )
 
-# A documentation request may discuss security, DevOps, or architecture without
-# mutating those systems. Only explicit combined implementation/execution phrases
-# disqualify the request from the lightweight documentation path.
+# Documentation can discuss technical or high-risk topics without mutating them.
+# A second explicit action keeps the request on the normal technical/risk path.
 _NON_DOCUMENTATION_ACTION_TERMS = (
     "and deploy",
     "then deploy",
-    "deploy changes",
     "and implement",
     "then implement",
-    "implement changes",
-    "implement feature",
     "and refactor",
     "then refactor",
-    "refactor code",
-    "change code",
-    "modify code",
-    "update code",
+    "and change",
+    "then change",
+    "and modify",
+    "then modify",
+    "and run",
+    "then run",
+    "and apply",
+    "then apply",
+    "and execute",
+    "then execute",
+    "and delete",
+    "then delete",
+    "and drop",
+    "then drop",
+    "and truncate",
+    "then truncate",
+    "and wipe",
+    "then wipe",
+    "rm -rf",
     "و استقرار",
     "و دیپلوی",
     "و پیاده سازی",
     "و پیاده‌سازی",
-    "کد را تغییر",
-    "کد رو تغییر",
+    "و ریفکتور",
+    "و تغییر",
+    "و اجرا",
+    "و اعمال",
+    "و حذف",
+    "و پاک",
 )
 
 _NEGATION_TERMS = (
