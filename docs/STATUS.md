@@ -16,7 +16,7 @@ Initial roadmap complete — stabilization and dogfooding
 
 ## Current verification baseline
 
-29 standard-library unit tests passing locally plus CLI JSON smoke test.
+31 standard-library unit tests passing locally plus `python -m intentos` CLI JSON smoke test.
 
 ## Next
 
