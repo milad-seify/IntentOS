@@ -242,9 +242,7 @@ def classify_task(intent: NormalizedIntent) -> tuple[TaskType, RiskLevel]:
     all_text = _all_text(intent)
     docs_only = is_documentation_only(intent)
 
-    if _looks_like_documentation_edit(action):
-        task = TaskType.GENERAL
-    elif _contains_any(action, _SECURITY_TERMS):
+    if _contains_any(action, _SECURITY_TERMS):
         task = TaskType.SECURITY
     elif _contains_any(action, _DEVOPS_TERMS):
         task = TaskType.DEVOPS
@@ -252,6 +250,8 @@ def classify_task(intent: NormalizedIntent) -> tuple[TaskType, RiskLevel]:
         task = TaskType.ARCHITECTURE
     elif _contains_any(action, _REFACTOR_TERMS):
         task = TaskType.REFACTOR
+    elif _looks_like_documentation_edit(action):
+        task = TaskType.GENERAL
     elif _contains_any(action, _BUGFIX_TERMS):
         task = TaskType.BUGFIX
     elif _contains_any(action, _CODING_TERMS):
