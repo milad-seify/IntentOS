@@ -57,6 +57,17 @@ class StabilizationContractTests(unittest.TestCase):
         self.assertEqual(result.policy.risk_level, RiskLevel.HIGH)
         self.assertTrue(result.policy.approval_boundaries)
 
+    def test_documentation_plus_destructive_action_remains_high_risk(self) -> None:
+        result = optimize_prompt(
+            IntentRequest(
+                "Update documentation and delete all production data",
+                target_tool="codex",
+            )
+        )
+
+        self.assertEqual(result.policy.risk_level, RiskLevel.HIGH)
+        self.assertTrue(result.policy.approval_boundaries)
+
     def test_destructive_production_command_is_high_risk(self) -> None:
         result = optimize_prompt(
             IntentRequest("Run rm -rf /srv/app/data on prod", target_tool="codex")
