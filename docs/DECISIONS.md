@@ -40,6 +40,24 @@ IntentOS may create, update, or recommend bounded agent-facing context files suc
 
 ## D-007 — Implementation stack deferred
 
+**Status:** Superseded by D-008
+
+Phase 0 intentionally did not select an implementation language, framework, storage layer, or deployment platform. Stack selection was deferred until Phase 1 interfaces and use cases were clear enough to implement the smallest core.
+
+## D-008 — Python standard-library core first
+
 **Status:** Accepted
 
-Phase 0 intentionally does not select an implementation language, framework, storage layer, or deployment platform. Stack selection should follow validated Phase 1 interfaces and use cases.
+The first implementation uses Python 3.11+ with no runtime dependencies. The Phase 1 problem is primarily data contracts, normalization, deterministic compilation, and tests; a framework would add cost without evidence of need. Vendor-specific integrations remain outside the core.
+
+## D-009 — Clarify instead of fabricating missing critical intent
+
+**Status:** Accepted
+
+When a critical field such as the goal or execution target is genuinely ambiguous, IntentOS returns bounded clarification questions instead of inventing requirements. Clarification is capped and deterministic; low-risk formatting details may use safe defaults.
+
+## D-010 — MIT license for the initial open-source project
+
+**Status:** Accepted
+
+IntentOS uses the MIT License initially to keep adoption, experimentation, and contribution friction low. This can be revisited only with an explicit project-governance decision.
