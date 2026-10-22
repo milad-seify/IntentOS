@@ -31,7 +31,7 @@ IntentOS makes those concerns explicit and composable.
 
 ### What makes it different
 
-- **Prompt engineering, not prompt inflation** — normalize and sharpen intent instead of adding boilerplate.
+- **Prompt engineering, not prompt inflation** — preserve and sharpen intent instead of adding boilerplate.
 - **Context-aware engineering** — KISS/YAGNI by default; SOLID, DRY, Clean Code, security, and DevOps guidance only when the task actually benefits from them.
 - **Risk-aware delegation** — production, security, schema, destructive, and persistent changes get stronger approval boundaries.
 - **Minimal project context** — rank, deduplicate, and budget repository context instead of dumping the whole repo into the agent.
@@ -66,7 +66,7 @@ Current surfaces:
 - **Python API** — programmatic access for integrations and automation.
 - **Agent Skills** — portable, reusable `SKILL.md` guidance.
 
-Planned after the independent audit validates the boundaries:
+Planned after the preparation contract is stabilized:
 
 - **MCP adapter** — standard connection for compatible AI agents.
 - **VS Code extension** — editor-native task preparation, risk/context preview, and agent handoff.
@@ -95,6 +95,12 @@ intentos optimize "Refactor the auth module without changing behavior" \
   --success "Relevant tests pass"
 ```
 
+If the target is named in the request, the CLI can detect it:
+
+```bash
+intentos optimize "Codex: refactor the parser without changing behavior"
+```
+
 Use project context:
 
 ```bash
@@ -118,11 +124,13 @@ Machine-readable output:
 intentos optimize "Review this architecture" --target claude --json
 ```
 
+JSON mode returns a small versioned status contract with preserved intent, task/risk policy, routing, context diagnostics, and clarification/error states. This contract is still pre-v1 and may evolve during stabilization.
+
 Plan agent workspace maintenance without writing files:
 
 ```bash
 intentos workspace \
-  --phase "Stabilization and dogfooding" \
+  --phase "Independent-audit stabilization" \
   --document AGENTS.md \
   --document docs/STATUS.md
 ```
@@ -174,6 +182,8 @@ else:
 For project-aware prompting, use `optimize_project_prompt()`. For model selection, pass replaceable `ModelMetadata` entries. IntentOS intentionally does not hardcode volatile model names in the core.
 
 Run records intentionally avoid storing raw prompts by default. They use fingerprints and compact metadata so future telemetry/dataset adapters can be added without making raw private agent traces a core requirement.
+
+The deterministic task/risk classifier is an **advisory preparation mechanism**, not a security authorization boundary.
 
 ## Engineering philosophy
 
@@ -240,15 +250,15 @@ The core currently has no third-party runtime dependencies.
 PYTHONPATH=src python -m unittest discover -s tests -v
 ```
 
-GitHub Actions runs the suite on Python 3.11, 3.12, and 3.13 plus a CLI smoke test.
+GitHub Actions runs the full suite on Ubuntu with Python 3.11, 3.12, and 3.13, plus focused Windows/Python 3.13 regression coverage and CLI smoke checks.
 
 ## Project status
 
-The initial Phase 0–6 roadmap is implemented. The project is now in **stabilization, real-world dogfooding, usage-architecture validation, and independent-audit preparation** before locking a stable v1 contract.
+The initial Phase 0–6 roadmap is implemented. An independent audit concluded **NEEDS STABILIZATION**, not architectural redesign. The current milestone is **contract-preserving task preparation** before MCP or VS Code implementation.
 
-Current baseline: **45 unit tests + CLI smoke**, verified by GitHub Actions on Python 3.11, 3.12, and 3.13.
+Current baseline: **69 unit tests + CLI smoke**, with Linux and Windows CI coverage.
 
-See [`docs/STATUS.md`](docs/STATUS.md) for the concise handoff, [`docs/DOGFOODING.md`](docs/DOGFOODING.md) for real-world findings, [`docs/HUGGINGFACE_RESEARCH.md`](docs/HUGGINGFACE_RESEARCH.md) for the ecosystem research pass, [`docs/UX.md`](docs/UX.md) for usage/access principles, [`docs/INDEPENDENT_AUDIT.md`](docs/INDEPENDENT_AUDIT.md) for the external review package, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for the roadmap.
+See [`docs/STATUS.md`](docs/STATUS.md) for the concise handoff, [`docs/DOGFOODING.md`](docs/DOGFOODING.md) for real-world findings, [`docs/HUGGINGFACE_RESEARCH.md`](docs/HUGGINGFACE_RESEARCH.md) for the ecosystem research pass, [`docs/UX.md`](docs/UX.md) for usage/access principles, [`docs/INDEPENDENT_AUDIT.md`](docs/INDEPENDENT_AUDIT.md) for the review contract, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for the roadmap.
 
 ## Contributing
 
