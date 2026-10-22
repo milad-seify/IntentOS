@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 4 — AI / Model Routing
+Phase 5 — Evaluation and Learning
 
 ## Implemented
 
@@ -11,14 +11,15 @@ Phase 4 — AI / Model Routing
 - Phase 2: task/risk classification and contextual engineering/DevOps policies
 - Phase 3: bounded project-context selection and proposal-first agent workspace maintenance
 - Phase 4: capability/cost/effort routing with replaceable model metadata and deterministic fallback
+- Phase 5: regression assertions/scoring, token-latency-retry metrics, A/B ranking, and evidence-backed learning proposals
 
 ## Current verification baseline
 
-22 standard-library unit tests passing locally.
+26 standard-library unit tests passing locally.
 
 ## Next
 
-Phase 5 — Evaluation and Learning.
+Phase 6 — Integrations and Ecosystem.
 
 ## Constraints carried forward
 
@@ -28,3 +29,4 @@ Phase 5 — Evaluation and Learning.
 - contextual engineering rules, not dogmatic injection
 - proposal/approval boundaries before destructive or persistent changes
 - no hardcoded volatile model names in core routing logic
+- learning requires repeated evidence, not one-off failures
