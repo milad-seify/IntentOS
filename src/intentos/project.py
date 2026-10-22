@@ -15,11 +15,18 @@ def optimize_project_prompt(
     max_context_chars: int = 6000,
     models: tuple[ModelMetadata, ...] = (),
 ) -> PromptResult:
+    if max_context_chars < 0:
+        raise ValueError("max_context_chars must be non-negative")
+
+    explicit_context_chars = sum(len(item.strip()) for item in request.context if item.strip())
+    if explicit_context_chars > max_context_chars:
+        raise ValueError("explicit context exceeds max_context_chars")
+
     base_intent = normalize_intent(request)
     selection = select_project_context(
         base_intent,
         documents,
-        max_chars=max_context_chars,
+        max_chars=max_context_chars - explicit_context_chars,
     )
 
     selected_context = tuple(
