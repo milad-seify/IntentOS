@@ -44,4 +44,4 @@ Use focused checks first, then the broader relevant test suite when available.
 
 ## Current phase
 
-Phase 3 adds bounded project-context selection and proposal-first agent workspace maintenance. Prefer authoritative guidance such as `AGENTS.md`, `docs/STATUS.md`, decisions, and architecture; deduplicate context and respect explicit budgets. Core logic may propose context-file creates/updates but must not silently perform repository writes. Model routing and evaluation remain later phases.
+Phase 4 adds AI/model routing metadata. Keep model names and volatile provider facts out of the core; use replaceable metadata catalogs/adapters. Route by required capability, effort, availability, surface compatibility, verification confidence, and relative cost. When metadata is unavailable, provide a deterministic capability-level fallback rather than inventing a model.
