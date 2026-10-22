@@ -13,17 +13,26 @@ Initial roadmap complete — stabilization and dogfooding
 - Phase 4: capability/cost/effort routing with replaceable model metadata and deterministic fallback
 - Phase 5: regression assertions/scoring, token-latency-retry metrics, A/B ranking, and evidence-backed learning proposals
 - Phase 6: standard-library CLI, package entry point, GitHub Actions CI, and contributor guidance
+- Stabilization pass 1: multilingual dogfooding, documentation-only policy correction, and independent-audit package
 
 ## Current verification baseline
 
-31 standard-library unit tests passing locally plus `python -m intentos` CLI JSON smoke test.
+37 standard-library unit tests plus the `python -m intentos` CLI smoke test. GitHub Actions passes on Python 3.11, 3.12, and 3.13.
+
+## Stabilization findings
+
+- English-only task heuristics were too narrow for mixed Persian + technical requests.
+- documentation-only architecture/security tasks needed lighter policy handling.
+- real failures are being promoted into regression fixtures rather than global prompt boilerplate.
+
+See `docs/DOGFOODING.md` for evidence and `docs/INDEPENDENT_AUDIT.md` for the independent review package.
 
 ## Next
 
-- dogfood IntentOS on real Codex / Claude Code / ChatGPT workflows
+- run the independent architecture/quality audit before freezing a stable v1 API
+- continue dogfooding on real multi-file Codex / Claude Code work
 - collect regression fixtures from real failures
 - add provider/model metadata adapters only where real usage requires them
-- run an independent architecture/quality audit before declaring a stable v1 contract
 
 ## Constraints carried forward
 
@@ -34,3 +43,4 @@ Initial roadmap complete — stabilization and dogfooding
 - proposal/approval boundaries before destructive or persistent changes
 - no hardcoded volatile model names in core routing logic
 - learning requires repeated evidence, not one-off failures
+- no claim of full multilingual NLP support from a small deterministic starter lexicon
