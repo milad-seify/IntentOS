@@ -6,13 +6,13 @@ from .models import PromptProfile
 _GENERIC = PromptProfile(
     name="generic",
     aliases=("generic", "ai", "llm"),
-    section_order=("Goal", "Context", "Constraints", "Output", "Done"),
+    section_order=("Goal", "Context", "Constraints", "Engineering", "Approvals", "Output", "Done"),
 )
 
 _CODEX = PromptProfile(
     name="codex",
     aliases=("codex", "openai codex"),
-    section_order=("Goal", "Context", "Scope", "Constraints", "Verification", "Done"),
+    section_order=("Goal", "Context", "Scope", "Constraints", "Engineering", "Approvals", "Verification", "Done"),
     guidance=(
         "Keep implementation scope explicit and bounded.",
         "Require concrete verification evidence when code changes are requested.",
@@ -22,7 +22,7 @@ _CODEX = PromptProfile(
 _CLAUDE_CODE = PromptProfile(
     name="claude-code",
     aliases=("claude code", "claude-code"),
-    section_order=("Goal", "Context", "Scope", "Constraints", "Verification", "Done"),
+    section_order=("Goal", "Context", "Scope", "Constraints", "Engineering", "Approvals", "Verification", "Done"),
     guidance=(
         "Keep repository scope explicit.",
         "State approval boundaries for destructive or persistent changes when relevant.",
@@ -32,7 +32,7 @@ _CLAUDE_CODE = PromptProfile(
 _CHATGPT = PromptProfile(
     name="chatgpt",
     aliases=("chatgpt", "gpt"),
-    section_order=("Goal", "Context", "Constraints", "Output", "Done"),
+    section_order=("Goal", "Context", "Constraints", "Engineering", "Approvals", "Output", "Done"),
 )
 
 _PROFILES = (_GENERIC, _CODEX, _CLAUDE_CODE, _CHATGPT)

@@ -44,4 +44,4 @@ Use focused checks first, then the broader relevant test suite when available.
 
 ## Current phase
 
-Phase 1 builds the smallest vendor-neutral prompt-engineering core: intent normalization, ambiguity handling, target-tool profiles, deterministic prompt compilation, and tests. Do not pull Phase 2 risk/engineering policy or later routing/context features forward unless needed to preserve a clean Phase 1 contract.
+Phase 2 adds deterministic task/risk classification plus contextual software-engineering and DevOps policy generation. Policies must remain proportional to task type and risk; do not inject heavyweight engineering rules into general tasks. Repository context management, model routing, and evaluation remain later phases.

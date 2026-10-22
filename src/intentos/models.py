@@ -10,6 +10,22 @@ class AmbiguitySeverity(str, Enum):
     HIGH = "high"
 
 
+class TaskType(str, Enum):
+    GENERAL = "general"
+    CODING = "coding"
+    BUGFIX = "bugfix"
+    REFACTOR = "refactor"
+    ARCHITECTURE = "architecture"
+    SECURITY = "security"
+    DEVOPS = "devops"
+
+
+class RiskLevel(str, Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+
+
 @dataclass(frozen=True, slots=True)
 class IntentRequest:
     raw_text: str
@@ -75,10 +91,20 @@ class PromptProfile:
 
 
 @dataclass(frozen=True, slots=True)
+class ExecutionPolicy:
+    task_type: TaskType
+    risk_level: RiskLevel
+    engineering_rules: tuple[str, ...] = ()
+    approval_boundaries: tuple[str, ...] = ()
+    done_criteria: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
 class PromptResult:
     prompt: str | None
     intent: NormalizedIntent
     questions: tuple[str, ...] = field(default_factory=tuple)
+    policy: ExecutionPolicy | None = None
 
     @property
     def needs_clarification(self) -> bool:
