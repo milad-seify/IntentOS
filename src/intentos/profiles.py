@@ -48,15 +48,26 @@ _GEMINI = PromptProfile(
 _PROFILES = (_GENERIC, _CODEX, _CLAUDE_CODE, _CURSOR, _CHATGPT, _CLAUDE, _GEMINI)
 
 
+def _normalized_name(name: str) -> str:
+    return " ".join(name.lower().strip().split())
+
+
 def all_profiles() -> tuple[PromptProfile, ...]:
     return _PROFILES
+
+
+def is_known_profile(name: str | None) -> bool:
+    if not name:
+        return False
+    normalized = _normalized_name(name)
+    return any(normalized == profile.name or normalized in profile.aliases for profile in _PROFILES)
 
 
 def resolve_profile(name: str | None) -> PromptProfile:
     if not name:
         return _GENERIC
 
-    normalized = " ".join(name.lower().strip().split())
+    normalized = _normalized_name(name)
     for profile in _PROFILES:
         if normalized == profile.name or normalized in profile.aliases:
             return profile
