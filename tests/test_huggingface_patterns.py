@@ -22,11 +22,32 @@ class HuggingFacePatternTests(unittest.TestCase):
         artifact = build_skill_artifact(result.intent, result.policy, name="Auth Refactor")
 
         self.assertEqual(artifact.name, "auth-refactor")
-        self.assertTrue(artifact.content.startswith("---\nname: auth-refactor\n"))
+        self.assertTrue(artifact.content.startswith('---\nname: "auth-refactor"\n'))
+        self.assertIn('description: "Apply IntentOS guidance', artifact.content)
         self.assertIn("## Engineering", artifact.content)
         self.assertIn("## Approval boundaries", artifact.content)
         self.assertIn("## Done", artifact.content)
         self.assertNotIn("selected_model", artifact.content)
+
+    def test_skill_name_is_sanitized_and_bounded(self) -> None:
+        result = optimize_prompt(IntentRequest("Refactor the parser", target_tool="codex"))
+        artifact = build_skill_artifact(
+            result.intent,
+            result.policy,
+            name="Very Long Skill Name !!! " * 10,
+        )
+
+        self.assertLessEqual(len(artifact.name), 64)
+        self.assertRegex(artifact.name, r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+
+    def test_skill_description_rejects_spec_overflow(self) -> None:
+        result = optimize_prompt(IntentRequest("Refactor the parser", target_tool="codex"))
+        with self.assertRaises(ValueError):
+            build_skill_artifact(
+                result.intent,
+                result.policy,
+                description="x" * 1025,
+            )
 
     def test_run_record_is_versioned_and_does_not_store_raw_prompt(self) -> None:
         result = optimize_prompt(
