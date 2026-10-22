@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 
 from .models import Ambiguity, AmbiguitySeverity, IntentRequest, NormalizedIntent
-from .profiles import detect_profile, resolve_profile
+from .profiles import detect_profile, is_known_profile, resolve_profile
 
 
 _WHITESPACE = re.compile(r"\s+")
@@ -53,10 +53,20 @@ def normalize_intent(request: IntentRequest) -> NormalizedIntent:
             )
         )
 
-    explicit_profile = resolve_profile(request.target_tool) if request.target_tool else None
+    explicit_target = _clean_metadata(request.target_tool)
+    explicit_profile = resolve_profile(explicit_target) if explicit_target else None
     detected_profile = detect_profile(goal) if goal else None
 
-    if explicit_profile is not None:
+    if explicit_target and not is_known_profile(explicit_target):
+        target = "generic"
+        ambiguities.append(
+            Ambiguity(
+                field="target_tool",
+                question=f"Unknown AI tool or agent '{explicit_target}'. Use a supported target or omit --target for detection.",
+                severity=AmbiguitySeverity.HIGH,
+            )
+        )
+    elif explicit_profile is not None:
         target = explicit_profile.name
     elif detected_profile is not None:
         target = detected_profile.name
