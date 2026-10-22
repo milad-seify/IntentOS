@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from .classifier import is_documentation_only
 from .models import ExecutionPolicy, NormalizedIntent, RiskLevel, TaskType
 
 
@@ -11,8 +12,21 @@ def build_execution_policy(
     engineering: list[str] = []
     approvals: list[str] = []
     done: list[str] = []
+    docs_only = is_documentation_only(intent)
 
-    if task_type in {TaskType.CODING, TaskType.BUGFIX, TaskType.REFACTOR, TaskType.ARCHITECTURE, TaskType.SECURITY}:
+    if docs_only:
+        engineering.append(
+            "Keep the change limited to documentation or comments; do not modify runtime behavior, dependencies, configuration, or infrastructure."
+        )
+        done.append("Only documentation/comment files are changed unless the request explicitly authorizes more.")
+
+    if not docs_only and task_type in {
+        TaskType.CODING,
+        TaskType.BUGFIX,
+        TaskType.REFACTOR,
+        TaskType.ARCHITECTURE,
+        TaskType.SECURITY,
+    }:
         engineering.extend(
             (
                 "Prefer the smallest coherent change; follow KISS and YAGNI before adding abstractions.",
@@ -22,11 +36,11 @@ def build_execution_policy(
         )
         done.extend(("Relevant automated checks pass.", "No unrelated refactor or scope expansion was introduced."))
 
-    if task_type is TaskType.BUGFIX:
+    if task_type is TaskType.BUGFIX and not docs_only:
         engineering.append("Fix the root cause when practical; avoid masking the symptom with a broad rewrite.")
         done.append("The failing behavior is covered by a regression check when feasible.")
 
-    if task_type is TaskType.REFACTOR:
+    if task_type is TaskType.REFACTOR and not docs_only:
         engineering.append("Keep observable behavior stable and prefer incremental, reviewable changes.")
         done.append("Behavior remains equivalent under the relevant test suite.")
 
@@ -35,11 +49,18 @@ def build_execution_policy(
         done.append("Key assumptions and trade-offs are documented.")
 
     if task_type is TaskType.SECURITY:
-        engineering.extend(("Use least privilege and secure defaults.", "Do not expose, log, or hard-code secrets."))
-        approvals.extend(("Ask before weakening an existing security control.", "Ask before changing authentication, authorization, or secret-handling behavior in a way that affects users or production."))
-        done.append("Security-sensitive assumptions and verification results are reported explicitly.")
+        engineering.append("Do not expose, log, or hard-code secrets.")
+        if not docs_only:
+            engineering.append("Use least privilege and secure defaults.")
+            approvals.extend(
+                (
+                    "Ask before weakening an existing security control.",
+                    "Ask before changing authentication, authorization, or secret-handling behavior in a way that affects users or production.",
+                )
+            )
+            done.append("Security-sensitive assumptions and verification results are reported explicitly.")
 
-    if task_type is TaskType.DEVOPS:
+    if task_type is TaskType.DEVOPS and not docs_only:
         engineering.extend(
             (
                 "Prefer reproducible, declarative, and idempotent changes where the toolchain supports them.",
@@ -49,7 +70,7 @@ def build_execution_policy(
         )
         done.extend(("Configuration or deployment changes are validated with the smallest relevant check.", "Rollback or recovery implications are stated for material operational changes."))
 
-    if risk_level is RiskLevel.HIGH:
+    if not docs_only and risk_level is RiskLevel.HIGH:
         approvals.extend(
             (
                 "Ask before destructive operations or irreversible data changes.",
@@ -57,7 +78,7 @@ def build_execution_policy(
             )
         )
         done.append("High-risk actions, assumptions, and residual risks are reported explicitly.")
-    elif risk_level is RiskLevel.MEDIUM:
+    elif not docs_only and risk_level is RiskLevel.MEDIUM:
         approvals.append("Do not expand scope, add dependencies, or change persistent interfaces without a demonstrated need.")
 
     if intent.success_criteria:
