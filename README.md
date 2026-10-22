@@ -48,14 +48,46 @@ A user request plus optional project context, target AI/tool, repository state, 
 
 Depending on the task, IntentOS may produce an optimized prompt, recommended AI/model/effort, execution workflow and approval boundaries, engineering constraints, relevant context selection, agent context files or updates, verification steps and Definition of Done, and evaluation metadata.
 
+## Phase 1 API
+
+The first implementation intentionally stays small and dependency-free. It normalizes rough intent, detects critical ambiguity, applies a target-tool profile, and compiles a deterministic execution prompt.
+
+```python
+from intentos import IntentRequest, optimize_prompt
+
+result = optimize_prompt(
+    IntentRequest.from_values(
+        "Refactor the auth module without changing behavior",
+        target_tool="codex",
+        constraints=["No new dependencies"],
+        success_criteria=["Relevant tests pass"],
+    )
+)
+
+if result.needs_clarification:
+    print(result.questions)
+else:
+    print(result.prompt)
+```
+
+Initial target profiles are intentionally narrow: generic, Codex, Claude Code, and ChatGPT. Unsupported tools fall back to the generic profile until a dedicated profile is justified.
+
+## Development
+
+Python 3.11+ is required. The runtime core currently has no third-party dependencies.
+
+```bash
+PYTHONPATH=src python -m unittest discover -s tests -v
+```
+
 ## Status
 
-**Phase 0 — Foundation**
+**Phase 1 — Prompt Engineering Core**
 
-The initial work defines vision, scope, principles, architecture, contributor-facing agent rules, and the roadmap before implementation begins.
+The current implementation covers intent schema, ambiguity handling, compact normalization, initial target-tool profiles, deterministic prompt compilation, and focused tests. Engineering/risk policy, repository context management, model routing, and evaluation remain later phases by design.
 
-See [`docs/`](docs/) for the design foundation.
+See [`docs/`](docs/) for the product foundation and roadmap.
 
 ## License
 
-License selection is intentionally deferred until the project foundation is reviewed.
+MIT
