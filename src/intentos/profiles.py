@@ -65,13 +65,23 @@ def resolve_profile(name: str | None) -> PromptProfile:
 
 def detect_profile(raw_text: str) -> PromptProfile | None:
     haystack = raw_text.lower()
-    matches: list[PromptProfile] = []
+    matches: list[tuple[int, PromptProfile]] = []
     for profile in _PROFILES:
         if profile is _GENERIC:
             continue
-        if any(alias in haystack for alias in profile.aliases):
-            matches.append(profile)
-    unique = {profile.name: profile for profile in matches}
-    if len(unique) == 1:
-        return next(iter(unique.values()))
+        for alias in profile.aliases:
+            if alias in haystack:
+                matches.append((len(alias), profile))
+
+    if not matches:
+        return None
+
+    longest = max(length for length, _ in matches)
+    most_specific = {
+        profile.name: profile
+        for length, profile in matches
+        if length == longest
+    }
+    if len(most_specific) == 1:
+        return next(iter(most_specific.values()))
     return None

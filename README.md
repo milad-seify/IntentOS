@@ -2,91 +2,201 @@
 
 **Engineering intent into reliable AI execution.**
 
-IntentOS is an open-source intent engineering and workflow layer between humans and AI systems. It turns rough requests into context-aware, model-aware, engineering-aware instructions and execution plans that are easier to verify, cheaper to run, and safer to delegate.
+[![CI](https://github.com/milad-seify/IntentOS/actions/workflows/ci.yml/badge.svg)](https://github.com/milad-seify/IntentOS/actions/workflows/ci.yml)
 
-It is designed for AI agents and assistants such as Codex, Claude Code, ChatGPT, Claude, Gemini, Cursor, and future tools without coupling the core to one vendor.
+IntentOS is an open-source engineering layer between **human intent** and **AI execution**. It turns rough requests into bounded, context-aware, engineering-aware execution contracts for AI assistants and agents such as Codex, Claude Code, ChatGPT, Claude, Gemini, Cursor, and future tools.
 
-## Why
+It is not just another prompt rewriter.
 
-Most prompt tools stop after rewriting text. IntentOS goes further:
+```text
+Intent
+  → Normalize / clarify
+  → Task + risk
+  → Relevant project context
+  → Engineering / DevOps policy
+  → AI / model route
+  → Optimized execution prompt
+  → Verification contract
+  → Evaluation + learning
+```
 
-**Intent → Context → Risk → Engineering Policy → AI/Model Route → Optimized Prompt → Workflow → Verification → Learning**
+## Why IntentOS?
 
-For software and DevOps work, a good request is not only well-worded. It should also respect scope, architecture, maintainability, security, testing, deployment constraints, rollback, and cost.
+A well-worded prompt is not enough for serious engineering work.
 
-## Core capabilities
+A coding or DevOps agent also needs the right scope, project context, risk controls, approval boundaries, engineering expectations, model capability, verification criteria, and a way to learn from repeated failures without endlessly growing the prompt.
 
-- Prompt engineering and prompt repair
-- Task and risk classification
-- Contextual software-engineering and DevOps policies
-- Project-aware context selection
-- Agent workspace file planning and maintenance
-- Capability/cost/effort-aware AI/model routing
-- Workflow and approval-boundary generation
-- Definition-of-Done and verification generation
-- Token/cost/context hygiene
-- Evaluation and reusable learning loops
-- Pluggable profiles for new AI tools and engineering domains
+IntentOS makes those concerns explicit and composable.
+
+### What makes it different
+
+- **Prompt engineering, not prompt inflation** — normalize and sharpen intent instead of adding boilerplate.
+- **Context-aware engineering** — KISS/YAGNI by default; SOLID, DRY, Clean Code, security, and DevOps guidance only when the task actually benefits from them.
+- **Risk-aware delegation** — production, security, schema, destructive, and persistent changes get stronger approval boundaries.
+- **Minimal project context** — rank, deduplicate, and budget repository context instead of dumping the whole repo into the agent.
+- **Agent workspace hygiene** — detect missing, stale, duplicate, or bloated agent-facing files and propose safe updates.
+- **Future-proof model routing** — route by capability, effort, availability, surface compatibility, and relative cost without hardcoding today's model names into the core.
+- **Evidence over intuition** — regression assertions, A/B ranking, token/latency/retry metrics, and repeated-failure learning proposals.
+- **Vendor-neutral core** — provider-specific behavior lives behind profiles/adapters.
+
+## Quick start
+
+Requires Python 3.11+.
+
+```bash
+git clone https://github.com/milad-seify/IntentOS.git
+cd IntentOS
+python -m pip install -e .
+```
+
+Optimize a request for Codex:
+
+```bash
+intentos optimize "Refactor the auth module without changing behavior" \
+  --target codex \
+  --constraint "No new dependencies" \
+  --success "Relevant tests pass"
+```
+
+Use project context:
+
+```bash
+intentos optimize "Refactor the parser" \
+  --target codex \
+  --context-file AGENTS.md \
+  --context-file docs/ARCHITECTURE.md
+```
+
+Machine-readable output:
+
+```bash
+intentos optimize "Review this architecture" --target claude --json
+```
+
+Plan agent workspace maintenance without writing files:
+
+```bash
+intentos workspace \
+  --phase "Stabilization and dogfooding" \
+  --document AGENTS.md \
+  --document docs/STATUS.md
+```
+
+`workspace` is **proposal-first**: it reports create/update/keep actions; it does not silently mutate your repository.
+
+You can also run the CLI as a module:
+
+```bash
+python -m intentos optimize "Fix the failing parser test" --target codex
+```
+
+## Python API
+
+```python
+from intentos import IntentRequest, optimize_prompt
+
+result = optimize_prompt(
+    IntentRequest.from_values(
+        "Refactor the auth module without changing behavior",
+        target_tool="codex",
+        constraints=["No new dependencies"],
+        success_criteria=["Relevant tests pass"],
+    )
+)
+
+if result.needs_clarification:
+    print(result.questions)
+else:
+    print(result.policy.task_type, result.policy.risk_level)
+    print(result.routing.required_capability, result.routing.effort)
+    print(result.prompt)
+```
+
+For project-aware prompting, use `optimize_project_prompt()`. For model selection, pass replaceable `ModelMetadata` entries. IntentOS intentionally does not hardcode volatile model names in the core.
 
 ## Engineering philosophy
 
-IntentOS prefers minimal sufficient context, small coherent changes, KISS and YAGNI before abstraction, contextual SOLID/DRY/Clean Code, explicit scope, testable and reversible changes, secure defaults, reproducible DevOps workflows, evidence-backed completion, and the lowest-cost model that meets the quality bar.
+IntentOS prefers:
 
-Principles are applied contextually. IntentOS must not force Clean Architecture, microservices, extra abstractions, or heavyweight process onto small tasks.
+- minimal sufficient context
+- small coherent changes
+- KISS and YAGNI before abstraction
+- contextual SOLID / DRY / Clean Code
+- explicit scope and approval boundaries
+- secure defaults and least privilege
+- reproducible and recoverable DevOps changes
+- evidence-backed completion
+- the lowest-overhead model that still meets the quality bar
+
+It should **not** force Clean Architecture, microservices, extra abstractions, or heavyweight process onto small tasks.
+
+## Architecture
+
+The conceptual pipeline is:
+
+```text
+User Intent
+   ↓
+Intent Normalizer
+   ↓
+Task + Risk Classifier
+   ↓
+Context Selector
+   ↓
+Policy Engine
+   ↓
+AI / Model Router
+   ↓
+Prompt + Workflow Compiler
+   ↓
+Verification Contract
+   ↓
+Evaluation Feedback
+```
+
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/DECISIONS.md`](docs/DECISIONS.md), and [`docs/EVALUATION.md`](docs/EVALUATION.md).
 
 ## What IntentOS is not
 
-IntentOS is not an IDE, an LLM or coding-agent replacement, a CI/CD platform, a project-management suite, a framework that forces one software architecture, or a giant prompt-template collection.
+IntentOS is not:
 
-## Current API
-
-```python
-from intentos import (
-    CapabilityClass,
-    CostClass,
-    IntentRequest,
-    ModelMetadata,
-    optimize_prompt,
-)
-
-models = (
-    ModelMetadata(
-        name="my-fast-model",
-        provider="example",
-        surfaces=("chatgpt",),
-        capability=CapabilityClass.FAST,
-        cost=CostClass.LOW,
-    ),
-)
-
-result = optimize_prompt(
-    IntentRequest("Write a short project announcement", target_tool="chatgpt"),
-    models=models,
-)
-
-print(result.routing)
-print(result.prompt)
-```
-
-Model metadata is supplied by callers/adapters. IntentOS intentionally does not hardcode volatile model names in the core. Without compatible metadata it returns a capability-level fallback such as fast, balanced, or strong plus an effort recommendation.
-
-Project-aware prompting and workspace planning are also available through `optimize_project_prompt()` and `plan_agent_workspace()`.
+- an IDE
+- an LLM or coding-agent replacement
+- a general autonomous-agent framework
+- a CI/CD platform
+- a project-management suite
+- a framework that forces one software architecture
+- a giant prompt-template collection
 
 ## Development
 
-Python 3.11+ is required. The runtime core currently has no third-party dependencies.
+The core currently has no third-party runtime dependencies.
 
 ```bash
 PYTHONPATH=src python -m unittest discover -s tests -v
 ```
 
-## Status
+GitHub Actions runs the suite on Python 3.11, 3.12, and 3.13 plus a CLI smoke test.
 
-**Phase 4 — AI / Model Routing**
+## Project status
 
-Implemented: prompt engineering, task/risk classification, contextual engineering and DevOps policies, bounded project context, proposal-first workspace maintenance, target-tool profiles, and replaceable capability/cost/effort model routing with deterministic fallbacks.
+The initial Phase 0–6 roadmap is implemented. The project is now in **stabilization and real-world dogfooding** before locking a stable v1 contract.
 
-Evaluation and integrations remain later phases by design. See [`docs/STATUS.md`](docs/STATUS.md) for the concise current handoff and [`docs/`](docs/) for the product foundation.
+Current local baseline: **31 unit tests passing + `python -m intentos` CLI smoke test**.
+
+See [`docs/STATUS.md`](docs/STATUS.md) for the concise handoff and [`docs/ROADMAP.md`](docs/ROADMAP.md) for the roadmap.
+
+## Contributing
+
+Contributions are welcome, especially:
+
+- real-world failure/regression fixtures
+- target-tool profiles where generic behavior is demonstrably insufficient
+- provider/model metadata adapters
+- context-selection improvements backed by tests
+- evaluation and workflow improvements with measurable evidence
+
+Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a PR.
 
 ## License
 

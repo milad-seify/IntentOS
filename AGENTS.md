@@ -44,4 +44,4 @@ Use focused checks first, then the broader relevant test suite when available.
 
 ## Current phase
 
-Phase 5 adds evidence-based evaluation. Treat prompt quality and operational efficiency as separate signals: assertions/score measure correctness, while token/latency/retry metrics measure execution cost. Promote repeated failures into learning proposals only when supported by multiple cases; do not turn one-off failures into permanent rules.
+The initial Phase 0–6 roadmap is implemented. Current work is stabilization and real-world dogfooding. Prefer regression fixes, clearer extension boundaries, verified community use cases, and measurable improvements over speculative features. New integrations should remain thin adapters around the existing core and must preserve proposal/approval boundaries for repository writes.
