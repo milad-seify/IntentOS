@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from statistics import mean
 
 from .models import CapabilityClass, IntentRequest, ModelMetadata, PromptResult, RiskLevel, TaskType
+from .records import RunMetrics
 from .service import optimize_prompt
 
 
@@ -36,14 +37,6 @@ class RegressionSummary:
     passed: int
     failed: int
     mean_score: float
-
-
-@dataclass(frozen=True, slots=True)
-class RunMetrics:
-    success: bool
-    tokens: int | None = None
-    latency_ms: int | None = None
-    retries: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -86,10 +79,15 @@ def evaluate_result(case: EvaluationCase, result: PromptResult) -> EvaluationOut
     if case.max_prompt_chars is not None:
         check(len(prompt) <= case.max_prompt_chars, f"prompt exceeds {case.max_prompt_chars} chars")
 
-    score = 1.0 if not checks else sum(checks) / len(checks)
+    if not checks:
+        failures.append("no evaluation expectations defined")
+        score = 0.0
+    else:
+        score = sum(checks) / len(checks)
+
     return EvaluationOutcome(
         name=case.name,
-        passed=not failures,
+        passed=bool(checks) and not failures,
         score=score,
         failures=tuple(failures),
         lesson_hint=case.lesson_hint,
@@ -107,17 +105,19 @@ def run_regression(cases: tuple[EvaluationCase, ...]) -> RegressionSummary:
         outcomes=outcomes,
         passed=passed,
         failed=failed,
-        mean_score=mean(outcome.score for outcome in outcomes) if outcomes else 1.0,
+        mean_score=mean(outcome.score for outcome in outcomes) if outcomes else 0.0,
     )
 
 
 def rank_variants(runs: tuple[VariantRun, ...]) -> tuple[VariantRun, ...]:
     def rank(run: VariantRun) -> tuple[float, ...]:
+        reported_quality = run.metrics.quality_score
         return (
             0 if run.metrics.success and run.outcome.passed else 1,
             -run.outcome.score,
-            run.metrics.retries,
-            run.metrics.tokens if run.metrics.tokens is not None else float("inf"),
+            -(reported_quality if reported_quality is not None else run.outcome.score),
+            run.metrics.retries if run.metrics.retries is not None else 0,
+            run.metrics.total_tokens if run.metrics.total_tokens is not None else float("inf"),
             run.metrics.latency_ms if run.metrics.latency_ms is not None else float("inf"),
         )
 
@@ -129,14 +129,14 @@ def propose_lessons(
     *,
     min_failures: int = 2,
 ) -> tuple[LearningProposal, ...]:
-    grouped: dict[str, list[str]] = {}
+    grouped: dict[str, set[str]] = {}
     for outcome in outcomes:
         if outcome.passed or not outcome.lesson_hint:
             continue
-        grouped.setdefault(outcome.lesson_hint, []).append(outcome.name)
+        grouped.setdefault(outcome.lesson_hint, set()).add(outcome.name)
 
     return tuple(
-        LearningProposal(rule=rule, evidence_cases=tuple(cases))
+        LearningProposal(rule=rule, evidence_cases=tuple(sorted(cases)))
         for rule, cases in sorted(grouped.items())
         if len(cases) >= min_failures
     )
