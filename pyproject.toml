@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "intentos"
+version = "0.1.0"
+description = "Engineering intent into reliable AI execution."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "Milad Seify"}]
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["src"]
