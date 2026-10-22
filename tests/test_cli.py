@@ -18,6 +18,10 @@ class CliTests(unittest.TestCase):
                     "Refactor the parser",
                     "--target",
                     "codex",
+                    "--output-format",
+                    "JSON",
+                    "--audience",
+                    "maintainers",
                     "--json",
                 ]
             )
@@ -26,6 +30,9 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual(payload["schema_version"], "1")
         self.assertEqual(payload["status"], "ready")
+        self.assertEqual(payload["intent"]["goal"], "Refactor the parser")
+        self.assertEqual(payload["intent"]["output_format"], "JSON")
+        self.assertEqual(payload["intent"]["audience"], "maintainers")
         self.assertEqual(payload["task_type"], "refactor")
         self.assertEqual(payload["risk_level"], "medium")
         self.assertEqual(payload["routing"]["required_capability"], "balanced")
@@ -76,6 +83,8 @@ class CliTests(unittest.TestCase):
             payload = json.loads(output.getvalue())
             self.assertEqual(code, 0)
             self.assertIn(str(path), payload["context_paths"])
+            self.assertEqual(payload["context"]["selected"][0]["path"], str(path))
+            self.assertTrue(payload["context"]["selected"][0]["reasons"])
             self.assertIn("preserve compatibility", payload["prompt"])
 
     def test_missing_context_file_returns_json_error(self) -> None:
