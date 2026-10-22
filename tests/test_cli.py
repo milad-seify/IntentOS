@@ -52,6 +52,27 @@ class CliTests(unittest.TestCase):
             self.assertIn(str(path), payload["context_paths"])
             self.assertIn("preserve compatibility", payload["prompt"])
 
+    def test_skill_command_emits_portable_artifact(self) -> None:
+        output = StringIO()
+        with redirect_stdout(output):
+            code = main(
+                [
+                    "skill",
+                    "Refactor the parser",
+                    "--target",
+                    "codex",
+                    "--name",
+                    "Parser Refactor",
+                    "--json",
+                ]
+            )
+
+        payload = json.loads(output.getvalue())
+        self.assertEqual(code, 0)
+        self.assertEqual(payload["name"], "parser-refactor")
+        self.assertIn('name: "parser-refactor"', payload["content"])
+        self.assertIn("## Engineering", payload["content"])
+
     def test_workspace_command_only_returns_plan(self) -> None:
         output = StringIO()
         with redirect_stdout(output):
