@@ -97,3 +97,15 @@ Core routing chooses required capability and effort from task/risk, then optiona
 **Status:** Accepted
 
 When multiple compatible candidates satisfy the required capability, IntentOS prefers verified metadata, the smallest sufficient capability class, then lower relative cost. If no compatible metadata exists, it returns a deterministic capability-level fallback instead of inventing a model.
+
+## D-017 — Portable Skills are a first-class output artifact
+
+**Status:** Accepted
+
+Reusable agent guidance should be compilable into an Agent Skills-compatible `SKILL.md` artifact with standard `name` and `description` frontmatter. IntentOS emits the artifact but does not silently install it or write it into agent-specific directories. This keeps portable context separate from execution and preserves proposal-first workspace behavior.
+
+## D-018 — Evaluation provenance uses versioned run records
+
+**Status:** Accepted
+
+IntentOS exposes a compact, versioned run record for reproducible evaluation across agents and models. The record stores a prompt fingerprint and routing/context provenance plus externally supplied quality, token, latency, and retry metrics. Raw prompts, tool outputs, storage, telemetry backends, and dataset publishing remain executor/integration concerns.
