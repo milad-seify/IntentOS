@@ -6,7 +6,7 @@ This file defines repository-level rules for AI coding agents and contributors u
 
 IntentOS is an intent-engineering and workflow layer between humans and AI systems. Do not reduce it to a prompt-template library and do not expand it into a general-purpose autonomous-agent platform.
 
-Read `README.md` and the relevant files in `docs/` before proposing architecture or implementation changes.
+Read `README.md` and the relevant files in `docs/` before proposing architecture or implementation changes. For user-facing integrations or access surfaces, read `docs/UX.md` as part of the product contract.
 
 ## Engineering rules
 
@@ -14,10 +14,19 @@ Read `README.md` and the relevant files in `docs/` before proposing architecture
 - Follow KISS and YAGNI. Apply SOLID, DRY, Clean Code, and architectural patterns only where they materially improve the design.
 - Do not introduce frameworks, dependencies, services, databases, queues, or infrastructure without a demonstrated need.
 - Keep the core vendor-neutral. AI/model-specific behavior belongs behind profiles/adapters.
+- Keep CLI, MCP, VS Code, UI, and other access surfaces thin; do not duplicate core task/risk/context/policy/routing/verification logic in integrations.
 - Keep agent-facing context human-readable, bounded, and reviewable.
 - Preserve existing public contracts unless the task explicitly changes them.
 - Security, destructive operations, persistent data changes, and external writes require explicit boundaries.
 - Never claim completion without evidence appropriate to the task.
+
+## UX rules
+
+- Ease of use is a product requirement, not optional polish.
+- Everyday users should not need prompt-engineering, model-routing, MCP, or internal architecture knowledge.
+- Prefer outcome-first language and safe defaults.
+- Use progressive disclosure: advanced controls should be available without becoming mandatory for common workflows.
+- Preserve semantically consistent core behavior across CLI, API, MCP, editor integrations, Agent Skills, and future UI surfaces.
 
 ## Scope discipline
 
@@ -29,7 +38,7 @@ Do not invent product requirements. When a requirement is ambiguous and the risk
 
 Documentation is part of the product contract.
 
-Update docs when a change alters product scope, architecture, a durable decision, agent behavior, or roadmap status. Avoid duplicating the same rule across many files.
+Update docs when a change alters product scope, architecture, UX/access surfaces, a durable decision, agent behavior, or roadmap status. Avoid duplicating the same rule across many files.
 
 ## Verification
 
@@ -44,4 +53,4 @@ Use focused checks first, then the broader relevant test suite when available.
 
 ## Current phase
 
-The initial Phase 0–6 roadmap is implemented. Current work is stabilization and real-world dogfooding. Prefer regression fixes, clearer extension boundaries, verified community use cases, and measurable improvements over speculative features. New integrations should remain thin adapters around the existing core and must preserve proposal/approval boundaries for repository writes.
+The initial Phase 0–6 roadmap is implemented. Current work is stabilization, real-world dogfooding, independent-audit preparation, and validation of the future access/UX architecture. Prefer regression fixes, clearer extension boundaries, verified community use cases, and measurable improvements over speculative features. New integrations should remain thin adapters around the existing core and must preserve proposal/approval boundaries for repository writes.
