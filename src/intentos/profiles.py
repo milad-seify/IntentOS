@@ -11,37 +11,37 @@ _GENERIC = PromptProfile(
 
 _CODEX = PromptProfile(
     name="codex",
-    aliases=("codex", "openai codex"),
+    aliases=("codex", "openai codex", "کدکس"),
     section_order=("Goal", "Context", "Scope", "Constraints", "Engineering", "Approvals", "Verification", "Done"),
 )
 
 _CLAUDE_CODE = PromptProfile(
     name="claude-code",
-    aliases=("claude code", "claude-code"),
+    aliases=("claude code", "claude-code", "کلود کد"),
     section_order=("Goal", "Context", "Scope", "Constraints", "Engineering", "Approvals", "Verification", "Done"),
 )
 
 _CURSOR = PromptProfile(
     name="cursor",
-    aliases=("cursor",),
+    aliases=("cursor", "کرسور"),
     section_order=("Goal", "Context", "Scope", "Constraints", "Engineering", "Approvals", "Verification", "Done"),
 )
 
 _CHATGPT = PromptProfile(
     name="chatgpt",
-    aliases=("chatgpt", "gpt"),
+    aliases=("chatgpt", "gpt", "چت جی پی تی", "چت‌جی‌پی‌تی"),
     section_order=("Goal", "Context", "Constraints", "Engineering", "Approvals", "Output", "Done"),
 )
 
 _CLAUDE = PromptProfile(
     name="claude",
-    aliases=("claude",),
+    aliases=("claude", "کلود"),
     section_order=("Goal", "Context", "Constraints", "Engineering", "Approvals", "Output", "Done"),
 )
 
 _GEMINI = PromptProfile(
     name="gemini",
-    aliases=("gemini",),
+    aliases=("gemini", "جمینای"),
     section_order=("Goal", "Context", "Constraints", "Engineering", "Approvals", "Output", "Done"),
 )
 
