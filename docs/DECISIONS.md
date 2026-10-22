@@ -85,3 +85,15 @@ Project context is selected by relevance plus source authority, not by loading t
 **Status:** Accepted
 
 The core may detect missing, stale, duplicate, or bloated agent context and produce create/update/keep proposals. Applying repository writes belongs to an integration boundary and must respect approval rules rather than silently mutating a workspace.
+
+## D-015 — Route by capability class, not hardcoded model names
+
+**Status:** Accepted
+
+Core routing chooses required capability and effort from task/risk, then optionally selects from caller-supplied model metadata. Model names, availability, and provider-specific controls are volatile and belong in replaceable catalogs/adapters.
+
+## D-016 — Prefer the lowest-overhead model that meets the quality bar
+
+**Status:** Accepted
+
+When multiple compatible candidates satisfy the required capability, IntentOS prefers verified metadata, the smallest sufficient capability class, then lower relative cost. If no compatible metadata exists, it returns a deterministic capability-level fallback instead of inventing a model.

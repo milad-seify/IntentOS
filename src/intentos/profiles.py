@@ -13,20 +13,18 @@ _CODEX = PromptProfile(
     name="codex",
     aliases=("codex", "openai codex"),
     section_order=("Goal", "Context", "Scope", "Constraints", "Engineering", "Approvals", "Verification", "Done"),
-    guidance=(
-        "Keep implementation scope explicit and bounded.",
-        "Require concrete verification evidence when code changes are requested.",
-    ),
 )
 
 _CLAUDE_CODE = PromptProfile(
     name="claude-code",
     aliases=("claude code", "claude-code"),
     section_order=("Goal", "Context", "Scope", "Constraints", "Engineering", "Approvals", "Verification", "Done"),
-    guidance=(
-        "Keep repository scope explicit.",
-        "State approval boundaries for destructive or persistent changes when relevant.",
-    ),
+)
+
+_CURSOR = PromptProfile(
+    name="cursor",
+    aliases=("cursor",),
+    section_order=("Goal", "Context", "Scope", "Constraints", "Engineering", "Approvals", "Verification", "Done"),
 )
 
 _CHATGPT = PromptProfile(
@@ -35,7 +33,19 @@ _CHATGPT = PromptProfile(
     section_order=("Goal", "Context", "Constraints", "Engineering", "Approvals", "Output", "Done"),
 )
 
-_PROFILES = (_GENERIC, _CODEX, _CLAUDE_CODE, _CHATGPT)
+_CLAUDE = PromptProfile(
+    name="claude",
+    aliases=("claude",),
+    section_order=("Goal", "Context", "Constraints", "Engineering", "Approvals", "Output", "Done"),
+)
+
+_GEMINI = PromptProfile(
+    name="gemini",
+    aliases=("gemini",),
+    section_order=("Goal", "Context", "Constraints", "Engineering", "Approvals", "Output", "Done"),
+)
+
+_PROFILES = (_GENERIC, _CODEX, _CLAUDE_CODE, _CURSOR, _CHATGPT, _CLAUDE, _GEMINI)
 
 
 def all_profiles() -> tuple[PromptProfile, ...]:
@@ -61,6 +71,7 @@ def detect_profile(raw_text: str) -> PromptProfile | None:
             continue
         if any(alias in haystack for alias in profile.aliases):
             matches.append(profile)
-    if len(matches) == 1:
-        return matches[0]
+    unique = {profile.name: profile for profile in matches}
+    if len(unique) == 1:
+        return next(iter(unique.values()))
     return None

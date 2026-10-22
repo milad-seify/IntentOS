@@ -32,6 +32,24 @@ class WorkspaceAction(str, Enum):
     KEEP = "keep"
 
 
+class CapabilityClass(str, Enum):
+    FAST = "fast"
+    BALANCED = "balanced"
+    STRONG = "strong"
+
+
+class EffortLevel(str, Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+
+
+class CostClass(str, Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+
+
 @dataclass(frozen=True, slots=True)
 class IntentRequest:
     raw_text: str
@@ -141,12 +159,34 @@ class WorkspacePlan:
 
 
 @dataclass(frozen=True, slots=True)
+class ModelMetadata:
+    name: str
+    provider: str
+    surfaces: tuple[str, ...]
+    capability: CapabilityClass
+    cost: CostClass
+    available: bool = True
+    verified: bool = True
+
+
+@dataclass(frozen=True, slots=True)
+class RoutingDecision:
+    target_tool: str
+    required_capability: CapabilityClass
+    effort: EffortLevel
+    selected_model: str | None
+    reason: str
+    fallback: bool = False
+
+
+@dataclass(frozen=True, slots=True)
 class PromptResult:
     prompt: str | None
     intent: NormalizedIntent
     questions: tuple[str, ...] = field(default_factory=tuple)
     policy: ExecutionPolicy | None = None
     context_selection: ContextSelection | None = None
+    routing: RoutingDecision | None = None
 
     @property
     def needs_clarification(self) -> bool:
