@@ -12,19 +12,19 @@ _GENERIC = PromptProfile(
 _CODEX = PromptProfile(
     name="codex",
     aliases=("codex", "openai codex", "کدکس"),
-    section_order=("Goal", "Context", "Scope", "Constraints", "Engineering", "Approvals", "Verification", "Done"),
+    section_order=("Goal", "Context", "Scope", "Constraints", "Engineering", "Approvals", "Output", "Verification", "Done"),
 )
 
 _CLAUDE_CODE = PromptProfile(
     name="claude-code",
     aliases=("claude code", "claude-code", "کلود کد"),
-    section_order=("Goal", "Context", "Scope", "Constraints", "Engineering", "Approvals", "Verification", "Done"),
+    section_order=("Goal", "Context", "Scope", "Constraints", "Engineering", "Approvals", "Output", "Verification", "Done"),
 )
 
 _CURSOR = PromptProfile(
     name="cursor",
     aliases=("cursor", "کرسور"),
-    section_order=("Goal", "Context", "Scope", "Constraints", "Engineering", "Approvals", "Verification", "Done"),
+    section_order=("Goal", "Context", "Scope", "Constraints", "Engineering", "Approvals", "Output", "Verification", "Done"),
 )
 
 _CHATGPT = PromptProfile(
