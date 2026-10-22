@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 5 — Evaluation and Learning
+Initial roadmap complete — stabilization and dogfooding
 
 ## Implemented
 
@@ -12,14 +12,18 @@ Phase 5 — Evaluation and Learning
 - Phase 3: bounded project-context selection and proposal-first agent workspace maintenance
 - Phase 4: capability/cost/effort routing with replaceable model metadata and deterministic fallback
 - Phase 5: regression assertions/scoring, token-latency-retry metrics, A/B ranking, and evidence-backed learning proposals
+- Phase 6: standard-library CLI, package entry point, GitHub Actions CI, and contributor guidance
 
 ## Current verification baseline
 
-26 standard-library unit tests passing locally.
+29 standard-library unit tests passing locally plus CLI JSON smoke test.
 
 ## Next
 
-Phase 6 — Integrations and Ecosystem.
+- dogfood IntentOS on real Codex / Claude Code / ChatGPT workflows
+- collect regression fixtures from real failures
+- add provider/model metadata adapters only where real usage requires them
+- run an independent architecture/quality audit before declaring a stable v1 contract
 
 ## Constraints carried forward
 
