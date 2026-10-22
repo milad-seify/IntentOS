@@ -44,4 +44,4 @@ Use focused checks first, then the broader relevant test suite when available.
 
 ## Current phase
 
-Phase 2 adds deterministic task/risk classification plus contextual software-engineering and DevOps policy generation. Policies must remain proportional to task type and risk; do not inject heavyweight engineering rules into general tasks. Repository context management, model routing, and evaluation remain later phases.
+Phase 3 adds bounded project-context selection and proposal-first agent workspace maintenance. Prefer authoritative guidance such as `AGENTS.md`, `docs/STATUS.md`, decisions, and architecture; deduplicate context and respect explicit budgets. Core logic may propose context-file creates/updates but must not silently perform repository writes. Model routing and evaluation remain later phases.
