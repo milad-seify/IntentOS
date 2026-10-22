@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .classifier import is_documentation_only
+from .classifier import has_devops_signals, has_persistent_data_signals, is_documentation_only
 from .models import ExecutionPolicy, NormalizedIntent, RiskLevel, TaskType
 
 
@@ -13,6 +13,8 @@ def build_execution_policy(
     approvals: list[str] = []
     done: list[str] = []
     docs_only = is_documentation_only(intent)
+    devops_related = has_devops_signals(intent)
+    persistent_data = has_persistent_data_signals(intent)
 
     if docs_only:
         engineering.append(
@@ -60,7 +62,7 @@ def build_execution_policy(
             )
             done.append("Security-sensitive assumptions and verification results are reported explicitly.")
 
-    if task_type is TaskType.DEVOPS and not docs_only:
+    if devops_related and not docs_only:
         engineering.extend(
             (
                 "Prefer reproducible, declarative, and idempotent changes where the toolchain supports them.",
@@ -68,7 +70,18 @@ def build_execution_policy(
                 "Preserve a practical rollback or recovery path for operational changes.",
             )
         )
-        done.extend(("Configuration or deployment changes are validated with the smallest relevant check.", "Rollback or recovery implications are stated for material operational changes."))
+        done.extend(
+            (
+                "Configuration or deployment changes are validated with the smallest relevant check.",
+                "Rollback or recovery implications are stated for material operational changes.",
+            )
+        )
+
+    if persistent_data and not docs_only:
+        engineering.append(
+            "For schema or data migrations, state validation, rollback/recovery, and backup implications before execution."
+        )
+        done.append("Persistent data changes include an explicit validation and recovery plan.")
 
     if not docs_only and risk_level is RiskLevel.HIGH:
         approvals.extend(

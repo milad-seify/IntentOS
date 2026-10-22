@@ -34,6 +34,8 @@ Do not perform unrelated refactors or cleanup while implementing a scoped task. 
 
 Do not invent product requirements. When a requirement is ambiguous and the risk of choosing incorrectly is material, surface the ambiguity. For low-risk implementation details, choose the simplest reversible option consistent with the documented principles.
 
+Do not add an abstraction merely to anticipate MCP, VS Code, hosted services, provider routing, or future plugins. Promote a new abstraction only when the current core or repeated real usage demonstrates the need.
+
 ## Documentation discipline
 
 Documentation is part of the product contract.
@@ -53,4 +55,4 @@ Use focused checks first, then the broader relevant test suite when available.
 
 ## Current phase
 
-The initial Phase 0–6 roadmap is implemented. Current work is stabilization, real-world dogfooding, independent-audit preparation, and validation of the future access/UX architecture. Prefer regression fixes, clearer extension boundaries, verified community use cases, and measurable improvements over speculative features. New integrations should remain thin adapters around the existing core and must preserve proposal/approval boundaries for repository writes.
+The initial Phase 0–6 roadmap and the independent audit are complete. Current work is the **contract-preserving task preparation stabilization gate**. Prioritize only confirmed correctness defects, regression coverage, and measured dogfood failures. Do not start MCP, VS Code, simple UI, plugin systems, LLM classification, embeddings/vector search, provider discovery, or telemetry infrastructure until the preparation contract passes this gate. The first MCP slice, when authorized, should remain a thin single-tool `prepare_task` adapter over the shared core unless evidence justifies more.

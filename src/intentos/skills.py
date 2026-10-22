@@ -80,6 +80,17 @@ def build_skill_artifact(
     if intent.constraints:
         sections.extend(("", "## Constraints", "", *[f"- {item}" for item in intent.constraints]))
 
+    output_requirements = tuple(
+        value
+        for value in (
+            f"Format: {intent.output_format}" if intent.output_format else None,
+            f"Audience: {intent.audience}" if intent.audience else None,
+        )
+        if value
+    )
+    if output_requirements:
+        sections.extend(("", "## Output", "", *[f"- {item}" for item in output_requirements]))
+
     if policy.engineering_rules:
         sections.extend(("", "## Engineering", "", *[f"- {item}" for item in policy.engineering_rules]))
 
