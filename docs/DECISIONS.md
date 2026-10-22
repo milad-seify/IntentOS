@@ -61,3 +61,15 @@ When a critical field such as the goal or execution target is genuinely ambiguou
 **Status:** Accepted
 
 IntentOS uses the MIT License initially to keep adoption, experimentation, and contribution friction low. This can be revisited only with an explicit project-governance decision.
+
+## D-011 — Engineering policy is contextual, composable, and deterministic
+
+**Status:** Accepted
+
+Software-engineering and DevOps guidance is selected from task type and risk level rather than injected globally. KISS/YAGNI lead by default; SOLID, DRY, Clean Code, security controls, reproducibility, rollback, and approval boundaries appear only when they materially fit the task.
+
+## D-012 — Risk controls process depth, not implementation style
+
+**Status:** Accepted
+
+Risk classification determines approval boundaries and completion evidence. It must not automatically force a specific architecture, framework, or abstraction level. High-risk work receives stronger guardrails; low-risk work stays lightweight.
