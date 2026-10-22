@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import replace
 
 from .context import select_project_context
-from .models import ContextDocument, IntentRequest, PromptResult
+from .models import ContextDocument, IntentRequest, ModelMetadata, PromptResult
 from .normalize import normalize_intent
 from .service import optimize_prompt
 
@@ -13,6 +13,7 @@ def optimize_project_prompt(
     documents: tuple[ContextDocument, ...],
     *,
     max_context_chars: int = 6000,
+    models: tuple[ModelMetadata, ...] = (),
 ) -> PromptResult:
     base_intent = normalize_intent(request)
     selection = select_project_context(
@@ -29,5 +30,5 @@ def optimize_project_prompt(
         request,
         context=tuple((*request.context, *selected_context)),
     )
-    result = optimize_prompt(enriched)
+    result = optimize_prompt(enriched, models=models)
     return replace(result, context_selection=selection)
