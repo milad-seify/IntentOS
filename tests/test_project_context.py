@@ -24,6 +24,21 @@ class ProjectContextTests(unittest.TestCase):
 
         self.assertEqual(selection.selected[0].document.path, "AGENTS.md")
 
+    def test_unicode_context_can_match_persian_intent(self) -> None:
+        intent = normalize_intent(
+            IntentRequest("معماری احراز هویت را بررسی کن", target_tool="codex")
+        )
+        documents = (
+            ContextDocument("docs/security-fa.md", "قواعد معماری احراز هویت و دسترسی کاربران"),
+            ContextDocument("docs/unrelated.md", "تنظیمات ظاهری رابط کاربری"),
+        )
+
+        selection = select_project_context(intent, documents)
+
+        self.assertEqual(len(selection.selected), 1)
+        self.assertEqual(selection.selected[0].document.path, "docs/security-fa.md")
+        self.assertGreater(selection.selected[0].score, 0)
+
     def test_duplicate_context_is_omitted(self) -> None:
         intent = normalize_intent(IntentRequest("Update Docker deployment", target_tool="codex"))
         documents = (
