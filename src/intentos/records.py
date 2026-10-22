@@ -4,6 +4,7 @@ from dataclasses import asdict, dataclass
 from hashlib import sha256
 from importlib.metadata import PackageNotFoundError, version
 import json
+import math
 from typing import Any
 
 from .models import PromptResult
@@ -27,6 +28,21 @@ class RunMetrics:
     output_tokens: int | None = None
     latency_ms: int | None = None
     retries: int | None = None
+
+    def __post_init__(self) -> None:
+        if self.quality_score is not None:
+            if not math.isfinite(self.quality_score) or not 0.0 <= self.quality_score <= 1.0:
+                raise ValueError("quality_score must be a finite value between 0 and 1")
+        for name in ("input_tokens", "output_tokens", "latency_ms", "retries"):
+            value = getattr(self, name)
+            if value is not None and value < 0:
+                raise ValueError(f"{name} must be non-negative")
+
+    @property
+    def total_tokens(self) -> int | None:
+        if self.input_tokens is None and self.output_tokens is None:
+            return None
+        return (self.input_tokens or 0) + (self.output_tokens or 0)
 
 
 @dataclass(frozen=True, slots=True)
@@ -60,7 +76,7 @@ class RunRecord:
         return value
 
     def to_json(self) -> str:
-        return json.dumps(self.to_dict(), ensure_ascii=False, sort_keys=True)
+        return json.dumps(self.to_dict(), ensure_ascii=False, sort_keys=True, allow_nan=False)
 
 
 def build_run_record(
