@@ -39,7 +39,42 @@ IntentOS makes those concerns explicit and composable.
 - **Agent workspace hygiene** — detect missing, stale, duplicate, or bloated agent-facing files and propose safe updates.
 - **Future-proof model routing** — route by capability, effort, availability, surface compatibility, and relative cost without hardcoding today's model names into the core.
 - **Evidence over intuition** — regression assertions, A/B ranking, token/latency/retry metrics, versioned privacy-minimal run records, and repeated-failure learning proposals.
+- **Ease of use by design** — common workflows should not require prompt-engineering, model-routing, MCP, or internal architecture knowledge.
 - **Vendor-neutral core** — provider-specific behavior lives behind profiles/adapters.
+
+## How people should use IntentOS
+
+IntentOS is designed as **one shared core with multiple access surfaces** so different users can work in the environment that fits them.
+
+```text
+                         IntentOS Core
+                              │
+          ┌───────────────────┼───────────────────┐
+          │                   │                   │
+       Simple UI          VS Code UX          CLI / API
+          │                   │                   │
+          └───────────────────┼───────────────────┘
+                              │
+                             MCP
+                              │
+                  Compatible AI agents/tools
+```
+
+Current surfaces:
+
+- **CLI** — portable use from the terminal and scripts.
+- **Python API** — programmatic access for integrations and automation.
+- **Agent Skills** — portable, reusable `SKILL.md` guidance.
+
+Planned after the independent audit validates the boundaries:
+
+- **MCP adapter** — standard connection for compatible AI agents.
+- **VS Code extension** — editor-native task preparation, risk/context preview, and agent handoff.
+- **Simple UI** — outcome-first experience for users who should not need CLI or prompt-engineering knowledge.
+
+Advanced controls should use **progressive disclosure**: everyday users see simple outcome-first actions, while experts can inspect and control context, risk, policy, routing, cost, approvals, and verification.
+
+See [`docs/UX.md`](docs/UX.md) for the product usage and UX contract.
 
 ## Quick start
 
@@ -153,8 +188,9 @@ IntentOS prefers:
 - reproducible and recoverable DevOps changes
 - evidence-backed completion
 - the lowest-overhead model that still meets the quality bar
+- simple defaults with expert controls available when needed
 
-It should **not** force Clean Architecture, microservices, extra abstractions, or heavyweight process onto small tasks.
+It should **not** force Clean Architecture, microservices, extra abstractions, heavyweight process, or expert-only UX onto small tasks.
 
 ## Architecture
 
@@ -180,7 +216,7 @@ Verification Contract
 Evaluation + Run Record
 ```
 
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/DECISIONS.md`](docs/DECISIONS.md), [`docs/EVALUATION.md`](docs/EVALUATION.md), and [`docs/HUGGINGFACE_RESEARCH.md`](docs/HUGGINGFACE_RESEARCH.md).
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/UX.md`](docs/UX.md), [`docs/DECISIONS.md`](docs/DECISIONS.md), [`docs/EVALUATION.md`](docs/EVALUATION.md), and [`docs/HUGGINGFACE_RESEARCH.md`](docs/HUGGINGFACE_RESEARCH.md).
 
 ## What IntentOS is not
 
@@ -208,11 +244,11 @@ GitHub Actions runs the suite on Python 3.11, 3.12, and 3.13 plus a CLI smoke te
 
 ## Project status
 
-The initial Phase 0–6 roadmap is implemented. The project is now in **stabilization and real-world dogfooding** before locking a stable v1 contract.
+The initial Phase 0–6 roadmap is implemented. The project is now in **stabilization, real-world dogfooding, usage-architecture validation, and independent-audit preparation** before locking a stable v1 contract.
 
 Current baseline: **45 unit tests + CLI smoke**, verified by GitHub Actions on Python 3.11, 3.12, and 3.13.
 
-See [`docs/STATUS.md`](docs/STATUS.md) for the concise handoff, [`docs/DOGFOODING.md`](docs/DOGFOODING.md) for real-world findings, [`docs/HUGGINGFACE_RESEARCH.md`](docs/HUGGINGFACE_RESEARCH.md) for the ecosystem research pass, [`docs/INDEPENDENT_AUDIT.md`](docs/INDEPENDENT_AUDIT.md) for the external review package, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for the roadmap.
+See [`docs/STATUS.md`](docs/STATUS.md) for the concise handoff, [`docs/DOGFOODING.md`](docs/DOGFOODING.md) for real-world findings, [`docs/HUGGINGFACE_RESEARCH.md`](docs/HUGGINGFACE_RESEARCH.md) for the ecosystem research pass, [`docs/UX.md`](docs/UX.md) for usage/access principles, [`docs/INDEPENDENT_AUDIT.md`](docs/INDEPENDENT_AUDIT.md) for the external review package, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for the roadmap.
 
 ## Contributing
 
@@ -224,6 +260,7 @@ Contributions are welcome, especially:
 - context-selection improvements backed by tests
 - evaluation and workflow improvements with measurable evidence
 - portable Agent Skills and integration adapters that preserve the vendor-neutral core
+- usability improvements that reduce friction without duplicating core behavior
 
 Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a PR.
 
