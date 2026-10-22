@@ -31,7 +31,7 @@ def build_execution_policy(
     }:
         engineering.extend(
             (
-                "Prefer the smallest coherent change; use the first sufficient option: skip unnecessary work, reuse existing project code, use standard-library or platform capabilities, reuse an already-installed dependency, and only then add the minimum new code.",
+                "Prefer the smallest coherent change; follow KISS and YAGNI and use the first sufficient option: skip unnecessary work, reuse existing project code, use standard-library or platform capabilities, reuse an already-installed dependency, and only then add the minimum new code.",
                 "Preserve existing public behavior unless the goal explicitly requires a change.",
                 "Apply SOLID, DRY, and Clean Code only where they materially improve maintainability or testability.",
             )
