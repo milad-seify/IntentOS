@@ -1,7 +1,8 @@
+import hashlib
 import json
 import unittest
 
-from intentos import IntentRequest, optimize_prompt
+from intentos import ContextDocument, IntentRequest, optimize_project_prompt, optimize_prompt
 from intentos.records import RunMetrics, build_run_record
 from intentos.skills import build_skill_artifact
 
@@ -72,11 +73,39 @@ class HuggingFacePatternTests(unittest.TestCase):
 
         payload = json.loads(record.to_json())
         self.assertEqual(payload["schema_version"], "1")
+        self.assertTrue(payload["intentos_version"])
         self.assertEqual(payload["context_paths"], ["AGENTS.md", "docs/STATUS.md"])
+        self.assertEqual(payload["context_fingerprints"], [])
         self.assertEqual(payload["tags"], ["dogfood", "docker"])
         self.assertEqual(payload["metrics"]["success"], True)
         self.assertEqual(len(payload["prompt_sha256"]), 64)
         self.assertNotIn("Deploy the service", record.to_json())
+
+    def test_project_run_record_hashes_selected_context_without_storing_it(self) -> None:
+        secret_context = "Parser contract: preserve API compatibility."
+        result = optimize_project_prompt(
+            IntentRequest("Refactor the parser", target_tool="codex"),
+            (
+                ContextDocument(
+                    path="AGENTS.md",
+                    content=secret_context,
+                    authoritative=True,
+                ),
+            ),
+        )
+
+        payload = json.loads(build_run_record(result).to_json())
+        self.assertEqual(payload["context_paths"], ["AGENTS.md"])
+        self.assertEqual(
+            payload["context_fingerprints"],
+            [
+                {
+                    "path": "AGENTS.md",
+                    "sha256": hashlib.sha256(secret_context.encode("utf-8")).hexdigest(),
+                }
+            ],
+        )
+        self.assertNotIn(secret_context, json.dumps(payload))
 
     def test_clarification_record_has_no_prompt_hash(self) -> None:
         result = optimize_prompt(IntentRequest("Summarize this decision"))
