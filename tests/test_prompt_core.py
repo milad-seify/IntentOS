@@ -37,7 +37,7 @@ class PromptCoreTests(unittest.TestCase):
         self.assertIn("Format: Markdown", result.prompt or "")
         self.assertNotIn("Scope:", result.prompt or "")
 
-    def test_normalization_is_compact_and_deduplicated(self) -> None:
+    def test_normalization_compacts_single_line_text_without_casefold_dedup(self) -> None:
         intent = normalize_intent(
             IntentRequest.from_values(
                 "  Fix   the login bug  ",
@@ -48,7 +48,10 @@ class PromptCoreTests(unittest.TestCase):
         )
 
         self.assertEqual(intent.goal, "Fix the login bug")
-        self.assertEqual(intent.constraints, ("No new dependencies", "Keep API stable"))
+        self.assertEqual(
+            intent.constraints,
+            ("No new dependencies", "no new dependencies", "Keep API stable"),
+        )
         self.assertEqual(intent.context, ("Python service",))
 
     def test_codex_prompt_has_default_evidence_contract(self) -> None:
@@ -112,6 +115,17 @@ class PromptCoreTests(unittest.TestCase):
         )
 
         self.assertEqual(result.policy.task_type, TaskType.GENERAL)
+        prompt = result.prompt or ""
+        self.assertNotIn("SOLID", prompt)
+        self.assertNotIn("Approval boundaries:", prompt)
+
+    def test_readme_typo_stays_lightweight(self) -> None:
+        result = optimize_prompt(
+            IntentRequest("Fix a typo in README", target_tool="codex")
+        )
+
+        self.assertEqual(result.policy.task_type, TaskType.GENERAL)
+        self.assertEqual(result.policy.risk_level, RiskLevel.LOW)
         prompt = result.prompt or ""
         self.assertNotIn("SOLID", prompt)
         self.assertNotIn("Approval boundaries:", prompt)
