@@ -38,7 +38,7 @@ IntentOS makes those concerns explicit and composable.
 - **Portable agent context** — compile reusable `SKILL.md` artifacts instead of repeating the same instructions in every conversation.
 - **Agent workspace hygiene** — detect missing, stale, duplicate, or bloated agent-facing files and propose safe updates.
 - **Future-proof model routing** — route by capability, effort, availability, surface compatibility, and relative cost without hardcoding today's model names into the core.
-- **Evidence over intuition** — regression assertions, A/B ranking, token/latency/retry metrics, versioned run records, and repeated-failure learning proposals.
+- **Evidence over intuition** — regression assertions, A/B ranking, token/latency/retry metrics, versioned privacy-minimal run records, and repeated-failure learning proposals.
 - **Vendor-neutral core** — provider-specific behavior lives behind profiles/adapters.
 
 ## Quick start
@@ -138,6 +138,8 @@ else:
 
 For project-aware prompting, use `optimize_project_prompt()`. For model selection, pass replaceable `ModelMetadata` entries. IntentOS intentionally does not hardcode volatile model names in the core.
 
+Run records intentionally avoid storing raw prompts by default. They use fingerprints and compact metadata so future telemetry/dataset adapters can be added without making raw private agent traces a core requirement.
+
 ## Engineering philosophy
 
 IntentOS prefers:
@@ -188,6 +190,7 @@ IntentOS is not:
 - an LLM or coding-agent replacement
 - a general autonomous-agent framework
 - an MCP runtime
+- a telemetry backend
 - a CI/CD platform
 - a project-management suite
 - a framework that forces one software architecture
@@ -206,6 +209,8 @@ GitHub Actions runs the suite on Python 3.11, 3.12, and 3.13 plus a CLI smoke te
 ## Project status
 
 The initial Phase 0–6 roadmap is implemented. The project is now in **stabilization and real-world dogfooding** before locking a stable v1 contract.
+
+Current baseline: **43 unit tests + CLI smoke**, verified by GitHub Actions on Python 3.11, 3.12, and 3.13.
 
 See [`docs/STATUS.md`](docs/STATUS.md) for the concise handoff, [`docs/DOGFOODING.md`](docs/DOGFOODING.md) for real-world findings, [`docs/HUGGINGFACE_RESEARCH.md`](docs/HUGGINGFACE_RESEARCH.md) for the ecosystem research pass, [`docs/INDEPENDENT_AUDIT.md`](docs/INDEPENDENT_AUDIT.md) for the external review package, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for the roadmap.
 
