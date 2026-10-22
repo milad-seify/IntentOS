@@ -44,4 +44,4 @@ Use focused checks first, then the broader relevant test suite when available.
 
 ## Current phase
 
-Phase 4 adds AI/model routing metadata. Keep model names and volatile provider facts out of the core; use replaceable metadata catalogs/adapters. Route by required capability, effort, availability, surface compatibility, verification confidence, and relative cost. When metadata is unavailable, provide a deterministic capability-level fallback rather than inventing a model.
+Phase 5 adds evidence-based evaluation. Treat prompt quality and operational efficiency as separate signals: assertions/score measure correctness, while token/latency/retry metrics measure execution cost. Promote repeated failures into learning proposals only when supported by multiple cases; do not turn one-off failures into permanent rules.
