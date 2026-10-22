@@ -24,10 +24,36 @@ class CliTests(unittest.TestCase):
 
         payload = json.loads(output.getvalue())
         self.assertEqual(code, 0)
+        self.assertEqual(payload["schema_version"], "1")
+        self.assertEqual(payload["status"], "ready")
         self.assertEqual(payload["task_type"], "refactor")
         self.assertEqual(payload["risk_level"], "medium")
         self.assertEqual(payload["routing"]["required_capability"], "balanced")
         self.assertIn("KISS and YAGNI", payload["prompt"])
+        self.assertTrue(payload["engineering_rules"])
+        self.assertTrue(payload["done_criteria"])
+
+    def test_cli_can_detect_target_when_target_flag_is_omitted(self) -> None:
+        output = StringIO()
+        with redirect_stdout(output):
+            code = main(["optimize", "Codex: refactor the parser", "--json"])
+
+        payload = json.loads(output.getvalue())
+        self.assertEqual(code, 0)
+        self.assertEqual(payload["routing"]["target_tool"], "codex")
+
+    def test_unknown_target_returns_structured_clarification(self) -> None:
+        output = StringIO()
+        with redirect_stdout(output):
+            code = main(
+                ["optimize", "Refactor the parser", "--target", "codxe", "--json"]
+            )
+
+        payload = json.loads(output.getvalue())
+        self.assertEqual(code, 2)
+        self.assertEqual(payload["status"], "clarification")
+        self.assertTrue(payload["needs_clarification"])
+        self.assertIn("Unknown AI tool", payload["questions"][0])
 
     def test_context_file_is_loaded_by_cli(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -52,6 +78,26 @@ class CliTests(unittest.TestCase):
             self.assertIn(str(path), payload["context_paths"])
             self.assertIn("preserve compatibility", payload["prompt"])
 
+    def test_missing_context_file_returns_json_error(self) -> None:
+        output = StringIO()
+        with redirect_stdout(output):
+            code = main(
+                [
+                    "optimize",
+                    "Refactor the parser",
+                    "--target",
+                    "codex",
+                    "--context-file",
+                    "definitely-missing-file.md",
+                    "--json",
+                ]
+            )
+
+        payload = json.loads(output.getvalue())
+        self.assertEqual(code, 2)
+        self.assertEqual(payload["status"], "error")
+        self.assertIn("FileNotFoundError", payload["error"]["type"])
+
     def test_skill_command_emits_portable_artifact(self) -> None:
         output = StringIO()
         with redirect_stdout(output):
@@ -69,9 +115,31 @@ class CliTests(unittest.TestCase):
 
         payload = json.loads(output.getvalue())
         self.assertEqual(code, 0)
+        self.assertEqual(payload["schema_version"], "1")
+        self.assertEqual(payload["status"], "ready")
         self.assertEqual(payload["name"], "parser-refactor")
         self.assertIn('name: "parser-refactor"', payload["content"])
         self.assertIn("## Engineering", payload["content"])
+
+    def test_skill_validation_error_remains_machine_readable(self) -> None:
+        output = StringIO()
+        with redirect_stdout(output):
+            code = main(
+                [
+                    "skill",
+                    "Refactor the parser",
+                    "--target",
+                    "codex",
+                    "--description",
+                    "x" * 1025,
+                    "--json",
+                ]
+            )
+
+        payload = json.loads(output.getvalue())
+        self.assertEqual(code, 2)
+        self.assertEqual(payload["status"], "error")
+        self.assertEqual(payload["error"]["type"], "ValueError")
 
     def test_workspace_command_only_returns_plan(self) -> None:
         output = StringIO()
@@ -87,6 +155,8 @@ class CliTests(unittest.TestCase):
 
         payload = json.loads(output.getvalue())
         self.assertEqual(code, 0)
+        self.assertEqual(payload["schema_version"], "1")
+        self.assertEqual(payload["status"], "ready")
         self.assertEqual(payload["changes"][0]["action"], "create")
         self.assertEqual(payload["changes"][0]["path"], "AGENTS.md")
 
