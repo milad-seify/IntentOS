@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 import re
 
 from .models import ExecutionPolicy, NormalizedIntent
 
 
 _SKILL_NAME_RE = re.compile(r"[^a-z0-9-]+")
+_MAX_SKILL_NAME = 64
+_MAX_DESCRIPTION = 1024
 
 
 @dataclass(frozen=True, slots=True)
@@ -20,7 +23,17 @@ def _slug(value: str) -> str:
     normalized = value.strip().lower().replace("_", "-").replace(" ", "-")
     normalized = _SKILL_NAME_RE.sub("-", normalized)
     normalized = re.sub(r"-+", "-", normalized).strip("-")
+    normalized = (normalized or "intentos-skill")[:_MAX_SKILL_NAME].rstrip("-")
     return normalized or "intentos-skill"
+
+
+def _description(value: str) -> str:
+    normalized = " ".join(value.split()).strip()
+    if not normalized:
+        raise ValueError("Skill description must not be empty.")
+    if len(normalized) > _MAX_DESCRIPTION:
+        raise ValueError("Skill description must be at most 1024 characters.")
+    return normalized
 
 
 def build_skill_artifact(
@@ -32,20 +45,24 @@ def build_skill_artifact(
 ) -> SkillArtifact:
     """Compile reusable, vendor-neutral agent guidance into a SKILL.md artifact.
 
-    The artifact is intentionally text-only and proposal-first. Installing it into
+    The artifact follows the required Agent Skills frontmatter shape (`name` and
+    `description`) while remaining text-only and proposal-first. Installation into
     agent-specific locations is an integration concern.
     """
     skill_name = _slug(name or f"intentos-{policy.task_type.value}")
-    skill_description = (
-        description.strip()
-        if description and description.strip()
-        else f"IntentOS guidance for {policy.task_type.value} tasks with {policy.risk_level.value} risk."
+    skill_description = _description(
+        description
+        if description is not None
+        else (
+            f"Apply IntentOS guidance for {policy.task_type.value} tasks with "
+            f"{policy.risk_level.value} risk. Use when delegating this class of work to an AI agent."
+        )
     )
 
     sections: list[str] = [
         "---",
-        f"name: {skill_name}",
-        f"description: {skill_description}",
+        f"name: {json.dumps(skill_name, ensure_ascii=False)}",
+        f"description: {json.dumps(skill_description, ensure_ascii=False)}",
         "---",
         "",
         f"# {skill_name}",
