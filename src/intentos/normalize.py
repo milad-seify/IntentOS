@@ -9,26 +9,39 @@ from .profiles import detect_profile, resolve_profile
 _WHITESPACE = re.compile(r"\s+")
 
 
-def _clean(text: str | None) -> str | None:
+def _clean_metadata(text: str | None) -> str | None:
     if text is None:
         return None
     value = _WHITESPACE.sub(" ", text).strip()
     return value or None
 
 
+def _clean_content(text: str | None) -> str | None:
+    if text is None:
+        return None
+    value = text.strip()
+    if not value:
+        return None
+    # Preserve meaningful multiline formatting such as code, YAML, Markdown,
+    # shell snippets, and indentation. Compact ordinary single-line prose only.
+    if "\n" in value or "\r" in value:
+        return value
+    return _WHITESPACE.sub(" ", value)
+
+
 def _clean_many(values: tuple[str, ...]) -> tuple[str, ...]:
     cleaned: list[str] = []
     seen: set[str] = set()
     for value in values:
-        item = _clean(value)
-        if item and item.casefold() not in seen:
+        item = _clean_content(value)
+        if item and item not in seen:
             cleaned.append(item)
-            seen.add(item.casefold())
+            seen.add(item)
     return tuple(cleaned)
 
 
 def normalize_intent(request: IntentRequest) -> NormalizedIntent:
-    goal = _clean(request.raw_text) or ""
+    goal = _clean_content(request.raw_text) or ""
     ambiguities: list[Ambiguity] = []
 
     if not goal:
@@ -60,10 +73,10 @@ def normalize_intent(request: IntentRequest) -> NormalizedIntent:
     return NormalizedIntent(
         goal=goal,
         target_tool=target,
-        output_format=_clean(request.output_format),
+        output_format=_clean_metadata(request.output_format),
         constraints=_clean_many(request.constraints),
         context=_clean_many(request.context),
-        audience=_clean(request.audience),
+        audience=_clean_metadata(request.audience),
         success_criteria=_clean_many(request.success_criteria),
         ambiguities=tuple(ambiguities),
     )
