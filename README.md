@@ -17,9 +17,9 @@ For software and DevOps work, a good request is not only well-worded. It should 
 ## Core capabilities
 
 - Prompt engineering and prompt repair
-- AI/tool and model-aware routing
 - Task and risk classification
-- Software engineering and DevOps policy profiles
+- Contextual software-engineering and DevOps policies
+- AI/tool and model-aware routing
 - Project-aware context selection
 - Agent workspace file creation and maintenance
 - Workflow and approval-boundary generation
@@ -46,11 +46,11 @@ A user request plus optional project context, target AI/tool, repository state, 
 
 ### Outputs
 
-Depending on the task, IntentOS may produce an optimized prompt, recommended AI/model/effort, execution workflow and approval boundaries, engineering constraints, relevant context selection, agent context files or updates, verification steps and Definition of Done, and evaluation metadata.
+Depending on the task, IntentOS may produce an optimized prompt, task/risk metadata, engineering and DevOps guardrails, recommended AI/model/effort, execution workflow and approval boundaries, relevant context selection, agent context files or updates, verification steps and Definition of Done, and evaluation metadata.
 
-## Phase 1 API
+## Current API
 
-The first implementation intentionally stays small and dependency-free. It normalizes rough intent, detects critical ambiguity, applies a target-tool profile, and compiles a deterministic execution prompt.
+The current implementation stays small and dependency-free. It normalizes rough intent, detects critical ambiguity, classifies task/risk, applies contextual engineering policy, selects a target-tool profile, and compiles a deterministic execution prompt.
 
 ```python
 from intentos import IntentRequest, optimize_prompt
@@ -67,6 +67,7 @@ result = optimize_prompt(
 if result.needs_clarification:
     print(result.questions)
 else:
+    print(result.policy.task_type, result.policy.risk_level)
     print(result.prompt)
 ```
 
@@ -82,9 +83,11 @@ PYTHONPATH=src python -m unittest discover -s tests -v
 
 ## Status
 
-**Phase 1 — Prompt Engineering Core**
+**Phase 2 — Engineering + Risk Profiles**
 
-The current implementation covers intent schema, ambiguity handling, compact normalization, initial target-tool profiles, deterministic prompt compilation, and focused tests. Engineering/risk policy, repository context management, model routing, and evaluation remain later phases by design.
+Implemented: intent schema, ambiguity handling, prompt normalization, initial target profiles, deterministic task/risk classification, contextual software-engineering and DevOps policy generation, approval boundaries, Definition-of-Done generation, and focused tests.
+
+Repository context management, model routing, evaluation, and integrations remain later phases by design.
 
 See [`docs/`](docs/) for the product foundation and roadmap.
 
