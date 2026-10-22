@@ -1,0 +1,33 @@
+from __future__ import annotations
+
+from dataclasses import replace
+
+from .context import select_project_context
+from .models import ContextDocument, IntentRequest, PromptResult
+from .normalize import normalize_intent
+from .service import optimize_prompt
+
+
+def optimize_project_prompt(
+    request: IntentRequest,
+    documents: tuple[ContextDocument, ...],
+    *,
+    max_context_chars: int = 6000,
+) -> PromptResult:
+    base_intent = normalize_intent(request)
+    selection = select_project_context(
+        base_intent,
+        documents,
+        max_chars=max_context_chars,
+    )
+
+    selected_context = tuple(
+        f"[{item.document.path}]\n{item.document.content}"
+        for item in selection.selected
+    )
+    enriched = replace(
+        request,
+        context=tuple((*request.context, *selected_context)),
+    )
+    result = optimize_prompt(enriched)
+    return replace(result, context_selection=selection)

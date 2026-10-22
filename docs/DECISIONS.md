@@ -73,3 +73,15 @@ Software-engineering and DevOps guidance is selected from task type and risk lev
 **Status:** Accepted
 
 Risk classification determines approval boundaries and completion evidence. It must not automatically force a specific architecture, framework, or abstraction level. High-risk work receives stronger guardrails; low-risk work stays lightweight.
+
+## D-013 — Context is ranked, bounded, and deduplicated
+
+**Status:** Accepted
+
+Project context is selected by relevance plus source authority, not by loading the entire repository. Agent guidance, status, decisions, and architecture receive priority; duplicate and irrelevant content is omitted and a character budget bounds the handoff.
+
+## D-014 — Workspace maintenance is proposal-first
+
+**Status:** Accepted
+
+The core may detect missing, stale, duplicate, or bloated agent context and produce create/update/keep proposals. Applying repository writes belongs to an integration boundary and must respect approval rules rather than silently mutating a workspace.

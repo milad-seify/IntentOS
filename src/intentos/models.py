@@ -26,6 +26,12 @@ class RiskLevel(str, Enum):
     HIGH = "high"
 
 
+class WorkspaceAction(str, Enum):
+    CREATE = "create"
+    UPDATE = "update"
+    KEEP = "keep"
+
+
 @dataclass(frozen=True, slots=True)
 class IntentRequest:
     raw_text: str
@@ -100,11 +106,47 @@ class ExecutionPolicy:
 
 
 @dataclass(frozen=True, slots=True)
+class ContextDocument:
+    path: str
+    content: str
+    authoritative: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class ScoredContext:
+    document: ContextDocument
+    score: int
+    reasons: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class ContextSelection:
+    selected: tuple[ScoredContext, ...]
+    omitted_paths: tuple[str, ...] = ()
+    total_chars: int = 0
+
+
+@dataclass(frozen=True, slots=True)
+class WorkspaceChange:
+    action: WorkspaceAction
+    path: str
+    reason: str
+    proposed_content: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class WorkspacePlan:
+    changes: tuple[WorkspaceChange, ...]
+    warnings: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
 class PromptResult:
     prompt: str | None
     intent: NormalizedIntent
     questions: tuple[str, ...] = field(default_factory=tuple)
     policy: ExecutionPolicy | None = None
+    context_selection: ContextSelection | None = None
 
     @property
     def needs_clarification(self) -> bool:
