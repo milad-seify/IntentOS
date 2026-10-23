@@ -46,7 +46,12 @@ function runIntentOS(request) {
         }
 
         try {
-          resolve(JSON.parse(stdout));
+          const payload = JSON.parse(stdout);
+          if (payload?.status === 'error') {
+            reject(new Error(payload.error?.message || 'IntentOS returned an error.'));
+            return;
+          }
+          resolve(payload);
         } catch (parseError) {
           reject(
             new Error(
