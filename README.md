@@ -65,12 +65,14 @@ Current surfaces:
 - **CLI** — portable use from the terminal and scripts.
 - **Python API** — programmatic access for integrations and automation.
 - **MCP adapter** — optional local stdio connection exposing one bounded `prepare_task` tool.
+- **VS Code extension (minimum slice)** — one `IntentOS: Prepare Task` command with temporary review and Copy Prepared Task.
 - **Agent Skills** — portable, reusable `SKILL.md` guidance.
 
-Planned next surfaces:
+Planned next surface:
 
-- **VS Code extension** — editor-native task preparation, risk/context preview, and agent handoff.
 - **Simple UI** — outcome-first experience for users who should not need CLI or prompt-engineering knowledge.
+
+Broader VS Code handoff/execution features remain gated by editor dogfooding rather than being assumed up front.
 
 Advanced controls should use **progressive disclosure**: everyday users see simple outcome-first actions, while experts can inspect and control context, risk, policy, routing, cost, approvals, and verification.
 
@@ -130,7 +132,7 @@ Plan agent workspace maintenance without writing files:
 
 ```bash
 intentos workspace \
-  --phase "Phase 7A — minimal MCP" \
+  --phase "Phase 7B — minimum VS Code UX" \
   --document AGENTS.md \
   --document docs/STATUS.md
 ```
@@ -164,6 +166,25 @@ The server uses stdio and exposes exactly one tool: `prepare_task`.
 The MCP result uses the same versioned machine contract as the CLI: ready/clarification status, prepared prompt, task/risk decision, engineering and approval boundaries, routing, context diagnostics, and verification criteria.
 
 MCP preparation does not execute the task, authorize a risky action, mutate the repository, expose workspace/Skill/run-record operations, or turn IntentOS into a general MCP runtime.
+
+## VS Code extension
+
+The first editor slice lives in `integrations/vscode` and intentionally has no npm runtime dependencies or build pipeline.
+
+Current flow:
+
+1. make sure the `intentos` CLI is available to the VS Code extension host
+2. select request text in an editor, or leave nothing selected
+3. run `IntentOS: Prepare Task` from the Command Palette
+4. if needed, type the request into the small input box
+5. review interpretation, risk/approval boundaries, context summary, verification, and the prepared prompt
+6. use **Copy Prepared Task** when ready
+
+Advanced routing/context details stay collapsed by default. The extension invokes `intentos optimize ... --json`; it does not duplicate IntentOS classification, policy, context, or routing logic in JavaScript.
+
+`intentos.executable` defaults to `intentos` and can be changed when VS Code needs a specific virtual-environment executable path.
+
+This first slice intentionally does not include a permanent sidebar, automatic project-file discovery, agent-specific Send/Execute wiring, telemetry, or a background service. See [`integrations/vscode/README.md`](integrations/vscode/README.md).
 
 ## Python API
 
@@ -266,21 +287,21 @@ IntentOS is not:
 
 ## Development
 
-The core currently has no third-party runtime dependencies. MCP support is an optional extra rather than a core dependency.
+The core currently has no third-party runtime dependencies. MCP support is an optional extra rather than a core dependency. The minimum VS Code extension uses plain JavaScript and built-in VS Code/Node APIs.
 
 ```bash
 PYTHONPATH=src python -m unittest discover -s tests -v
 ```
 
-GitHub Actions runs the full core suite on Ubuntu with Python 3.11, 3.12, and 3.13, focused Windows/Python 3.13 regression coverage, CLI smoke checks, and a separate MCP v2 protocol smoke with the optional extra installed.
+GitHub Actions runs the full core suite on Ubuntu with Python 3.11, 3.12, and 3.13, focused Windows/Python 3.13 regression coverage, CLI smoke checks, MCP protocol/stdio parity checks, and a dependency-free VS Code extension syntax check.
 
 ## Project status
 
-The initial Phase 0–6 roadmap and the independent-audit stabilization gate are complete. **Phase 7A adds the first access integration: one optional `prepare_task` MCP tool over the shared core.** MCP expansion remains gated by real usage; VS Code is the next planned access surface after MCP/core parity is dogfooded.
+The initial Phase 0–6 roadmap and independent-audit stabilization gate are complete. **Phase 7A MCP parity is proven, and Phase 7B now has the minimum Prepare → Review → Copy VS Code workflow.** Editor expansion is gated by dogfooding this small flow rather than adding a sidebar or agent-specific execution bridge immediately.
 
-Current baseline: **79 unit tests + CLI smoke + MCP protocol smoke**, with Linux and Windows CI coverage.
+Current baseline: **81 unit tests + CLI smoke + MCP protocol/stdio parity checks + VS Code syntax smoke**, with Linux and Windows CI coverage.
 
-See [`docs/STATUS.md`](docs/STATUS.md) for the concise handoff, [`docs/DOGFOODING.md`](docs/DOGFOODING.md) for real-world findings, [`docs/HUGGINGFACE_RESEARCH.md`](docs/HUGGINGFACE_RESEARCH.md) for the ecosystem research pass, [`docs/UX.md`](docs/UX.md) for usage/access principles, [`docs/INDEPENDENT_AUDIT.md`](docs/INDEPENDENT_AUDIT.md) for the review contract, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for the roadmap.
+See [`docs/STATUS.md`](docs/STATUS.md) for the concise handoff, [`docs/DOGFOODING.md`](docs/DOGFOODING.md) for real-world findings, [`docs/MCP_DOGFOODING.md`](docs/MCP_DOGFOODING.md) for MCP parity evidence, [`docs/HUGGINGFACE_RESEARCH.md`](docs/HUGGINGFACE_RESEARCH.md) for the ecosystem research pass, [`docs/UX.md`](docs/UX.md) for usage/access principles, [`docs/INDEPENDENT_AUDIT.md`](docs/INDEPENDENT_AUDIT.md) for the review contract, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for the roadmap.
 
 ## Contributing
 

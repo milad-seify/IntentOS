@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 7B preparation — minimum useful VS Code UX
+Phase 7B — minimum VS Code UX dogfooding
 
 ## Implemented
 
@@ -21,13 +21,15 @@ Phase 7B preparation — minimum useful VS Code UX
 - Review dogfood regressions: documentation work stays lightweight without losing topic taxonomy; combined mutation requests remain high risk; distinct context ranks by relevance while authoritative duplicates still win
 - Phase 7A: optional MCP v2 stdio adapter with exactly one `prepare_task` tool over the shared core
 - Phase 7A parity dogfood: installed `intentos-mcp` launched as a real stdio subprocess and produced exact structured-result parity with CLI and Python API across four representative cases
+- Phase 7B minimum editor slice: one `IntentOS: Prepare Task` Command Palette action, selected-text/input capture, temporary review panel, progressive advanced details, and Copy Prepared Task handoff
 
 ## Current verification baseline
 
-79 standard-library unit tests plus CLI smoke checks, plus two MCP checks:
+81 standard-library unit tests plus CLI smoke checks, plus dedicated integration checks:
 
 - in-memory MCP v2 protocol smoke
-- stdio subprocess host-parity dogfood across four representative cases
+- stdio subprocess MCP host-parity dogfood across four representative cases
+- VS Code extension JavaScript syntax smoke with no npm install/build pipeline
 
 CI covers:
 
@@ -36,42 +38,47 @@ CI covers:
 - Ubuntu / Python 3.13
 - Windows / Python 3.13 focused regression coverage
 - MCP v2 protocol and stdio host-parity checks on Ubuntu / Python 3.13 with the optional `mcp` extra installed
+- dependency-free VS Code extension syntax check
+
+## Phase 7B boundary
+
+The first VS Code slice intentionally stays thin and local.
+
+It currently:
+
+- exposes one user-facing command: `IntentOS: Prepare Task`
+- uses selected editor text when present, otherwise asks for the request
+- invokes `intentos optimize ... --json` rather than reimplementing core logic
+- shows interpretation, risk, consequential approval boundaries, context summary, and verification in a temporary review panel
+- keeps routing/context internals behind a collapsed Advanced section
+- copies the prepared prompt to the clipboard on explicit user action
+- allows one optional `intentos.executable` setting for PATH/virtual-environment cases
+- surfaces structured CLI errors rather than presenting them as clarification
+
+It does **not**:
+
+- add a permanent sidebar/activity-bar view
+- discover or read project files automatically
+- execute or send prepared tasks to an agent
+- embed an MCP client inside the extension
+- add npm runtime dependencies, TypeScript, bundlers, telemetry, background services, or provider settings
+
+See `integrations/vscode/README.md` for the editor workflow.
 
 ## Phase 7A boundary
 
-The first MCP slice intentionally exposes only `prepare_task`.
+The MCP surface remains exactly one `prepare_task` tool. It does not read arbitrary local files, execute prepared work, authorize risky actions, mutate the workspace, or expose classifier/router/policy/Skill/workspace/run-record/telemetry/provider tools.
 
-It accepts:
-
-- user request
-- optional target AI/tool
-- constraints and success criteria
-- optional output format and audience
-- caller-supplied project context as `path` labels plus `content`
-
-It returns the shared versioned machine contract: ready/clarification status, prepared prompt, task/risk decision, engineering rules, approval boundaries, routing, context diagnostics, and verification criteria.
-
-MCP currently does **not**:
-
-- read arbitrary local files
-- execute the prepared task
-- grant authorization for risky actions
-- mutate the workspace
-- expose classifier/router/policy as separate tools
-- expose Skill, workspace, run-record, telemetry, provider-discovery, or orchestration tools
-- require MCP dependencies for normal core/CLI installation
-
-Project context is limited to 32 caller-supplied documents and 6000 characters total in this first slice.
-
-See `docs/MCP_DOGFOODING.md` for the parity evidence and its limits.
+Project context is limited to 32 caller-supplied documents and 6000 characters total in this first slice. See `docs/MCP_DOGFOODING.md` for parity evidence and limits.
 
 ## Deliberately deferred
 
-To avoid over-engineering, Phase 7A did **not** add:
+To avoid over-engineering, current access work does **not** add:
 
-- additional MCP tools
-- Streamable HTTP deployment
-- an MCP runtime/framework beyond the optional official SDK adapter
+- additional MCP tools or Streamable HTTP deployment
+- a permanent VS Code sidebar or settings framework
+- agent-specific execution wiring
+- automatic editor filesystem/context discovery
 - an LLM-based classifier
 - embeddings or a vector database
 - a policy/plugin framework
@@ -83,15 +90,10 @@ The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-Begin Phase 7B with the smallest useful editor slice:
-
-- Command Palette action to prepare typed or selected text
-- temporary review panel showing concise interpretation, consequential risk/approval, context summary, and verification summary
-- Copy Prepared Task handoff first; do not add agent-specific execution wiring unless real usage justifies it
-- keep full prompt, taxonomy, context scores, routing metadata, and expert controls behind progressive disclosure
-- reuse the shared preparation contract; do not duplicate core logic in the extension
-
-Keep additional MCP tools deferred unless repeated real use demonstrates a concrete need.
+- dogfood the VS Code extension manually in an Extension Development Host on representative ready, clarification, high-risk, and error cases
+- promote only observed editor UX/contract failures into focused regressions
+- do not add Send to Agent, sidebar UI, automatic context discovery, packaging/Marketplace work, or broader settings until the minimum flow proves useful
+- keep additional MCP tools deferred unless repeated real use demonstrates a concrete need
 
 ## Constraints carried forward
 

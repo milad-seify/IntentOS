@@ -1,0 +1,36 @@
+{
+  "name": "intentos-vscode",
+  "displayName": "IntentOS",
+  "description": "Prepare bounded AI execution tasks with IntentOS.",
+  "version": "0.1.0",
+  "publisher": "milad-seify",
+  "private": true,
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onCommand:intentos.prepareTask"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "intentos.prepareTask",
+        "title": "IntentOS: Prepare Task"
+      }
+    ],
+    "configuration": {
+      "title": "IntentOS",
+      "properties": {
+        "intentos.executable": {
+          "type": "string",
+          "default": "intentos",
+          "description": "IntentOS CLI executable available to the VS Code extension host."
+        }
+      }
+    }
+  }
+}

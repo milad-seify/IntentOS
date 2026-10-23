@@ -55,15 +55,15 @@ Use focused checks first, then the broader relevant test suite when available.
 
 ## Current phase
 
-Phase 7A MCP/core parity is proven through the installed `intentos-mcp` stdio subprocess, with exact structured-result parity against CLI and Python API across representative cases. The authorized next slice is **Phase 7B — minimum useful VS Code UX**.
+Phase 7A MCP/core parity is proven. Phase 7B now has the **minimum useful VS Code slice**: one `IntentOS: Prepare Task` command, typed/selected request capture, a temporary review panel, and Copy Prepared Task. The current gate is editor dogfooding, not feature expansion.
 
 Keep Phase 7B thin:
 
-- start with Command Palette preparation of typed or selected text
-- use a temporary review panel rather than a permanent sidebar
-- show concise interpretation, consequential risk/approval, context summary, and verification summary by default
-- offer Copy Prepared Task first
-- keep full prompt, taxonomy, context scores, routing metadata, and expert controls behind progressive disclosure
-- reuse the existing preparation contract; do not duplicate classifier/router/policy/context logic in TypeScript
+- preserve the one-command Prepare → Review → Copy workflow until real use exposes a concrete gap
+- keep the temporary review panel instead of adding a permanent sidebar
+- show concise interpretation, consequential risk/approval, context summary, and verification by default
+- keep routing/context internals behind progressive disclosure
+- keep the extension as a transport/UX adapter over `intentos optimize ... --json`; do not duplicate classifier/router/policy/context logic in JavaScript
+- promote observed editor UX or contract failures into focused regressions before adding capabilities
 
-Do not add another MCP tool, Streamable HTTP deployment, filesystem discovery, workspace mutation, agent-specific execution wiring, settings frameworks, hosted services, plugin systems, LLM classification, embeddings/vector search, provider discovery, or telemetry infrastructure unless real usage demonstrates a concrete need.
+Do not add another MCP tool, Streamable HTTP deployment, automatic filesystem/context discovery, workspace mutation, agent-specific Send/Execute wiring, VS Code sidebar/activity-bar UI, packaging/Marketplace infrastructure, settings frameworks, hosted services, plugin systems, LLM classification, embeddings/vector search, provider discovery, or telemetry infrastructure unless real usage demonstrates a concrete need.
