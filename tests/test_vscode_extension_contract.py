@@ -35,6 +35,20 @@ class VSCodeExtensionContractTests(unittest.TestCase):
         self.assertNotIn("workspace.fs", source)
         self.assertNotIn("mcp", source.lower())
 
+    def test_repository_launch_config_runs_only_the_development_extension(self) -> None:
+        launch = json.loads((ROOT / ".vscode" / "launch.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(len(launch["configurations"]), 1)
+        config = launch["configurations"][0]
+        self.assertEqual(config["type"], "extensionHost")
+        self.assertEqual(config["request"], "launch")
+        self.assertEqual(config["runtimeExecutable"], "${execPath}")
+        self.assertEqual(
+            config["args"],
+            ["--extensionDevelopmentPath=${workspaceFolder}/integrations/vscode"],
+        )
+        self.assertNotIn("preLaunchTask", config)
+
 
 if __name__ == "__main__":
     unittest.main()
