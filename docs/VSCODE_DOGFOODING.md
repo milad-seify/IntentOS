@@ -4,13 +4,18 @@ This is the acceptance protocol for the first VS Code slice. It is intentionally
 
 ## Prerequisite
 
-From the repository root, install the current IntentOS package so the extension host can run the CLI:
+The extension uses the repository-local virtual environment executable when the default `intentos` setting is in use:
+
+- Windows: `.venv\Scripts\intentos.exe`
+- POSIX: `.venv/bin/intentos`
+
+If that executable is not present, install the current IntentOS package so `intentos` is available to the Extension Host:
 
 ```bash
 python -m pip install -e .
 ```
 
-If `intentos` is not on the Extension Host PATH, set `IntentOS: Executable` (`intentos.executable`) to the full CLI path.
+To use a different CLI executable, set `IntentOS: Executable` (`intentos.executable`) to its command or full path.
 
 ## Launch
 

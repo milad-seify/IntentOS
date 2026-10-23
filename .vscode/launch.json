@@ -6,9 +6,6 @@
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "env": {
-        "PATH": "${workspaceFolder}\\.venv\\Scripts;${env:PATH}"
-      },
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}/integrations/vscode",
         "--disable-extension=pflannery.vscode-versionlens"

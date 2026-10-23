@@ -35,6 +35,14 @@ class VSCodeExtensionContractTests(unittest.TestCase):
         self.assertNotIn("workspace.fs", source)
         self.assertNotIn("mcp", source.lower())
 
+    def test_default_cli_resolution_prefers_workspace_virtual_environment(self) -> None:
+        source = (EXTENSION_DIR / "extension.js").read_text(encoding="utf-8")
+
+        self.assertIn("function resolveExecutable(executable, cwd)", source)
+        self.assertIn("process.platform === 'win32' ? 'Scripts' : 'bin'", source)
+        self.assertIn("process.platform === 'win32' ? 'intentos.exe' : 'intentos'", source)
+        self.assertIn("fs.existsSync(localExecutable) ? localExecutable : executable", source)
+
     def test_repository_launch_config_runs_only_the_development_extension(self) -> None:
         launch = json.loads((ROOT / ".vscode" / "launch.json").read_text(encoding="utf-8"))
 
