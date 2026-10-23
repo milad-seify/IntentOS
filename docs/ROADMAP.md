@@ -102,7 +102,7 @@ Independent audit verdict: **NEEDS STABILIZATION**, not architectural redesign. 
 
 Goal: make IntentOS easy to use across environments while preserving one shared core.
 
-### 7A — Minimal MCP adapter — IMPLEMENTED
+### 7A — Minimal MCP adapter — IMPLEMENTED + PARITY GATE PASSED
 
 The first MCP slice exposes exactly **one tool: `prepare_task`** through an optional local stdio adapter using the official stable MCP Python SDK.
 
@@ -136,23 +136,28 @@ Current implementation constraints:
 - workspace planning, Skill helpers, run records, telemetry, provider discovery, and orchestration remain outside the MCP surface
 - no generic MCP runtime or autonomous orchestration
 
-Exit gate before MCP expansion:
+Parity evidence:
 
-> Dogfood `prepare_task` through a real MCP host and demonstrate semantic parity with CLI/Python API. Promote only observed failures into regressions. Do not add another MCP tool merely because the protocol can expose one.
+- the installed `intentos-mcp` entry point is launched as a real stdio subprocess
+- the host must discover exactly one tool: `prepare_task`
+- complete structured MCP results are compared exactly with CLI JSON and Python API results
+- four representative cases cover lightweight security-topic docs, high-risk production auth work, context selection, and clarification
 
-### 7B — VS Code extension
+See `docs/MCP_DOGFOODING.md`.
 
-Begin after MCP/core parity is proven through real usage.
+Do not add another MCP tool merely because the protocol can expose one. Expand only from repeated real usage evidence.
+
+### 7B — VS Code extension — NEXT
 
 Minimum useful editor experience:
 
-- prepare a typed request or selected text
-- show concise interpretation, consequential risk/approval, context summary, and verification summary
-- offer Copy Prepared Task / Send to Agent handoff
-- put full prompt, taxonomy, context scores, routing metadata, and other expert controls behind progressive disclosure
+- prepare typed or selected text from the Command Palette
+- show concise interpretation, consequential risk/approval, context summary, and verification summary in a temporary review panel
+- offer Copy Prepared Task first
+- keep full prompt, taxonomy, context scores, routing metadata, and other expert controls behind progressive disclosure
 - remain a thin adapter over the shared preparation contract
 
-Start with Command Palette actions and a temporary review panel; do not commit to a permanent sidebar until usage justifies it.
+Do not build a permanent sidebar, agent-specific execution bridge, settings framework, or broad editor feature set until usage justifies it.
 
 ### 7C — Simple user interface
 
