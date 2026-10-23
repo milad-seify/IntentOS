@@ -1,0 +1,39 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+import unittest
+
+
+ROOT = Path(__file__).resolve().parents[1]
+EXTENSION_DIR = ROOT / "integrations" / "vscode"
+
+
+class VSCodeExtensionContractTests(unittest.TestCase):
+    def test_manifest_exposes_only_prepare_task_command(self) -> None:
+        manifest = json.loads((EXTENSION_DIR / "package.json").read_text(encoding="utf-8"))
+
+        commands = manifest["contributes"]["commands"]
+        self.assertEqual(
+            commands,
+            [{"command": "intentos.prepareTask", "title": "IntentOS: Prepare Task"}],
+        )
+        self.assertNotIn("views", manifest["contributes"])
+        self.assertNotIn("viewsContainers", manifest["contributes"])
+        self.assertNotIn("dependencies", manifest)
+        self.assertNotIn("devDependencies", manifest)
+
+    def test_extension_stays_a_thin_cli_adapter(self) -> None:
+        source = (EXTENSION_DIR / "extension.js").read_text(encoding="utf-8")
+
+        self.assertIn("execFile", source)
+        self.assertIn("['optimize', request, '--json']", source)
+        self.assertIn("createWebviewPanel", source)
+        self.assertIn("clipboard.writeText", source)
+        self.assertNotIn("readFile", source)
+        self.assertNotIn("workspace.fs", source)
+        self.assertNotIn("mcp", source.lower())
+
+
+if __name__ == "__main__":
+    unittest.main()
