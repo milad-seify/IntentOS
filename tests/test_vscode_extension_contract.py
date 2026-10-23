@@ -45,7 +45,10 @@ class VSCodeExtensionContractTests(unittest.TestCase):
         self.assertEqual(config["runtimeExecutable"], "${execPath}")
         self.assertEqual(
             config["args"],
-            ["--extensionDevelopmentPath=${workspaceFolder}/integrations/vscode"],
+            [
+                "--extensionDevelopmentPath=${workspaceFolder}/integrations/vscode",
+                "--disable-extension=pflannery.vscode-versionlens",
+            ],
         )
         self.assertNotIn("preLaunchTask", config)
 

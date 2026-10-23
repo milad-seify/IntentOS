@@ -1,0 +1,3 @@
+[console_scripts]
+intentos = intentos.cli:main
+intentos-mcp = intentos.mcp_server:main
