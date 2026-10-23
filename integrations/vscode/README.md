@@ -4,13 +4,21 @@ This is the minimum Phase 7B editor surface. It remains a thin adapter over the 
 
 ## Current workflow
 
-1. Install IntentOS so the `intentos` executable is available to VS Code.
-2. Open this directory as an extension development host or install/package it with your normal VS Code extension workflow.
-3. Run `IntentOS: Prepare Task` from the Command Palette.
-4. If text is selected in the active editor, that selection is used as the request. Otherwise IntentOS asks for the request.
-5. Review the temporary panel and choose **Copy Prepared Task** when ready.
+1. Install IntentOS from the repository root so the `intentos` executable is available to VS Code:
+
+   ```bash
+   python -m pip install -e .
+   ```
+
+2. Open the repository root in desktop VS Code and press `F5` (or run **Debug: Start Debugging**).
+3. Choose `IntentOS: Run VS Code Extension`. The repository `.vscode/launch.json` opens a standard Extension Development Host with this directory loaded via `--extensionDevelopmentPath`.
+4. In the Extension Development Host, run `IntentOS: Prepare Task` from the Command Palette.
+5. If text is selected in the active editor, that selection is used as the request. Otherwise IntentOS asks for the request.
+6. Review the temporary panel and choose **Copy Prepared Task** when ready.
 
 The panel shows the interpretation, consequential risk/approval boundaries, selected context summary, verification criteria, and the prepared task. Advanced routing/context details stay collapsed by default.
+
+See [`../../docs/VSCODE_DOGFOODING.md`](../../docs/VSCODE_DOGFOODING.md) for the four-case real-UI acceptance protocol.
 
 ## Configuration
 
