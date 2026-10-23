@@ -11,7 +11,7 @@ Phase 7B — minimum VS Code UX dogfooding
 - Phase 2: task/risk classification and contextual engineering/DevOps policies
 - Phase 3: bounded project-context selection and proposal-first agent workspace maintenance
 - Phase 4: capability/cost/effort routing with replaceable model metadata and deterministic fallback
-- Phase 5: regression assertions/scoring, token-latency-retry metrics, A/B ranking, and evidence-backed learning proposals
+- Phase 5: regression assertions/scoring, token/latency/retry metrics, A/B ranking, and evidence-backed learning proposals
 - Phase 6: standard-library CLI, package entry point, GitHub Actions CI, and contributor guidance
 - Stabilization pass 1: multilingual dogfooding, documentation-only policy correction, and independent-audit package
 - Stabilization pass 2: Hugging Face ecosystem research, portable Agent Skill compilation, privacy-minimal versioned run records, Unicode-aware context selection, and CI action refresh
@@ -22,14 +22,16 @@ Phase 7B — minimum VS Code UX dogfooding
 - Phase 7A: optional MCP v2 stdio adapter with exactly one `prepare_task` tool over the shared core
 - Phase 7A parity dogfood: installed `intentos-mcp` launched as a real stdio subprocess and produced exact structured-result parity with CLI and Python API across four representative cases
 - Phase 7B minimum editor slice: one `IntentOS: Prepare Task` Command Palette action, selected-text/input capture, temporary review panel, progressive advanced details, and Copy Prepared Task handoff
+- Phase 7B dogfood setup: repository `F5` launch configuration plus a four-case real Extension Development Host acceptance protocol
 
 ## Current verification baseline
 
-81 standard-library unit tests plus CLI smoke checks, plus dedicated integration checks:
+82 standard-library unit tests plus CLI smoke checks, plus dedicated integration checks:
 
 - in-memory MCP v2 protocol smoke
 - stdio subprocess MCP host-parity dogfood across four representative cases
 - VS Code extension JavaScript syntax smoke with no npm install/build pipeline
+- static regression for the repository Extension Development Host launch contract
 
 CI covers:
 
@@ -54,6 +56,7 @@ It currently:
 - copies the prepared prompt to the clipboard on explicit user action
 - allows one optional `intentos.executable` setting for PATH/virtual-environment cases
 - surfaces structured CLI errors rather than presenting them as clarification
+- can be launched from the repository root with `F5` using `.vscode/launch.json`
 
 It does **not**:
 
@@ -63,7 +66,7 @@ It does **not**:
 - embed an MCP client inside the extension
 - add npm runtime dependencies, TypeScript, bundlers, telemetry, background services, or provider settings
 
-See `integrations/vscode/README.md` for the editor workflow.
+See `integrations/vscode/README.md` for the editor workflow and `docs/VSCODE_DOGFOODING.md` for the real-UI acceptance protocol.
 
 ## Phase 7A boundary
 
@@ -79,6 +82,7 @@ To avoid over-engineering, current access work does **not** add:
 - a permanent VS Code sidebar or settings framework
 - agent-specific execution wiring
 - automatic editor filesystem/context discovery
+- `@vscode/test-electron` or a downloaded/headless VS Code CI harness before a real UI failure justifies it
 - an LLM-based classifier
 - embeddings or a vector database
 - a policy/plugin framework
@@ -90,7 +94,8 @@ The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-- dogfood the VS Code extension manually in an Extension Development Host on representative ready, clarification, high-risk, and error cases
+- run the four cases in `docs/VSCODE_DOGFOODING.md` inside a real desktop VS Code Extension Development Host
+- record only pass/fail and observed friction; do not add features from preference alone
 - promote only observed editor UX/contract failures into focused regressions
 - do not add Send to Agent, sidebar UI, automatic context discovery, packaging/Marketplace work, or broader settings until the minimum flow proves useful
 - keep additional MCP tools deferred unless repeated real use demonstrates a concrete need
