@@ -121,3 +121,9 @@ CLI, Python API, MCP, VS Code, Agent Skills, and future simple user interfaces a
 **Status:** Accepted
 
 IntentOS must be usable without prompt-engineering, model-routing, or MCP expertise. Common workflows should expose outcome-first actions and safe defaults; advanced users may inspect or override deeper context, routing, policy, cost, and verification details through progressive disclosure. Simplicity must not weaken high-risk approval or safety boundaries.
+
+## D-021 — First MCP integration is optional, stdio-first, and single-tool
+
+**Status:** Accepted
+
+The first MCP integration uses the official stable Python SDK as an optional package extra so the core keeps no third-party runtime dependency. It exposes exactly one local stdio tool, `prepare_task`, which calls the shared preparation core and returns the shared machine result contract. Caller-supplied project context is bounded and passed as content; MCP does not gain arbitrary filesystem access, execution authority, workspace mutation, orchestration, or additional tools until real usage demonstrates a need.

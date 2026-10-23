@@ -12,8 +12,12 @@ license = {text = "MIT"}
 authors = [{name = "Milad Seify"}]
 dependencies = []
 
+[project.optional-dependencies]
+mcp = ["mcp>=2,<3"]
+
 [project.scripts]
 intentos = "intentos.cli:main"
+intentos-mcp = "intentos.mcp_server:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

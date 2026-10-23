@@ -93,65 +93,56 @@ Completed:
 - Hugging Face ecosystem review and portable Agent Skills/run records
 - independent architecture/product/code audit
 - usage architecture and ease-of-use principles
+- contract-preserving task preparation stabilization
+- review-skill dogfooding and focused regression fixes
 
-Independent audit verdict: **NEEDS STABILIZATION**, not architectural redesign.
-
-## Stabilization Gate — Contract-Preserving Task Preparation
-
-Goal: make the existing preparation path trustworthy before building additional access surfaces.
-
-Required outcomes:
-
-- preserve user-supplied content, formatting, constraints, audience, and output requirements
-- keep background context from silently weakening mutation-risk boundaries
-- make deterministic task/risk matching less brittle without introducing an LLM dependency
-- make context ranking, budgeting, deduplication, path handling, and workspace proposals safe and explainable
-- provide consistent clarification/error/structured-result behavior across CLI and API-facing contracts
-- keep evaluation metrics internally consistent and reject misleading evidence
-- verify regressions on Linux and Windows
-
-Acceptance criterion:
-
-> Preparation preserves the user's meaning, exposes uncertainty, and produces reviewable boundaries consistently across CLI and API.
-
-Only confirmed defects and measured dogfood failures should expand this milestone. Do not add speculative frameworks, orchestration, embeddings, or integrations to solve hypothetical future problems.
+Independent audit verdict: **NEEDS STABILIZATION**, not architectural redesign. The required preparation-contract stabilization was completed before access-surface implementation began.
 
 ## Phase 7 — Access and Agent Interoperability
 
 Goal: make IntentOS easy to use across environments while preserving one shared core.
 
-Begin only after the stabilization gate passes real dogfood checks.
+### 7A — Minimal MCP adapter — IMPLEMENTED
 
-### 7A — Minimal MCP adapter
+The first MCP slice exposes exactly **one tool: `prepare_task`** through an optional local stdio adapter using the official stable MCP Python SDK.
 
-Start with **one MCP tool: `prepare_task`**.
-
-Inputs should remain bounded and explicit:
+Inputs are bounded and explicit:
 
 - user request
 - optional target AI/tool
 - constraints and success criteria
-- bounded caller-supplied project context
+- optional output format and audience
+- bounded caller-supplied project context as `path` labels plus `content`
 
-The structured result should expose:
+The structured result exposes:
 
 - ready or clarification status
 - prepared execution prompt
 - task/risk decision and consequential approval boundaries
 - engineering constraints
 - selected/omitted context diagnostics
+- routing decision
 - verification expectations
 
-Constraints:
+Current implementation constraints:
 
-- call the existing shared core; do not duplicate classification/routing/policy logic
-- preparation must not grant execution authorization
-- no arbitrary filesystem access in the first MCP slice
-- do not expose classify/route/policy/verify as separate MCP tools initially
-- keep workspace planning, Skill helpers, run records, and additional MCP operations separate until real use demonstrates they are needed
-- do not turn IntentOS into a generic MCP runtime or agent orchestrator
+- calls the existing shared core; classification/routing/policy logic is not duplicated
+- MCP support is an optional package extra; the normal core/CLI install keeps no third-party runtime dependency
+- stdio is the first transport for local agent/IDE use
+- preparation does not grant execution authorization
+- no arbitrary filesystem access; callers supply context content explicitly
+- project context is capped at 32 documents and 6000 characters total
+- no separate classify/route/policy/verify tools
+- workspace planning, Skill helpers, run records, telemetry, provider discovery, and orchestration remain outside the MCP surface
+- no generic MCP runtime or autonomous orchestration
+
+Exit gate before MCP expansion:
+
+> Dogfood `prepare_task` through a real MCP host and demonstrate semantic parity with CLI/Python API. Promote only observed failures into regressions. Do not add another MCP tool merely because the protocol can expose one.
 
 ### 7B — VS Code extension
+
+Begin after MCP/core parity is proven through real usage.
 
 Minimum useful editor experience:
 

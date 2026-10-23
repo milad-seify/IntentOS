@@ -64,11 +64,11 @@ Current surfaces:
 
 - **CLI** — portable use from the terminal and scripts.
 - **Python API** — programmatic access for integrations and automation.
+- **MCP adapter** — optional local stdio connection exposing one bounded `prepare_task` tool.
 - **Agent Skills** — portable, reusable `SKILL.md` guidance.
 
-Planned after the preparation contract is stabilized:
+Planned next surfaces:
 
-- **MCP adapter** — standard connection for compatible AI agents.
 - **VS Code extension** — editor-native task preparation, risk/context preview, and agent handoff.
 - **Simple UI** — outcome-first experience for users who should not need CLI or prompt-engineering knowledge.
 
@@ -130,7 +130,7 @@ Plan agent workspace maintenance without writing files:
 
 ```bash
 intentos workspace \
-  --phase "Independent-audit stabilization" \
+  --phase "Phase 7A — minimal MCP" \
   --document AGENTS.md \
   --document docs/STATUS.md
 ```
@@ -142,6 +142,28 @@ You can also run the CLI as a module:
 ```bash
 python -m intentos optimize "Fix the failing parser test" --target codex
 ```
+
+## MCP adapter
+
+MCP support is optional so the standard-library core remains lightweight.
+
+```bash
+python -m pip install -e ".[mcp]"
+```
+
+A compatible local MCP host can launch:
+
+```bash
+intentos-mcp
+```
+
+The server uses stdio and exposes exactly one tool: `prepare_task`.
+
+`prepare_task` accepts the user request, optional target tool, constraints, success criteria, output format/audience, and bounded caller-supplied project context. Project context entries contain only `path` labels and `content`; IntentOS does **not** read those paths from the filesystem. The first slice accepts at most 32 context documents and 6000 characters total.
+
+The MCP result uses the same versioned machine contract as the CLI: ready/clarification status, prepared prompt, task/risk decision, engineering and approval boundaries, routing, context diagnostics, and verification criteria.
+
+MCP preparation does not execute the task, authorize a risky action, mutate the repository, expose workspace/Skill/run-record operations, or turn IntentOS into a general MCP runtime.
 
 ## Python API
 
@@ -235,7 +257,7 @@ IntentOS is not:
 - an IDE
 - an LLM or coding-agent replacement
 - a general autonomous-agent framework
-- an MCP runtime
+- a general MCP runtime
 - a telemetry backend
 - a CI/CD platform
 - a project-management suite
@@ -244,19 +266,19 @@ IntentOS is not:
 
 ## Development
 
-The core currently has no third-party runtime dependencies.
+The core currently has no third-party runtime dependencies. MCP support is an optional extra rather than a core dependency.
 
 ```bash
 PYTHONPATH=src python -m unittest discover -s tests -v
 ```
 
-GitHub Actions runs the full suite on Ubuntu with Python 3.11, 3.12, and 3.13, plus focused Windows/Python 3.13 regression coverage and CLI smoke checks.
+GitHub Actions runs the full core suite on Ubuntu with Python 3.11, 3.12, and 3.13, focused Windows/Python 3.13 regression coverage, CLI smoke checks, and a separate MCP v2 protocol smoke with the optional extra installed.
 
 ## Project status
 
-The initial Phase 0–6 roadmap is implemented. An independent audit concluded **NEEDS STABILIZATION**, not architectural redesign. The current milestone is **contract-preserving task preparation** before MCP or VS Code implementation.
+The initial Phase 0–6 roadmap and the independent-audit stabilization gate are complete. **Phase 7A adds the first access integration: one optional `prepare_task` MCP tool over the shared core.** MCP expansion remains gated by real usage; VS Code is the next planned access surface after MCP/core parity is dogfooded.
 
-Current baseline: **69 unit tests + CLI smoke**, with Linux and Windows CI coverage.
+Current baseline: **79 unit tests + CLI smoke + MCP protocol smoke**, with Linux and Windows CI coverage.
 
 See [`docs/STATUS.md`](docs/STATUS.md) for the concise handoff, [`docs/DOGFOODING.md`](docs/DOGFOODING.md) for real-world findings, [`docs/HUGGINGFACE_RESEARCH.md`](docs/HUGGINGFACE_RESEARCH.md) for the ecosystem research pass, [`docs/UX.md`](docs/UX.md) for usage/access principles, [`docs/INDEPENDENT_AUDIT.md`](docs/INDEPENDENT_AUDIT.md) for the review contract, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for the roadmap.
 
