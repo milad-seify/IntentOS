@@ -117,10 +117,9 @@ def _cli_payload(case: dict[str, Any]) -> dict[str, object]:
 
 
 async def _run() -> None:
-    server = StdioServerParameters(
-        command=sys.executable,
-        args=["-m", "intentos.mcp_server"],
-    )
+    # Exercise the installed console entry point through a real stdio subprocess,
+    # matching how a local MCP host launches IntentOS.
+    server = StdioServerParameters(command="intentos-mcp")
     async with Client(server, raise_exceptions=True) as client:
         tools = await client.list_tools()
         names = [tool.name for tool in tools.tools]
