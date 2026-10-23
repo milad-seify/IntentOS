@@ -147,17 +147,32 @@ See `docs/MCP_DOGFOODING.md`.
 
 Do not add another MCP tool merely because the protocol can expose one. Expand only from repeated real usage evidence.
 
-### 7B — VS Code extension — NEXT
+### 7B — VS Code extension — MINIMUM SLICE IMPLEMENTED
 
-Minimum useful editor experience:
+The first editor slice intentionally uses only the existing CLI/machine contract and VS Code built-in APIs.
 
-- prepare typed or selected text from the Command Palette
-- show concise interpretation, consequential risk/approval, context summary, and verification summary in a temporary review panel
-- offer Copy Prepared Task first
-- keep full prompt, taxonomy, context scores, routing metadata, and other expert controls behind progressive disclosure
-- remain a thin adapter over the shared preparation contract
+Implemented:
 
-Do not build a permanent sidebar, agent-specific execution bridge, settings framework, or broad editor feature set until usage justifies it.
+- one Command Palette action: `IntentOS: Prepare Task`
+- selected editor text when present; otherwise a small input prompt
+- one temporary review panel rather than a permanent sidebar
+- concise interpretation, risk, consequential approval boundaries, context summary, and verification by default
+- Copy Prepared Task handoff
+- advanced routing/context details collapsed by default
+- one optional executable-path setting for PATH/virtual-environment cases
+- no duplicated classifier/router/policy/context logic in the extension
+
+Current constraints:
+
+- the extension calls `intentos optimize ... --json`
+- no automatic filesystem/context discovery
+- no agent-specific Send/Execute action
+- no MCP client embedded in the extension
+- no npm runtime dependency, TypeScript compiler, bundler, telemetry, background service, or provider configuration
+
+Exit gate before editor expansion:
+
+> Dogfood the extension in an Extension Development Host across ready, clarification, high-risk, and error cases. Promote only observed UX/contract failures into focused regressions. Do not add a sidebar, agent execution bridge, automatic context discovery, packaging/Marketplace work, or broader settings merely because VS Code supports them.
 
 ### 7C — Simple user interface
 
