@@ -28,6 +28,7 @@ class VSCodeExtensionContractTests(unittest.TestCase):
 
         self.assertIn("execFile", source)
         self.assertIn("['optimize', request, '--json']", source)
+        self.assertIn("payload?.status === 'error'", source)
         self.assertIn("createWebviewPanel", source)
         self.assertIn("clipboard.writeText", source)
         self.assertNotIn("readFile", source)
