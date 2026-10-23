@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 7A — minimal MCP adapter and parity dogfooding
+Phase 7B preparation — minimum useful VS Code UX
 
 ## Implemented
 
@@ -20,10 +20,14 @@ Phase 7A — minimal MCP adapter and parity dogfooding
 - Stabilization pass 3: preserve user content/output requirements, harden deterministic risk classification, context/workspace safety, structured results, and evaluation evidence contracts
 - Review dogfood regressions: documentation work stays lightweight without losing topic taxonomy; combined mutation requests remain high risk; distinct context ranks by relevance while authoritative duplicates still win
 - Phase 7A: optional MCP v2 stdio adapter with exactly one `prepare_task` tool over the shared core
+- Phase 7A parity dogfood: installed `intentos-mcp` launched as a real stdio subprocess and produced exact structured-result parity with CLI and Python API across four representative cases
 
 ## Current verification baseline
 
-79 standard-library unit tests plus CLI smoke checks, plus a dedicated MCP v2 in-memory protocol smoke.
+79 standard-library unit tests plus CLI smoke checks, plus two MCP checks:
+
+- in-memory MCP v2 protocol smoke
+- stdio subprocess host-parity dogfood across four representative cases
 
 CI covers:
 
@@ -31,7 +35,7 @@ CI covers:
 - Ubuntu / Python 3.12
 - Ubuntu / Python 3.13
 - Windows / Python 3.13 focused regression coverage
-- MCP v2 protocol smoke on Ubuntu / Python 3.13 with the optional `mcp` extra installed
+- MCP v2 protocol and stdio host-parity checks on Ubuntu / Python 3.13 with the optional `mcp` extra installed
 
 ## Phase 7A boundary
 
@@ -59,27 +63,11 @@ MCP currently does **not**:
 
 Project context is limited to 32 caller-supplied documents and 6000 characters total in this first slice.
 
-## Stabilization findings addressed
-
-- background project context can no longer mark an operational request as documentation-only and silently lower its risk
-- deterministic classifier matching uses term boundaries, preventing substring collisions such as `iam` inside `William`
-- common login/authentication and destructive production/Persian cases have regression coverage
-- documentation about security/architecture can remain lightweight while preserving topic taxonomy
-- combined documentation plus deploy/destructive work remains on the technical/high-risk path
-- multiline code/YAML/Markdown-like input is preserved instead of collapsing all whitespace
-- context values are no longer deduplicated case-insensitively
-- explicit output format and audience survive coding-agent prompt and Skill compilation
-- project context validates budgets, handles Windows-style paths, preserves authoritative duplicate representatives, and ranks distinct documents primarily by relevance
-- explicit caller context participates in the project context budget instead of bypassing it
-- workspace phase proposals canonicalize repository paths and replace only the current phase value rather than deleting neighboring human guidance
-- CLI target detection is shared with the API; unknown targets produce clarification instead of silent generic fallback
-- CLI and MCP reuse one machine-readable result serializer rather than forking the contract
-- evaluation uses one public run-metrics contract, validates metric values, does not count an assertion-free case as success, and requires distinct failure cases for learning proposals
-- CI exercises regressions on Windows as well as Linux
+See `docs/MCP_DOGFOODING.md` for the parity evidence and its limits.
 
 ## Deliberately deferred
 
-To avoid over-engineering, Phase 7A does **not** add:
+To avoid over-engineering, Phase 7A did **not** add:
 
 - additional MCP tools
 - Streamable HTTP deployment
@@ -89,18 +77,21 @@ To avoid over-engineering, Phase 7A does **not** add:
 - a policy/plugin framework
 - provider discovery or failover orchestration
 - a telemetry backend
-- VS Code implementation
 - a standalone simple UI
 
 The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-- dogfood `prepare_task` through a real MCP host and compare MCP results with CLI/Python API results for the same requests
-- promote only observed MCP parity/UX failures into regression fixtures
-- keep additional MCP tools deferred unless repeated real use demonstrates a concrete need
-- once MCP/core parity is proven, begin the minimum useful VS Code UX with Command Palette actions and a temporary review panel
-- keep routing/model freshness and broader OSS release work experimental unless real usage demonstrates need
+Begin Phase 7B with the smallest useful editor slice:
+
+- Command Palette action to prepare typed or selected text
+- temporary review panel showing concise interpretation, consequential risk/approval, context summary, and verification summary
+- Copy Prepared Task handoff first; do not add agent-specific execution wiring unless real usage justifies it
+- keep full prompt, taxonomy, context scores, routing metadata, and expert controls behind progressive disclosure
+- reuse the shared preparation contract; do not duplicate core logic in the extension
+
+Keep additional MCP tools deferred unless repeated real use demonstrates a concrete need.
 
 ## Constraints carried forward
 

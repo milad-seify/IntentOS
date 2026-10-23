@@ -55,4 +55,15 @@ Use focused checks first, then the broader relevant test suite when available.
 
 ## Current phase
 
-Phase 7A has one authorized MCP surface: the optional stdio `prepare_task` tool over the shared core. Current work is **MCP/core parity dogfooding**. Do not add more MCP tools, Streamable HTTP deployment, filesystem discovery, workspace mutation, VS Code implementation, hosted services, plugin systems, LLM classification, embeddings/vector search, provider discovery, or telemetry infrastructure until real MCP-host usage demonstrates a concrete need. Promote observed parity or UX failures into focused regressions first. Once MCP parity is proven, the next authorized access slice is the minimum useful VS Code UX described in `docs/ROADMAP.md`.
+Phase 7A MCP/core parity is proven through the installed `intentos-mcp` stdio subprocess, with exact structured-result parity against CLI and Python API across representative cases. The authorized next slice is **Phase 7B — minimum useful VS Code UX**.
+
+Keep Phase 7B thin:
+
+- start with Command Palette preparation of typed or selected text
+- use a temporary review panel rather than a permanent sidebar
+- show concise interpretation, consequential risk/approval, context summary, and verification summary by default
+- offer Copy Prepared Task first
+- keep full prompt, taxonomy, context scores, routing metadata, and expert controls behind progressive disclosure
+- reuse the existing preparation contract; do not duplicate classifier/router/policy/context logic in TypeScript
+
+Do not add another MCP tool, Streamable HTTP deployment, filesystem discovery, workspace mutation, agent-specific execution wiring, settings frameworks, hosted services, plugin systems, LLM classification, embeddings/vector search, provider discovery, or telemetry infrastructure unless real usage demonstrates a concrete need.
