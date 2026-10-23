@@ -2,6 +2,10 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
 import unittest
 
 
@@ -10,6 +14,56 @@ EXTENSION_DIR = ROOT / "integrations" / "vscode"
 
 
 class VSCodeExtensionContractTests(unittest.TestCase):
+    def run_input_box_request(self, workspace: Path, executable: str) -> dict[str, str]:
+        node = shutil.which("node")
+        if node is None:
+            self.skipTest("Node.js is required to exercise the VS Code adapter")
+
+        script = r"""
+const Module = require('module');
+const originalLoad = Module._load;
+let command;
+let observed;
+const vscode = {
+  window: {
+    activeTextEditor: undefined,
+    showInputBox: async () => 'Codex: refactor the parser without changing behavior',
+    withProgress: async (_options, callback) => callback(),
+    createWebviewPanel: () => ({ webview: { html: '', onDidReceiveMessage() {} } }),
+    showErrorMessage: (message) => { throw new Error(message); },
+  },
+  workspace: {
+    workspaceFolders: [{ uri: { fsPath: process.argv[2] } }],
+    getConfiguration: () => ({ get: () => process.argv[3] }),
+  },
+  commands: {
+    registerCommand: (_id, callback) => { command = callback; return { dispose() {} }; },
+  },
+  ProgressLocation: { Notification: 1 },
+  ViewColumn: { Beside: 2 },
+};
+Module._load = function (request, parent, isMain) {
+  if (request === 'vscode') return vscode;
+  if (request === 'child_process') {
+    return { execFile: (executable, _args, options, callback) => {
+      observed = { executable, cwd: options.cwd };
+      callback(null, JSON.stringify({ status: 'ready' }), '');
+    } };
+  }
+  return originalLoad.call(this, request, parent, isMain);
+};
+require(process.argv[1]).activate({ subscriptions: [] });
+command().then(() => process.stdout.write(JSON.stringify(observed)))
+  .catch((error) => { console.error(error); process.exitCode = 1; });
+"""
+        result = subprocess.run(
+            [node, "-e", script, str(EXTENSION_DIR / "extension.js"), str(workspace), executable],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return json.loads(result.stdout)
+
     def test_manifest_exposes_only_prepare_task_command(self) -> None:
         manifest = json.loads((EXTENSION_DIR / "package.json").read_text(encoding="utf-8"))
 
@@ -43,6 +97,39 @@ class VSCodeExtensionContractTests(unittest.TestCase):
         self.assertIn("process.platform === 'win32' ? 'intentos.exe' : 'intentos'", source)
         self.assertIn("fs.existsSync(localExecutable) ? localExecutable : executable", source)
 
+    def test_input_box_request_without_editor_uses_workspace_virtual_environment(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            workspace = Path(temp_dir)
+            scripts = workspace / ".venv" / ("Scripts" if sys.platform == "win32" else "bin")
+            scripts.mkdir(parents=True)
+            local_executable = scripts / ("intentos.exe" if sys.platform == "win32" else "intentos")
+            local_executable.touch()
+
+            observed = self.run_input_box_request(workspace, "intentos")
+
+        self.assertEqual(observed["executable"], str(local_executable))
+        self.assertEqual(observed["cwd"], str(workspace))
+
+    def test_custom_executable_takes_precedence_over_workspace_virtual_environment(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            workspace = Path(temp_dir)
+            scripts = workspace / ".venv" / ("Scripts" if sys.platform == "win32" else "bin")
+            scripts.mkdir(parents=True)
+            (scripts / ("intentos.exe" if sys.platform == "win32" else "intentos")).touch()
+
+            observed = self.run_input_box_request(workspace, "custom-intentos")
+
+        self.assertEqual(observed["executable"], "custom-intentos")
+        self.assertEqual(observed["cwd"], str(workspace))
+
+    def test_missing_workspace_virtual_environment_falls_back_to_intentos(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            workspace = Path(temp_dir)
+            observed = self.run_input_box_request(workspace, "intentos")
+
+        self.assertEqual(observed["executable"], "intentos")
+        self.assertEqual(observed["cwd"], str(workspace))
+
     def test_repository_launch_config_runs_only_the_development_extension(self) -> None:
         launch = json.loads((ROOT / ".vscode" / "launch.json").read_text(encoding="utf-8"))
 
@@ -56,6 +143,7 @@ class VSCodeExtensionContractTests(unittest.TestCase):
             [
                 "--extensionDevelopmentPath=${workspaceFolder}/integrations/vscode",
                 "--disable-extension=pflannery.vscode-versionlens",
+                "${workspaceFolder}",
             ],
         )
         self.assertNotIn("preLaunchTask", config)

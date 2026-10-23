@@ -23,7 +23,7 @@ Open the IntentOS repository in desktop VS Code and press `F5` (or run **Debug: 
 
 `IntentOS: Run VS Code Extension`
 
-VS Code should open a new Extension Development Host window with `integrations/vscode` loaded as the development extension. This uses the standard `--extensionDevelopmentPath` flow and does not require npm install or a build step.
+VS Code should open a new Extension Development Host window with the repository workspace open and `integrations/vscode` loaded as the development extension. This uses the standard `--extensionDevelopmentPath` flow and does not require npm install or a build step.
 
 In the Extension Development Host, open the Command Palette and run:
 
