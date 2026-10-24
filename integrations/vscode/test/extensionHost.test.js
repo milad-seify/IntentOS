@@ -45,13 +45,25 @@ function runExecutable(executable, cwd) {
 async function run() {
   try {
     const repository = fs.realpathSync(path.resolve(__dirname, '..', '..', '..'));
+    const extensionPath = vscode.extensions.getExtension(extensionId)?.extensionUri.fsPath;
+    const expectNoWorkspace = process.env.INTENTOS_EXPECT_NO_WORKSPACE === '1';
     const folders = vscode.workspace.workspaceFolders || [];
     const folderPaths = folders.map((folder) => folder.uri.fsPath);
-    assert(folders.length > 0, 'The Extension Host has no workspace folders.');
-    assert(
-      folderPaths.some((folder) => normalizedPath(folder) === normalizedPath(repository)),
-      `The IntentOS repository is not open. Workspace folders: ${JSON.stringify(folderPaths)}`
+    assert.strictEqual(typeof extensionPath, 'string', 'VS Code did not provide the development extension path.');
+    assert.strictEqual(
+      normalizedPath(extensionPath),
+      normalizedPath(path.join(repository, 'integrations', 'vscode')),
+      `Unexpected development extension path: ${extensionPath}`
     );
+    if (expectNoWorkspace) {
+      assert.strictEqual(folders.length, 0, `Expected no workspace, got: ${JSON.stringify(folderPaths)}`);
+    } else {
+      assert(folders.length > 0, 'The Extension Host has no workspace folders.');
+      assert(
+        folderPaths.some((folder) => normalizedPath(folder) === normalizedPath(repository)),
+        `The IntentOS repository is not open. Workspace folders: ${JSON.stringify(folderPaths)}`
+      );
+    }
 
     const extension = vscode.extensions.getExtension(extensionId);
     assert(extension, `Development extension ${extensionId} is not present.`);
@@ -62,20 +74,15 @@ async function run() {
     assert.strictEqual(typeof resolveExecutable, 'function', 'Production executable resolver is unavailable.');
 
     const cwd = workspaceCwd(vscode, null);
-    assert.strictEqual(
-      normalizedPath(cwd),
-      normalizedPath(repository),
-      'No active editor should resolve to the repository workspace folder.'
-    );
-
-    const noWorkspaceApi = {
-      window: { activeTextEditor: undefined },
-      workspace: { workspaceFolders: [] },
-    };
-    const missingWorkspaceCwd = workspaceCwd(noWorkspaceApi, null);
-    assert.strictEqual(missingWorkspaceCwd, undefined);
-    const missingWorkspaceExecutable = resolveExecutable('intentos', missingWorkspaceCwd);
-    assert.strictEqual(missingWorkspaceExecutable, 'intentos');
+    if (expectNoWorkspace) {
+      assert.strictEqual(cwd, undefined, 'No-workspace host unexpectedly resolved a workspace cwd.');
+    } else {
+      assert.strictEqual(
+        normalizedPath(cwd),
+        normalizedPath(repository),
+        'No active editor should resolve to the repository workspace folder.'
+      );
+    }
 
     const configuredExecutable = vscode.workspace
       .getConfiguration('intentos')
@@ -93,7 +100,7 @@ async function run() {
       'POSIX local executable path is incorrect.'
     );
 
-    const executable = resolveExecutable(configuredExecutable, cwd);
+    const executable = resolveExecutable(configuredExecutable, cwd, extensionPath);
     const expectedExecutable = localExecutablePath(repository, process.platform);
     assert.strictEqual(
       normalizedPath(executable),
@@ -104,7 +111,7 @@ async function run() {
 
     const customExecutable = 'custom-intentos-command';
     assert.strictEqual(
-      resolveExecutable(customExecutable, repository),
+      resolveExecutable(customExecutable, repository, extensionPath),
       customExecutable,
       'A configured custom executable must take precedence.'
     );
@@ -112,9 +119,9 @@ async function run() {
     const emptyWorkspace = fs.mkdtempSync(path.join(os.tmpdir(), 'intentos-no-venv-'));
     try {
       assert.strictEqual(
-        resolveExecutable('intentos', emptyWorkspace),
+        resolveExecutable('intentos', emptyWorkspace, path.join(emptyWorkspace, 'integrations', 'vscode')),
         'intentos',
-        'Missing local virtual environment must fall back to intentos.'
+        'Missing workspace and development virtual environments must fall back to intentos.'
       );
     } finally {
       fs.rmSync(emptyWorkspace, { recursive: true, force: true });
@@ -124,22 +131,6 @@ async function run() {
     const payload = JSON.parse(stdout);
     assert.strictEqual(payload.status, 'ready', `IntentOS returned status ${payload.status}.`);
 
-    let missingWorkspaceEnoent = false;
-    let missingWorkspaceSpawnError;
-    try {
-      await runExecutable(missingWorkspaceExecutable, missingWorkspaceCwd);
-    } catch (error) {
-      if (!String(error.message).includes('ENOENT')) throw error;
-      assert.match(
-        error.message,
-        /executable "intentos" from workspace "\(none\)" \(error ENOENT\)/,
-        'Spawn failures should identify the executable, workspace, and original error code.'
-      );
-      missingWorkspaceEnoent = true;
-      missingWorkspaceSpawnError = error.message;
-      console.log(`Missing-workspace control reproduced expected ENOENT: ${error.message}`);
-    }
-
     const result = {
       ok: true,
       repository,
@@ -148,8 +139,8 @@ async function run() {
       executable,
       cwd,
       status: payload.status,
-      missingWorkspaceEnoent,
-      missingWorkspaceSpawnError,
+      extensionPath,
+      mode: expectNoWorkspace ? 'no-workspace' : 'workspace',
     };
     writeResult(result);
     console.log(`INTENTOS_EXTENSION_HOST_TEST_RESULT=${JSON.stringify(result)}`);

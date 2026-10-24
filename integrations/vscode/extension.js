@@ -11,12 +11,12 @@ function selectedRequest() {
   return editor.document.getText(editor.selection);
 }
 
-function runIntentOS(request) {
+function runIntentOS(request, extensionPath) {
   const configuredExecutable = vscode.workspace
     .getConfiguration('intentos')
     .get('executable', 'intentos');
   const cwd = workspaceCwd(vscode);
-  const executable = resolveExecutable(configuredExecutable, cwd);
+  const executable = resolveExecutable(configuredExecutable, cwd, extensionPath);
 
   return new Promise((resolve, reject) => {
     execFile(
@@ -168,7 +168,7 @@ function showReviewPanel(payload) {
   });
 }
 
-async function prepareTask() {
+async function prepareTask(extensionPath) {
   let request = selectedRequest();
   if (!request.trim()) {
     request = await vscode.window.showInputBox({
@@ -190,7 +190,7 @@ async function prepareTask() {
         title: 'IntentOS: preparing task…',
         cancellable: false,
       },
-      () => runIntentOS(request)
+      () => runIntentOS(request, extensionPath)
     );
     showReviewPanel(payload);
   } catch (error) {
@@ -200,8 +200,9 @@ async function prepareTask() {
 }
 
 function activate(context) {
+  const extensionPath = context.extensionUri.fsPath;
   context.subscriptions.push(
-    vscode.commands.registerCommand('intentos.prepareTask', prepareTask)
+    vscode.commands.registerCommand('intentos.prepareTask', () => prepareTask(extensionPath))
   );
 }
 

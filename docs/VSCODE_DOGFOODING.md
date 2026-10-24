@@ -31,13 +31,14 @@ In the Extension Development Host, open the Command Palette and run:
 
 ## Automated Extension Host check
 
-Run the dependency-free integration test from the repository root:
+Run the dependency-free integration tests from the repository root:
 
 ```bash
 node tests/run_vscode_extension_host.js
+node tests/run_vscode_extension_host.js --no-workspace
 ```
 
-It uses the locally installed VS Code with `--extensionDevelopmentPath`, `--extensionTestsPath`, and the repository folder explicitly opened. It creates temporary user-data and extensions directories, disables unrelated extensions for the test process, verifies the production executable resolver, invokes the local CLI, and closes the isolated VS Code process tree. It does not change the normal VS Code profile or require manually starting an Extension Development Host.
+They use the locally installed VS Code with `--extensionDevelopmentPath` and `--extensionTestsPath`, once with the repository open and once with no workspace. Each creates temporary user-data and extensions directories, disables unrelated extensions for the test process, verifies the production executable resolver, invokes the local CLI, and closes the isolated VS Code process tree. The no-workspace case verifies the bounded fallback derived from the development extension path. These checks do not change the normal VS Code profile or require manually starting an Extension Development Host.
 
 ## Acceptance cases
 

@@ -14,7 +14,7 @@ EXTENSION_DIR = ROOT / "integrations" / "vscode"
 
 
 class VSCodeExtensionContractTests(unittest.TestCase):
-    def run_input_box_request(self, workspace: Path, executable: str) -> dict[str, str]:
+    def run_input_box_request(self, workspace: Path | None, executable: str, extension_path: Path) -> dict[str, str]:
         node = shutil.which("node")
         if node is None:
             self.skipTest("Node.js is required to exercise the VS Code adapter")
@@ -33,7 +33,7 @@ const vscode = {
     showErrorMessage: (message) => { throw new Error(message); },
   },
   workspace: {
-    workspaceFolders: [{ uri: { fsPath: process.argv[2] } }],
+    workspaceFolders: process.argv[2] === 'none' ? [] : [{ uri: { fsPath: process.argv[2] } }],
     getConfiguration: () => ({ get: () => process.argv[3] }),
   },
   commands: {
@@ -52,12 +52,12 @@ Module._load = function (request, parent, isMain) {
   }
   return originalLoad.call(this, request, parent, isMain);
 };
-require(process.argv[1]).activate({ subscriptions: [] });
+require(process.argv[1]).activate({ subscriptions: [], extensionUri: { fsPath: process.argv[4] } });
 command().then(() => process.stdout.write(JSON.stringify(observed)))
   .catch((error) => { console.error(error); process.exitCode = 1; });
 """
         result = subprocess.run(
-            [node, "-e", script, str(EXTENSION_DIR / "extension.js"), str(workspace), executable],
+            [node, "-e", script, str(EXTENSION_DIR / "extension.js"), str(workspace) if workspace else "none", executable, str(extension_path)],
             check=True,
             capture_output=True,
             text=True,
@@ -92,23 +92,31 @@ command().then(() => process.stdout.write(JSON.stringify(observed)))
     def test_default_cli_resolution_prefers_workspace_virtual_environment(self) -> None:
         source = (EXTENSION_DIR / "executable.js").read_text(encoding="utf-8")
 
-        self.assertIn("function resolveExecutable(executable, cwd, platform = process.platform)", source)
+        self.assertIn("function resolveExecutable(executable, cwd, extensionPath, platform = process.platform)", source)
         self.assertIn("function formatSpawnError(executable, cwd, error, stderr = '')", source)
         self.assertIn("platform === 'win32' ? 'Scripts' : 'bin'", source)
         self.assertIn("platform === 'win32' ? 'intentos.exe' : 'intentos'", source)
-        self.assertIn("fs.existsSync(localExecutable) ? localExecutable : executable", source)
+        self.assertIn("path.resolve(extensionPath, '..', '..')", source)
+        self.assertIn("if (fs.existsSync(workspaceExecutable))", source)
+        self.assertIn("if (fs.existsSync(developmentExecutable))", source)
         self.assertIn("cwd || '(none)'", source)
         self.assertIn("error ${error.code || 'unknown'}", source)
 
     def test_input_box_request_without_editor_uses_workspace_virtual_environment(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            workspace = Path(temp_dir)
+            workspace = Path(temp_dir) / "workspace"
             scripts = workspace / ".venv" / ("Scripts" if sys.platform == "win32" else "bin")
             scripts.mkdir(parents=True)
             local_executable = scripts / ("intentos.exe" if sys.platform == "win32" else "intentos")
             local_executable.touch()
 
-            observed = self.run_input_box_request(workspace, "intentos")
+            development_repository = Path(temp_dir) / "development-repository"
+            extension_path = development_repository / "integrations" / "vscode"
+            extension_path.mkdir(parents=True)
+            development_scripts = development_repository / ".venv" / ("Scripts" if sys.platform == "win32" else "bin")
+            development_scripts.mkdir(parents=True)
+            (development_scripts / ("intentos.exe" if sys.platform == "win32" else "intentos")).touch()
+            observed = self.run_input_box_request(workspace, "intentos", extension_path)
 
         self.assertEqual(observed["executable"], str(local_executable))
         self.assertEqual(observed["cwd"], str(workspace))
@@ -120,18 +128,35 @@ command().then(() => process.stdout.write(JSON.stringify(observed)))
             scripts.mkdir(parents=True)
             (scripts / ("intentos.exe" if sys.platform == "win32" else "intentos")).touch()
 
-            observed = self.run_input_box_request(workspace, "custom-intentos")
+            extension_path = workspace / "integrations" / "vscode"
+            extension_path.mkdir(parents=True)
+            observed = self.run_input_box_request(workspace, "custom-intentos", extension_path)
 
         self.assertEqual(observed["executable"], "custom-intentos")
         self.assertEqual(observed["cwd"], str(workspace))
 
-    def test_missing_workspace_virtual_environment_falls_back_to_intentos(self) -> None:
+    def test_no_workspace_uses_development_repository_virtual_environment(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            workspace = Path(temp_dir)
-            observed = self.run_input_box_request(workspace, "intentos")
+            repository = Path(temp_dir)
+            extension_path = repository / "integrations" / "vscode"
+            extension_path.mkdir(parents=True)
+            scripts = repository / ".venv" / ("Scripts" if sys.platform == "win32" else "bin")
+            scripts.mkdir(parents=True)
+            local_executable = scripts / ("intentos.exe" if sys.platform == "win32" else "intentos")
+            local_executable.touch()
+            observed = self.run_input_box_request(None, "intentos", extension_path)
+
+        self.assertEqual(observed["executable"], str(local_executable))
+        self.assertNotIn("cwd", observed)
+
+    def test_missing_workspace_and_development_virtual_environments_fall_back_to_intentos(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            extension_path = Path(temp_dir) / "integrations" / "vscode"
+            extension_path.mkdir(parents=True)
+            observed = self.run_input_box_request(None, "intentos", extension_path)
 
         self.assertEqual(observed["executable"], "intentos")
-        self.assertEqual(observed["cwd"], str(workspace))
+        self.assertNotIn("cwd", observed)
 
     def test_repository_launch_config_runs_only_the_development_extension(self) -> None:
         launch = json.loads((ROOT / ".vscode" / "launch.json").read_text(encoding="utf-8"))

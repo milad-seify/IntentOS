@@ -21,12 +21,24 @@ function localExecutablePath(cwd, platform = process.platform) {
   );
 }
 
-function resolveExecutable(executable, cwd, platform = process.platform) {
-  if (executable !== 'intentos' || !cwd) {
+function resolveExecutable(executable, cwd, extensionPath, platform = process.platform) {
+  if (executable !== 'intentos') {
     return executable;
   }
-  const localExecutable = localExecutablePath(cwd, platform);
-  return fs.existsSync(localExecutable) ? localExecutable : executable;
+  if (cwd) {
+    const workspaceExecutable = localExecutablePath(cwd, platform);
+    if (fs.existsSync(workspaceExecutable)) {
+      return workspaceExecutable;
+    }
+  }
+  if (extensionPath) {
+    const developmentRepository = path.resolve(extensionPath, '..', '..');
+    const developmentExecutable = localExecutablePath(developmentRepository, platform);
+    if (fs.existsSync(developmentExecutable)) {
+      return developmentExecutable;
+    }
+  }
+  return executable;
 }
 
 function formatSpawnError(executable, cwd, error, stderr = '') {

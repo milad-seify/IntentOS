@@ -7,6 +7,7 @@ const repository = path.resolve(__dirname, '..');
 const extensionPath = path.join(repository, 'integrations', 'vscode');
 const extensionTestsPath = path.join(extensionPath, 'test', 'extensionHost.test.js');
 const timeoutMs = Number(process.env.INTENTOS_VSCODE_TEST_TIMEOUT_MS || 120000);
+const noWorkspace = process.argv.includes('--no-workspace');
 
 function findVSCodeExecutable() {
   const configured = process.env.VSCODE_EXECUTABLE;
@@ -161,13 +162,14 @@ async function run() {
     '--new-window',
     `--extensionDevelopmentPath=${extensionPath}`,
     `--extensionTestsPath=${extensionTestsPath}`,
-    repository,
+    ...(!noWorkspace ? [repository] : []),
   ];
   const child = spawn(executable, args, {
     env: {
       ...process.env,
       ...(cliScript ? { ELECTRON_RUN_AS_NODE: '1' } : {}),
       INTENTOS_EXTENSION_TEST_RESULT: resultFile,
+      INTENTOS_EXPECT_NO_WORKSPACE: noWorkspace ? '1' : '0',
     },
     stdio: ['ignore', 'pipe', 'pipe'],
     windowsHide: true,
@@ -183,7 +185,7 @@ async function run() {
   console.log(`VS Code executable: ${executable}`);
   console.log(`Extension Development Path: ${extensionPath}`);
   console.log(`Extension Tests Path: ${extensionTestsPath}`);
-  console.log(`Repository workspace: ${repository}`);
+  console.log(noWorkspace ? 'Repository workspace: none' : `Repository workspace: ${repository}`);
   console.log('VS Code user data and extensions are isolated under a temporary directory.');
 
   let testResult;
