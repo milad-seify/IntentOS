@@ -5,6 +5,7 @@ from intentos import IntentRequest
 from intentos.evaluation import (
     EvaluationCase,
     EvaluationOutcome,
+    compare_paired_runs,
     RunMetrics,
     VariantRun,
     propose_lessons,
@@ -15,6 +16,21 @@ from intentos.models import CapabilityClass, RiskLevel, TaskType
 
 
 class EvaluationTests(unittest.TestCase):
+    @staticmethod
+    def paired_run(
+        name: str,
+        *,
+        success: bool | None = True,
+        passed: bool = True,
+        score: float = 1.0,
+        metrics: RunMetrics | None = None,
+    ) -> VariantRun:
+        return VariantRun(
+            name,
+            EvaluationOutcome(name, passed, score),
+            metrics if metrics is not None else RunMetrics(success=success),
+        )
+
     def test_regression_suite_scores_prompt_contracts(self) -> None:
         cases = (
             EvaluationCase(
@@ -99,6 +115,86 @@ class EvaluationTests(unittest.TestCase):
         ranked = rank_variants((lower_quality, higher_quality))
 
         self.assertEqual([run.name for run in ranked], ["higher-quality", "lower-quality"])
+
+    def test_variant_ranking_does_not_treat_missing_retries_as_zero(self) -> None:
+        measured = VariantRun(
+            "measured",
+            EvaluationOutcome("same", True, 1.0),
+            RunMetrics(success=True, retries=1),
+        )
+        unavailable = VariantRun(
+            "unavailable",
+            EvaluationOutcome("same", True, 1.0),
+            RunMetrics(success=True),
+        )
+
+        self.assertEqual([run.name for run in rank_variants((unavailable, measured))], ["measured", "unavailable"])
+
+    def test_paired_comparison_prefers_prepared_when_both_pass_with_fewer_tokens(self) -> None:
+        raw = self.paired_run("raw", metrics=RunMetrics(success=True, input_tokens=100, output_tokens=40))
+        prepared = self.paired_run("prepared", metrics=RunMetrics(success=True, input_tokens=70, output_tokens=30))
+
+        comparison = compare_paired_runs(
+            "parser-refactor-01", raw, prepared, raw_code_lines=120, prepared_code_lines=90
+        )
+
+        self.assertEqual(comparison.winner, "prepared")
+        self.assertEqual(comparison.total_tokens_delta, -40)
+        self.assertEqual(comparison.code_lines_delta, -30)
+        self.assertTrue(comparison.enough_evidence)
+        payload = comparison.to_dict()
+        self.assertEqual(payload["task_id"], "parser-refactor-01")
+        self.assertEqual(payload["raw"]["metrics"]["total_tokens"], 140)
+        self.assertNotIn("prompt", payload)
+
+    def test_paired_comparison_correctness_dominates_prepared_efficiency(self) -> None:
+        raw = self.paired_run("raw", metrics=RunMetrics(success=True, input_tokens=100, output_tokens=40))
+        prepared = self.paired_run(
+            "prepared", passed=False,
+            metrics=RunMetrics(success=False, input_tokens=10, output_tokens=5),
+        )
+
+        comparison = compare_paired_runs("task-02", raw, prepared)
+
+        self.assertEqual(comparison.winner, "raw")
+        self.assertTrue(comparison.correctness_regressed)
+        self.assertEqual(comparison.total_tokens_delta, -125)
+
+    def test_paired_comparison_can_choose_fewer_retries_when_both_pass(self) -> None:
+        raw = self.paired_run("raw", metrics=RunMetrics(success=True, retries=2))
+        prepared = self.paired_run("prepared", metrics=RunMetrics(success=True, retries=1))
+
+        comparison = compare_paired_runs("task-03", raw, prepared)
+
+        self.assertEqual(comparison.winner, "prepared")
+        self.assertEqual(comparison.retries_delta, -1)
+        self.assertIsNone(comparison.total_tokens_delta)
+
+    def test_missing_metrics_remain_unavailable_and_do_not_produce_winner(self) -> None:
+        raw = self.paired_run("raw", success=None, metrics=RunMetrics(input_tokens=40))
+        prepared = self.paired_run("prepared", success=None, metrics=RunMetrics(input_tokens=20))
+
+        comparison = compare_paired_runs("task-04", raw, prepared)
+
+        self.assertIsNone(comparison.winner)
+        self.assertFalse(comparison.enough_evidence)
+        self.assertIsNone(comparison.total_tokens_delta)
+        self.assertEqual(comparison.input_tokens_delta, -20)
+        self.assertIsNone(RunMetrics(input_tokens=40).total_tokens)
+        self.assertIsNone(comparison.to_dict()["latency_ms_delta"])
+
+    def test_paired_comparison_quality_beats_token_savings(self) -> None:
+        raw = self.paired_run(
+            "raw", metrics=RunMetrics(success=True, quality_score=0.95, input_tokens=100, output_tokens=40)
+        )
+        prepared = self.paired_run(
+            "prepared", metrics=RunMetrics(success=True, quality_score=0.70, input_tokens=10, output_tokens=5)
+        )
+
+        comparison = compare_paired_runs("task-05", raw, prepared)
+
+        self.assertEqual(comparison.winner, "raw")
+        self.assertEqual(comparison.total_tokens_delta, -125)
 
     def test_learning_requires_repeated_failure_evidence(self) -> None:
         outcomes = (
