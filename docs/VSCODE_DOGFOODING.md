@@ -29,6 +29,16 @@ In the Extension Development Host, open the Command Palette and run:
 
 `IntentOS: Prepare Task`
 
+## Automated Extension Host check
+
+Run the dependency-free integration test from the repository root:
+
+```bash
+node tests/run_vscode_extension_host.js
+```
+
+It uses the locally installed VS Code with `--extensionDevelopmentPath`, `--extensionTestsPath`, and the repository folder explicitly opened. It creates temporary user-data and extensions directories, disables unrelated extensions for the test process, verifies the production executable resolver, invokes the local CLI, and closes the isolated VS Code process tree. It does not change the normal VS Code profile or require manually starting an Extension Development Host.
+
 ## Acceptance cases
 
 ### 1. Ready / selected text

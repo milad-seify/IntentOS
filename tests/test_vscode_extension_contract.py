@@ -90,12 +90,15 @@ command().then(() => process.stdout.write(JSON.stringify(observed)))
         self.assertNotIn("mcp", source.lower())
 
     def test_default_cli_resolution_prefers_workspace_virtual_environment(self) -> None:
-        source = (EXTENSION_DIR / "extension.js").read_text(encoding="utf-8")
+        source = (EXTENSION_DIR / "executable.js").read_text(encoding="utf-8")
 
-        self.assertIn("function resolveExecutable(executable, cwd)", source)
-        self.assertIn("process.platform === 'win32' ? 'Scripts' : 'bin'", source)
-        self.assertIn("process.platform === 'win32' ? 'intentos.exe' : 'intentos'", source)
+        self.assertIn("function resolveExecutable(executable, cwd, platform = process.platform)", source)
+        self.assertIn("function formatSpawnError(executable, cwd, error, stderr = '')", source)
+        self.assertIn("platform === 'win32' ? 'Scripts' : 'bin'", source)
+        self.assertIn("platform === 'win32' ? 'intentos.exe' : 'intentos'", source)
         self.assertIn("fs.existsSync(localExecutable) ? localExecutable : executable", source)
+        self.assertIn("cwd || '(none)'", source)
+        self.assertIn("error ${error.code || 'unknown'}", source)
 
     def test_input_box_request_without_editor_uses_workspace_virtual_environment(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

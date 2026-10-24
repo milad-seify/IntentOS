@@ -1,8 +1,7 @@
 const vscode = require('vscode');
 const { execFile } = require('child_process');
 const { randomBytes } = require('crypto');
-const fs = require('fs');
-const path = require('path');
+const { workspaceCwd, resolveExecutable, formatSpawnError } = require('./executable');
 
 function selectedRequest() {
   const editor = vscode.window.activeTextEditor;
@@ -12,34 +11,11 @@ function selectedRequest() {
   return editor.document.getText(editor.selection);
 }
 
-function workspaceCwd() {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor) {
-    return vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-  }
-  const folder = vscode.workspace.getWorkspaceFolder(editor.document.uri);
-  return folder?.uri.fsPath || vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-}
-
-function resolveExecutable(executable, cwd) {
-  if (executable !== 'intentos' || !cwd) {
-    return executable;
-  }
-
-  const localExecutable = path.join(
-    cwd,
-    '.venv',
-    process.platform === 'win32' ? 'Scripts' : 'bin',
-    process.platform === 'win32' ? 'intentos.exe' : 'intentos'
-  );
-  return fs.existsSync(localExecutable) ? localExecutable : executable;
-}
-
 function runIntentOS(request) {
   const configuredExecutable = vscode.workspace
     .getConfiguration('intentos')
     .get('executable', 'intentos');
-  const cwd = workspaceCwd();
+  const cwd = workspaceCwd(vscode);
   const executable = resolveExecutable(configuredExecutable, cwd);
 
   return new Promise((resolve, reject) => {
@@ -53,13 +29,7 @@ function runIntentOS(request) {
       },
       (error, stdout, stderr) => {
         if (error && error.code !== 2) {
-          const detail = (stderr || error.message || '').trim();
-          reject(
-            new Error(
-              detail ||
-                `Could not run ${executable}. Install IntentOS or configure intentos.executable.`
-            )
-          );
+          reject(new Error(formatSpawnError(executable, cwd, error, stderr)));
           return;
         }
 
