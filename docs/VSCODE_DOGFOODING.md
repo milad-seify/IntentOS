@@ -1,6 +1,6 @@
 # VS Code Dogfooding
 
-This is the acceptance protocol for the first VS Code slice. It is intentionally manual and small: the goal is to validate the real Extension Development Host UX before adding more editor features.
+This records the acceptance protocol and dogfood results for the first VS Code slice. The real Extension Development Host workflow has passed; the protocol remains as a regression reference.
 
 ## Prerequisite
 
@@ -113,6 +113,12 @@ Restore `intentos.executable` afterwards.
 ## Pass gate
 
 Phase 7B UX dogfooding passes when all four cases behave as expected in a real desktop VS Code Extension Development Host.
+
+## Dogfood result
+
+Phase 7B passed manual dogfooding: Ctrl+F5 launched the Extension Development Host, `IntentOS: Prepare Task` accepted input-box text, the IntentOS Review panel opened, and Copy Prepared Task produced valid output preserving the requested goal. The runtime executable issue is also covered by automated real Extension Host runs with both the repository workspace open and no workspace open; each resolved and ran the repository-local CLI and returned `ready`.
+
+Phase 7B is complete. Further editor work remains gated on concrete product evidence. This completion does not authorize a sidebar, Send-to-Agent wiring, automatic context discovery, Marketplace packaging, or additional MCP tools.
 
 Do not add a sidebar, agent-specific execution bridge, automatic context discovery, or additional settings in response to preference alone. Promote only observed failures/friction into focused regressions or the smallest reversible UX change.
 
