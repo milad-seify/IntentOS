@@ -55,15 +55,19 @@ Use focused checks first, then the broader relevant test suite when available.
 
 ## Current phase
 
-Phase 7A MCP/core parity is proven. Phase 7B now has the **minimum useful VS Code slice**: one `IntentOS: Prepare Task` command, typed/selected request capture, a temporary review panel, and Copy Prepared Task. The current gate is editor dogfooding, not feature expansion.
+Phase 7A MCP/core parity is proven and Phase 7B minimum VS Code UX is complete. Phase 7C is now an **evidence-gathering gate**, not permission to add the next feature.
 
-Keep Phase 7B thin:
+Read `docs/PHASE_7C_EVIDENCE.md` before proposing new editor/UI/agent workflow capabilities.
 
-- preserve the one-command Prepare → Review → Copy workflow until real use exposes a concrete gap
-- keep the temporary review panel instead of adding a permanent sidebar
-- show concise interpretation, consequential risk/approval, context summary, and verification by default
-- keep routing/context internals behind progressive disclosure
-- keep the extension as a transport/UX adapter over `intentos optimize ... --json`; do not duplicate classifier/router/policy/context logic in JavaScript
-- promote observed editor UX or contract failures into focused regressions before adding capabilities
+During Phase 7C:
 
-Do not add another MCP tool, Streamable HTTP deployment, automatic filesystem/context discovery, workspace mutation, agent-specific Send/Execute wiring, VS Code sidebar/activity-bar UI, packaging/Marketplace infrastructure, settings frameworks, hosted services, plugin systems, LLM classification, embeddings/vector search, provider discovery, or telemetry infrastructure unless real usage demonstrates a concrete need.
+- use real tasks to record concrete friction, rework, context gaps, verification gaps, and outcome evidence
+- promote correctness, safety, or public-contract failures directly into focused regressions
+- require repeated evidence before adding a new capability or access surface
+- treat ideas from other projects as hypotheses, not product requirements
+- prefer a small paired evaluation when outcome quality is uncertain rather than subjective prompt tuning
+- keep optional measures such as cost, tokens, time, code size, and test results manual or already-available; do not add telemetry infrastructure just to collect them
+
+Preserve the Phase 7B one-command Prepare → Review → Copy workflow until repeated real use demonstrates a concrete gap.
+
+Do not add another MCP tool, Streamable HTTP deployment, automatic filesystem/context discovery, workspace mutation, agent-specific Send/Execute wiring, VS Code sidebar/activity-bar UI, packaging/Marketplace infrastructure, settings frameworks, hosted services, plugin systems, LLM classification, embeddings/vector search, provider discovery, telemetry infrastructure, autonomous multi-agent orchestration/checkers, benchmark-framework dependencies, or a standalone simple UI unless real usage demonstrates a concrete need.
