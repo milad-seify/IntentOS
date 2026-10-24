@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 7B — minimum VS Code UX complete
+Phase 7C — evidence gathering active; feature implementation remains gated
 
 ## Implemented
 
@@ -27,7 +27,7 @@ Phase 7B — minimum VS Code UX complete
 
 ## Current verification baseline
 
-82 standard-library unit tests plus CLI smoke checks, plus dedicated integration checks:
+87 Python unit tests plus CLI smoke checks, plus dedicated integration checks:
 
 - in-memory MCP v2 protocol smoke
 - stdio subprocess MCP host-parity dogfood across four representative cases
@@ -43,6 +43,21 @@ CI covers:
 - Windows / Python 3.13 focused regression coverage
 - MCP v2 protocol and stdio host-parity checks on Ubuntu / Python 3.13 with the optional `mcp` extra installed
 - dependency-free VS Code extension syntax check
+
+## Phase 7C evidence gate
+
+Phase 7C begins with repeated-use evidence rather than a new access surface. See `docs/PHASE_7C_EVIDENCE.md` for the observation fields, promotion rules, current hypotheses, and the initial 10-task evidence target.
+
+External projects may supply hypotheses, benchmark ideas, or comparison methods, but do not justify feature adoption by themselves.
+
+The first questions are whether repeated use demonstrates material need for:
+
+- Send-to-Agent rather than Copy Prepared Task
+- automatic context discovery
+- changes to the Review Panel information hierarchy
+- a separate simple UI for non-expert users
+- stronger or independent verification guidance
+- a paired raw-request versus IntentOS-prepared-request evaluation
 
 ## Phase 7B boundary
 
@@ -91,14 +106,17 @@ To avoid over-engineering, current access work does **not** add:
 - provider discovery or failover orchestration
 - a telemetry backend
 - a standalone simple UI
+- an autonomous multi-agent execution/checking runtime
+- a benchmark-framework dependency
 
 The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-- Phase 7B is complete. Keep further editor work gated on concrete, repeated product evidence; do not begin a new phase or add features from preference alone.
-- Do not automatically add Send to Agent, sidebar UI, automatic context discovery, Marketplace packaging, broader settings, or MCP tools.
-- Promote observed editor UX/contract failures into focused regressions before considering a scoped change.
+- Use IntentOS on at least 10 distinct real tasks and record only decision-relevant outcomes/friction using `docs/PHASE_7C_EVIDENCE.md`.
+- Promote correctness, safety, or public-contract failures immediately into focused regressions.
+- Require repeated real friction before adding Send to Agent, automatic context discovery, a simple UI, stronger verification machinery, or another access surface.
+- If outcome quality remains uncertain after real use, prefer a small paired evaluation over subjective prompt tuning.
 
 ## Constraints carried forward
 
