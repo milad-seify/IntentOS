@@ -147,7 +147,7 @@ See `docs/MCP_DOGFOODING.md`.
 
 Do not add another MCP tool merely because the protocol can expose one. Expand only from repeated real usage evidence.
 
-### 7B — VS Code extension — MINIMUM SLICE IMPLEMENTED
+### 7B — VS Code extension — COMPLETE
 
 The first editor slice intentionally uses only the existing CLI/machine contract and VS Code built-in APIs.
 
@@ -172,9 +172,9 @@ Current constraints:
 
 Exit gate before editor expansion:
 
-> Dogfood the extension in an Extension Development Host across ready, clarification, high-risk, and error cases. Promote only observed UX/contract failures into focused regressions. Do not add a sidebar, agent execution bridge, automatic context discovery, packaging/Marketplace work, or broader settings merely because VS Code supports them.
+> Passed: manual Extension Development Host dogfood verified input, Review Panel, and Copy Prepared Task; automated real Extension Host tests verify CLI resolution and execution with and without a workspace. Further editor work remains gated on concrete product evidence. Do not add a sidebar, agent execution bridge, automatic context discovery, packaging/Marketplace work, or broader settings merely because VS Code supports them.
 
-### 7C — Simple user interface
+### 7C — Simple user interface — EVIDENCE-GATED, NOT STARTED
 
 - outcome-first workflow for non-expert users
 - no prompt-engineering prerequisite

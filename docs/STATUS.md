@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 7B — minimum VS Code UX dogfooding
+Phase 7B — minimum VS Code UX complete
 
 ## Implemented
 
@@ -22,7 +22,8 @@ Phase 7B — minimum VS Code UX dogfooding
 - Phase 7A: optional MCP v2 stdio adapter with exactly one `prepare_task` tool over the shared core
 - Phase 7A parity dogfood: installed `intentos-mcp` launched as a real stdio subprocess and produced exact structured-result parity with CLI and Python API across four representative cases
 - Phase 7B minimum editor slice: one `IntentOS: Prepare Task` Command Palette action, selected-text/input capture, temporary review panel, progressive advanced details, and Copy Prepared Task handoff
-- Phase 7B dogfood setup: repository `F5` launch configuration plus a four-case real Extension Development Host acceptance protocol
+- Phase 7B runtime reliability: dependency-free real Extension Host integration tests pass with the repository workspace and with no workspace; both resolve and run the repository-local `.venv` CLI
+- Phase 7B manual dogfood: `Ctrl+F5`, input-box request, Review Panel, and Copy Prepared Task passed; copied output was valid and preserved the requested goal
 
 ## Current verification baseline
 
@@ -32,6 +33,7 @@ Phase 7B — minimum VS Code UX dogfooding
 - stdio subprocess MCP host-parity dogfood across four representative cases
 - VS Code extension JavaScript syntax smoke with no npm install/build pipeline
 - static regression for the repository Extension Development Host launch contract
+- real VS Code Extension Host integration checks for workspace and no-workspace executable resolution
 
 CI covers:
 
@@ -94,11 +96,9 @@ The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-- run the four cases in `docs/VSCODE_DOGFOODING.md` inside a real desktop VS Code Extension Development Host
-- record only pass/fail and observed friction; do not add features from preference alone
-- promote only observed editor UX/contract failures into focused regressions
-- do not add Send to Agent, sidebar UI, automatic context discovery, packaging/Marketplace work, or broader settings until the minimum flow proves useful
-- keep additional MCP tools deferred unless repeated real use demonstrates a concrete need
+- Phase 7B is complete. Keep further editor work gated on concrete, repeated product evidence; do not begin a new phase or add features from preference alone.
+- Do not automatically add Send to Agent, sidebar UI, automatic context discovery, Marketplace packaging, broader settings, or MCP tools.
+- Promote observed editor UX/contract failures into focused regressions before considering a scoped change.
 
 ## Constraints carried forward
 
