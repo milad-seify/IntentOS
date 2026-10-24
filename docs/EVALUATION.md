@@ -39,7 +39,7 @@ Quality is never traded away merely to save tokens.
 
 ## Paired runs
 
-`compare_paired_runs()` compares two externally executed `VariantRun` values for one task ID: the raw request arm and the IntentOS-prepared arm. It does not execute either arm. The result keeps both runs independently inspectable and reports prepared-minus-raw deltas for retries, input/output/total tokens, latency, and quality when both values exist. Missing values remain `null`/unavailable; total tokens are unavailable unless both input and output counts are present. Optional code-line counts can be supplied by the caller as descriptive evidence.
+`compare_paired_runs()` compares two externally executed `VariantRun` values for one task ID: the raw request arm and the IntentOS-prepared arm. Callers must hold the downstream agent and task conditions constant; this helper does not execute either arm or enforce a runner. The result keeps both runs independently inspectable and reports prepared-minus-raw deltas for retries, input/output/total tokens, latency, and quality when both values exist. Missing values remain `null`/unavailable; total tokens are unavailable unless both input and output counts are present. Optional code-line counts can be supplied by the caller as descriptive evidence.
 
 The comparison calls a task-local winner only when correctness is established and one arm is clearly better: a passing arm beats a failing arm; evaluation/check score and then reported quality precede efficiency; efficiency decides only when all comparable efficiency measures point the same way. Mixed or missing evidence produces no winner. This result is not a learned product rule, and synthetic contract tests do not count toward the real-task evidence target.
 

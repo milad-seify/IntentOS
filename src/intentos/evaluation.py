@@ -190,8 +190,8 @@ def compare_paired_runs(
     """Compare externally executed raw/prepared runs for one task only.
 
     IntentOS does not execute either arm or generalize this result into a product
-    rule. Deltas are prepared minus raw, and remain unavailable when either value
-    is missing.
+    rule. Callers must hold downstream agent and task conditions constant. Deltas
+    are prepared minus raw, and remain unavailable when either value is missing.
     """
     if not task_id.strip():
         raise ValueError("task_id must not be empty")
