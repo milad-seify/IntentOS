@@ -107,3 +107,5 @@ After the initial evidence target, review the log and choose exactly one of:
 - make no product change because the existing workflow is sufficient.
 
 The absence of a justified new feature is a valid Phase 7C result.
+
+If real-task outcomes leave the preparation hypothesis uncertain, `intentos.evaluation.compare_paired_runs()` can preserve a task-local raw/prepared comparison using externally collected `VariantRun` outcomes and metrics. It does not execute an agent, store request text, aggregate across tasks, or turn one result into a product rule. Synthetic contract tests validate comparison behavior only; they do not count toward the 10 distinct real tasks above.

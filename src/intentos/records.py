@@ -40,9 +40,9 @@ class RunMetrics:
 
     @property
     def total_tokens(self) -> int | None:
-        if self.input_tokens is None and self.output_tokens is None:
+        if self.input_tokens is None or self.output_tokens is None:
             return None
-        return (self.input_tokens or 0) + (self.output_tokens or 0)
+        return self.input_tokens + self.output_tokens
 
 
 @dataclass(frozen=True, slots=True)
