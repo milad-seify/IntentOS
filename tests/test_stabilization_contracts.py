@@ -2,12 +2,55 @@ import unittest
 
 from intentos import ContextDocument, IntentRequest, optimize_project_prompt, optimize_prompt, plan_agent_workspace
 from intentos.context import select_project_context
-from intentos.models import RiskLevel, TaskType
+from intentos.models import CapabilityClass, EffortLevel, RiskLevel, TaskType
 from intentos.normalize import normalize_intent
 from intentos.skills import build_skill_artifact
 
 
 class StabilizationContractTests(unittest.TestCase):
+    def test_concurrency_mutation_risk_terms_require_both_categories(self) -> None:
+        cases = (
+            (
+                "Prevent concurrent inventory mutation.",
+                RiskLevel.HIGH,
+            ),
+            (
+                "Make the balance/order/stock update atomic.",
+                RiskLevel.HIGH,
+            ),
+            (
+                "Fix a race condition causing duplicate or lost persistent writes.",
+                RiskLevel.HIGH,
+            ),
+            ("Update documentation about concurrent inventory mutation.", RiskLevel.LOW),
+            ("Improve concurrent UI rendering.", RiskLevel.LOW),
+            ("Update atomic CSS design terms.", RiskLevel.LOW),
+            ("Show a read-only stock/inventory display.", RiskLevel.LOW),
+        )
+
+        for request, expected_risk in cases:
+            with self.subTest(request=request):
+                result = optimize_prompt(IntentRequest(request, target_tool="codex"))
+
+                self.assertEqual(result.policy.risk_level, expected_risk)
+
+    def test_checkout_concurrency_and_inventory_integrity_is_high_risk(self) -> None:
+        result = optimize_prompt(
+            IntentRequest(
+                "Make demo checkout concurrency-safe so successful order creation "
+                "atomically consumes product stock and concurrent checkouts cannot "
+                "oversell inventory, while preserving existing order idempotency, "
+                "cart ownership, pricing behavior, and demo-only semantics.",
+                target_tool="codex",
+            )
+        )
+
+        self.assertEqual(result.policy.task_type, TaskType.GENERAL)
+        self.assertEqual(result.policy.risk_level, RiskLevel.HIGH)
+        self.assertEqual(result.routing.required_capability, CapabilityClass.STRONG)
+        self.assertEqual(result.routing.effort, EffortLevel.HIGH)
+        self.assertTrue(result.policy.approval_boundaries)
+
     def test_context_cannot_downgrade_production_migration_risk(self) -> None:
         result = optimize_prompt(
             IntentRequest.from_values(

@@ -136,6 +136,36 @@ _PERSISTENT_DATA_TERMS = (
     "حذف داده",
 )
 
+_CONCURRENCY_TERMS = (
+    "concurrency",
+    "concurrent",
+    "race condition",
+    "race",
+    "atomicity",
+    "atomic",
+    "atomically",
+)
+
+# These terms are used only with a concurrency, race, or atomicity signal. A
+# stock or inventory reference on its own remains insufficient for high risk.
+_PERSISTENT_OR_BUSINESS_MUTATION_TERMS = (
+    "persistent data",
+    "persistent write",
+    "persistent writes",
+    "data integrity",
+    "integrity",
+    "order creation",
+    "checkout",
+    "consume stock",
+    "oversell",
+    "inventory mutation",
+    "inventory update",
+    "stock mutation",
+    "stock update",
+    "balance update",
+    "order update",
+)
+
 _DOCUMENTATION_ONLY_TERMS = (
     "docs only",
     "documentation only",
@@ -276,6 +306,13 @@ def has_persistent_data_signals(intent: NormalizedIntent) -> bool:
     return _contains_any(_all_text(intent), _PERSISTENT_DATA_TERMS)
 
 
+def has_concurrency_mutation_risk(intent: NormalizedIntent) -> bool:
+    action = _action_text(intent)
+    return _contains_any(action, _CONCURRENCY_TERMS) and _contains_any(
+        action, _PERSISTENT_OR_BUSINESS_MUTATION_TERMS
+    )
+
+
 def classify_task(intent: NormalizedIntent) -> tuple[TaskType, RiskLevel]:
     action = _action_text(intent)
     all_text = _all_text(intent)
@@ -300,7 +337,11 @@ def classify_task(intent: NormalizedIntent) -> tuple[TaskType, RiskLevel]:
 
     if docs_only:
         risk = RiskLevel.LOW
-    elif _contains_any(all_text, _HIGH_RISK_TERMS) or task is TaskType.SECURITY:
+    elif (
+        _contains_any(all_text, _HIGH_RISK_TERMS)
+        or has_concurrency_mutation_risk(intent)
+        or task is TaskType.SECURITY
+    ):
         risk = RiskLevel.HIGH
     elif task in {TaskType.ARCHITECTURE, TaskType.DEVOPS, TaskType.REFACTOR, TaskType.CODING}:
         risk = RiskLevel.MEDIUM
