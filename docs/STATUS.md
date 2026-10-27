@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 7C — evidence gathering active; feature implementation remains gated
+Phase 7C COMPLETE — real-use evidence gate closed; no product change
 
 ## Implemented
 
@@ -25,10 +25,15 @@ Phase 7C — evidence gathering active; feature implementation remains gated
 - Phase 7B runtime reliability: dependency-free real Extension Host integration tests pass with the repository workspace and with no workspace; both resolve and run the repository-local `.venv` CLI
 - Phase 7B manual dogfood: `Ctrl+F5`, input-box request, Review Panel, and Copy Prepared Task passed; copied output was valid and preserved the requested goal
 - Phase 7C-A evaluation pilot: task-local raw/prepared run comparison reuses `VariantRun` and `RunMetrics`; it records deltas without executing agents or claiming empirical improvement
+- Phase 7C real-use evidence: 10/10 distinct tasks collected; paired outcomes were 3 prepared, 2 raw, and 5 inconclusive
+- Phase 7C decision: no new capability met the promotion threshold; the Phase 7B Prepare → Review → Copy workflow remains accepted
+- Task 7 exposed a deterministic high-risk classification defect; the focused regression fix is incorporated
+- Task 8 exposed a pre-existing ARIS CRM CI/deployment baseline defect; it was not an IntentOS product defect
+- No Phase 7D or other feature phase has started
 
 ## Current verification baseline
 
-93 Python unit tests plus CLI smoke checks, plus dedicated integration checks:
+95 Python unit tests plus CLI smoke checks, plus dedicated integration checks (current local full-suite run on main):
 
 - in-memory MCP v2 protocol smoke
 - stdio subprocess MCP host-parity dogfood across four representative cases
@@ -45,20 +50,9 @@ CI covers:
 - MCP v2 protocol and stdio host-parity checks on Ubuntu / Python 3.13 with the optional `mcp` extra installed
 - dependency-free VS Code extension syntax check
 
-## Phase 7C evidence gate
+## Phase 7C closeout
 
-Phase 7C begins with repeated-use evidence rather than a new access surface. See `docs/PHASE_7C_EVIDENCE.md` for the observation fields, promotion rules, current hypotheses, and the initial 10-task evidence target.
-
-External projects may supply hypotheses, benchmark ideas, or comparison methods, but do not justify feature adoption by themselves.
-
-The first questions are whether repeated use demonstrates material need for:
-
-- Send-to-Agent rather than Copy Prepared Task
-- automatic context discovery
-- changes to the Review Panel information hierarchy
-- a separate simple UI for non-expert users
-- stronger or independent verification guidance
-- a paired raw-request versus IntentOS-prepared-request evaluation
+The 10/10 real-task evidence target is complete. The aggregate result supports no IntentOS product change: no repeated workflow friction met the promotion threshold and no consistent raw-versus-prepared winner emerged. The existing Phase 7B Prepare → Review → Copy workflow remains accepted. Task 7's classifier correction is incorporated; the Task 8 external ARIS baseline repair did not reveal an IntentOS defect. See `docs/PHASE_7C_EVIDENCE.md` and [Issue #21](https://github.com/milad-seify/IntentOS/issues/21) for the concise decision and detailed evidence log.
 
 ## Phase 7B boundary
 
@@ -114,10 +108,8 @@ The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-- Use IntentOS on at least 10 distinct real tasks and record only decision-relevant outcomes/friction using `docs/PHASE_7C_EVIDENCE.md`.
-- Promote correctness, safety, or public-contract failures immediately into focused regressions.
-- Require repeated real friction before adding Send to Agent, automatic context discovery, a simple UI, stronger verification machinery, or another access surface.
-- If outcome quality remains uncertain after real use, prefer a small paired evaluation over subjective prompt tuning.
+- Conduct a bounded stable-v1/release-readiness review: verify the supported install/runtime contract, release metadata and packaging, clean-install smoke path, documentation consistency, and CI release gates.
+- Do not start feature development or Phase 7D as part of that review; any proposed product change requires a separate evidence-backed decision.
 
 ## Constraints carried forward
 

@@ -1,8 +1,17 @@
 # Phase 7C evidence gathering
 
-Phase 7C begins with evidence gathering, not feature implementation.
+## Final results — COMPLETE
 
-The goal is to learn from repeated real use before choosing whether the next useful product change is a simple UI, an editor improvement, a stronger verification contract, another handoff path, or no new feature at all.
+- Real-use target: **10/10 tasks collected**. Issue [#21](https://github.com/milad-seify/IntentOS/issues/21) is the detailed evidence log.
+- Paired outcomes: **3 prepared, 2 raw, 5 inconclusive**; no consistent prepared-versus-raw winner emerged.
+- Task 7 exposed one reproducible IntentOS risk-classification correctness defect, fixed with a focused regression.
+- Task 8 exposed a pre-existing external ARIS CRM CI/deployment baseline defect, not an IntentOS product defect.
+- No repeated workflow friction reached the documented promotion threshold. The Phase 7B Prepare → Review → Copy workflow remains accepted.
+- **Final decision: no IntentOS product change.** Send-to-Agent, automatic context discovery, a standalone simple UI, additional MCP tools, a permanent VS Code sidebar, and new orchestration remain unjustified by this evidence. No Phase 7D or other feature phase has started.
+
+Phase 7C was an evidence-gathering gate, not feature implementation; the gate is now closed.
+
+The goal was to learn from repeated real use before choosing whether a product change was justified.
 
 ## What to record
 
@@ -38,7 +47,7 @@ Promote an observation into implementation only when one of these is true:
 
 One isolated preference is not enough to justify a new surface, dependency, service, orchestration layer, or settings framework.
 
-## Current hypotheses
+## Hypotheses evaluated
 
 These are questions to test, not requirements:
 
@@ -49,9 +58,9 @@ These are questions to test, not requirements:
 5. Do higher-risk tasks repeatedly need stronger or independent verification guidance beyond the current verification contract?
 6. Does IntentOS measurably reduce rework, unnecessary scope, retries, cost, time, or code while preserving correctness?
 
-## Initial evidence target
+## Evidence target
 
-Collect at least 10 distinct real tasks before choosing a new product slice, unless a material correctness/safety defect justifies an earlier regression fix.
+The initial target was at least 10 distinct real tasks before choosing a new product slice, unless a material correctness/safety defect justified an earlier regression fix. The target is now complete; synthetic tests do not count toward it.
 
 The set should include more than one task type and more than one risk level. It is not a benchmark requirement; it is a minimum product-learning sample so one unusual task does not drive the roadmap.
 
@@ -83,7 +92,7 @@ Source: https://github.com/AntonOsika/gpt-engineer
 
 ## What is explicitly not starting now
 
-Evidence gathering does not authorize:
+The completed evidence did not authorize:
 
 - Send-to-Agent or agent execution wiring
 - automatic filesystem/context discovery
@@ -95,17 +104,14 @@ Evidence gathering does not authorize:
 - additional MCP tools
 - provider orchestration, concurrency controls, or sandboxes
 
-If repeated evidence supports one of these, define the smallest separate phase with its own exit criteria.
+Any future evidence that supports one of these requires a separate phase with its own exit criteria.
 
-## Decision gate
+## Decision gate — closed
 
-After the initial evidence target, review the log and choose exactly one of:
+The completed evidence supports exactly this outcome:
 
-- implement one narrowly supported product change;
-- run a focused paired evaluation because outcome quality is still uncertain;
-- continue gathering evidence because the signal is weak;
-- make no product change because the existing workflow is sufficient.
+- **Make no product change because the existing workflow is sufficient.**
 
-The absence of a justified new feature is a valid Phase 7C result.
+This closes Phase 7C. Do not start a new feature phase from this result.
 
 If real-task outcomes leave the preparation hypothesis uncertain, `intentos.evaluation.compare_paired_runs()` can preserve a task-local raw/prepared comparison using externally collected `VariantRun` outcomes and metrics. It does not execute an agent, store request text, aggregate across tasks, or turn one result into a product rule. Synthetic contract tests validate comparison behavior only; they do not count toward the 10 distinct real tasks above.
