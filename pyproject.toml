@@ -1,16 +1,20 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "intentos"
+name = "intentos-engineering"
 version = "0.1.0"
 description = "Engineering intent into reliable AI execution."
 readme = "README.md"
 requires-python = ">=3.11"
-license = {text = "MIT"}
+license = "MIT"
 authors = [{name = "Milad Seify"}]
 dependencies = []
+
+[project.urls]
+Repository = "https://github.com/milad-seify/IntentOS"
+Issues = "https://github.com/milad-seify/IntentOS/issues"
 
 [project.optional-dependencies]
 mcp = ["mcp>=2,<3"]

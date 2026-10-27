@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Sequence
 
@@ -164,6 +165,7 @@ def _run_workspace(args: argparse.Namespace) -> int:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    _configure_output_encoding()
     args = _build_parser().parse_args(argv)
     try:
         if args.command == "optimize":
@@ -179,6 +181,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(f"ERROR: {error}")
         return 2
     return 2
+
+
+def _configure_output_encoding() -> None:
+    """Keep the CLI's user-visible text and JSON Unicode-safe on Windows."""
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8")
 
 
 if __name__ == "__main__":

@@ -60,7 +60,7 @@ def result_dict(result: PromptResult) -> dict[str, object]:
             "omitted_paths": list(selection.omitted_paths) if selection else [],
             "total_chars": selection.total_chars if selection else 0,
         },
-        # Compatibility alias for current pre-v1 machine consumers.
+        # Retained as a schema-v1 compatibility alias.
         "context_paths": [item["path"] for item in selected_context],
     }
 

@@ -15,7 +15,7 @@ RUN_RECORD_SCHEMA_VERSION = "1"
 
 def _intentos_version() -> str:
     try:
-        return version("intentos")
+        return version("intentos-engineering")
     except PackageNotFoundError:
         return "dev"
 

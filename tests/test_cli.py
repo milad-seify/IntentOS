@@ -1,4 +1,7 @@
 import json
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -8,7 +11,53 @@ from pathlib import Path
 from intentos.cli import main
 
 
+ROOT = Path(__file__).resolve().parents[1]
+
+
 class CliTests(unittest.TestCase):
+    @unittest.skipUnless(os.name == "nt", "Windows legacy console encoding regression")
+    def test_unicode_json_output_survives_legacy_windows_stream_encoding(self) -> None:
+        request = "Codex: preserve behavior → فارسی"
+        bootstrap = (
+            "import sys; "
+            "sys.stdout.reconfigure(encoding='cp1252'); "
+            "sys.stderr.reconfigure(encoding='cp1252'); "
+            "from intentos.cli import main; "
+            "raise SystemExit(main(sys.argv[1:]))"
+        )
+        environment = os.environ.copy()
+        environment.pop("PYTHONIOENCODING", None)
+        environment["PYTHONUTF8"] = "0"
+        environment["PYTHONPATH"] = str(ROOT / "src")
+
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                bootstrap,
+                "optimize",
+                request,
+                "--target",
+                "codex",
+                "--json",
+            ],
+            cwd=ROOT.parent,
+            env=environment,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            check=False,
+        )
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        self.assertNotIn("UnicodeEncodeError", completed.stdout + completed.stderr)
+        self.assertNotIn("Traceback", completed.stdout + completed.stderr)
+        payload = json.loads(completed.stdout)
+        self.assertEqual(payload["status"], "ready")
+        self.assertEqual(payload["intent"]["goal"], request)
+        self.assertIn("→", payload["prompt"])
+        self.assertIn("فارسی", payload["prompt"])
+
     def test_optimize_json_output(self) -> None:
         output = StringIO()
         with redirect_stdout(output):

@@ -31,13 +31,6 @@ Documentation-only signals now lower risk and produce a bounded documentation po
 
 A real failure should become a regression fixture before it becomes a new general rule. Avoid growing global prompts or keyword lists from one-off preferences without evidence.
 
-## Next real-world coverage
+## Phase 7C evidence status
 
-Before v1, collect examples from:
-
-- multi-file Codex implementation work
-- security-sensitive auth changes
-- infrastructure changes with explicit approval boundaries
-- repository context selection on medium/large repos
-- model-routing decisions using externally supplied current metadata
-- repeated prompt failures suitable for the learning-proposal layer
+The Phase 7C target is complete: 10/10 distinct real tasks were collected and reviewed. No additional sample is required by that evidence gate. See PHASE_7C_EVIDENCE.md and Issue #21 for the aggregate outcome and detailed task evidence. The next bounded step is the stable-v1 readiness re-check, not feature development.

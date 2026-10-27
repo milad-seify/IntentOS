@@ -30,16 +30,18 @@ Phase 7C COMPLETE — real-use evidence gate closed; no product change
 - Task 7 exposed a deterministic high-risk classification defect; the focused regression fix is incorporated
 - Task 8 exposed a pre-existing ARIS CRM CI/deployment baseline defect; it was not an IntentOS product defect
 - No Phase 7D or other feature phase has started
+- The stable-v1 public contract is defined in docs/PUBLIC_CONTRACT.md for release preparation; package version remains 0.1.0 and stable 1.0.0 has not been published
 
 ## Current verification baseline
 
-95 Python unit tests plus CLI smoke checks, plus dedicated integration checks (current local full-suite run on main):
+100 Python unit tests plus CLI smoke checks, plus dedicated integration checks (current full-suite run on this readiness branch):
 
 - in-memory MCP v2 protocol smoke
 - stdio subprocess MCP host-parity dogfood across four representative cases
 - VS Code extension JavaScript syntax smoke with no npm install/build pipeline
 - static regression for the repository Extension Development Host launch contract
 - real VS Code Extension Host integration checks for workspace and no-workspace executable resolution
+- release-artifact CI builds and inspects wheel/sdist, then tests clean core, MCP-extra, and sdist installations without publishing
 
 CI covers:
 
@@ -108,8 +110,8 @@ The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-- Conduct a bounded stable-v1/release-readiness review: verify the supported install/runtime contract, release metadata and packaging, clean-install smoke path, documentation consistency, and CI release gates.
-- Do not start feature development or Phase 7D as part of that review; any proposed product change requires a separate evidence-backed decision.
+- Conduct the final stable-v1 readiness re-check against merged main after the release-readiness corrections pass.
+- Do not publish 1.0.0 or start Phase 7D without a separate explicit release decision; no product feature is authorized by this contract freeze.
 
 ## Constraints carried forward
 
