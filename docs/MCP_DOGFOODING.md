@@ -1,5 +1,7 @@
 # MCP Dogfooding
 
+After stable-v1 publication, install the MCP extra with `python -m pip install "intentos-engineering[mcp]"`. Until then, repository contributors can use `python -m pip install -e ".[mcp]"`; the stable distribution is not yet published.
+
 ## Goal
 
 Validate the Phase 7A `prepare_task` adapter through the same local stdio process boundary used by desktop/IDE MCP hosts, without adding more tools or host-specific runtime code.

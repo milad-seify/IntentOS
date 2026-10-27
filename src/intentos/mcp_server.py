@@ -93,7 +93,7 @@ def build_mcp_server() -> Any:
         from mcp.server import MCPServer
     except ModuleNotFoundError as error:  # pragma: no cover - exercised by packaging/use
         raise RuntimeError(
-            'MCP support is optional. Install it with: pip install "intentos[mcp]"'
+            'MCP support is optional. Install it with: pip install "intentos-engineering[mcp]"'
         ) from error
 
     server = MCPServer(
