@@ -174,15 +174,15 @@ Exit gate before editor expansion:
 
 > Passed: manual Extension Development Host dogfood verified input, Review Panel, and Copy Prepared Task; automated real Extension Host tests verify CLI resolution and execution with and without a workspace. Further editor work remains gated on concrete product evidence. Do not add a sidebar, agent execution bridge, automatic context discovery, packaging/Marketplace work, or broader settings merely because VS Code supports them.
 
-### 7C — Simple user interface — EVIDENCE-GATED, NOT STARTED
+### 7C — Real-use evidence gate — COMPLETE
 
-- outcome-first workflow for non-expert users
-- no prompt-engineering prerequisite
-- safe defaults
-- advanced controls through progressive disclosure
-- choose desktop/web/other surface from observed usage rather than assumption
+- Collected 10/10 distinct real tasks; paired outcomes were 3 prepared, 2 raw, and 5 inconclusive.
+- Task 7's reproducible risk-classification correctness defect was fixed with a focused regression; Task 8's CI issue was a pre-existing external ARIS baseline defect.
+- No repeated friction met the promotion threshold and no consistent paired winner emerged.
+- Decision: no IntentOS product change; the Phase 7B Prepare → Review → Copy workflow remains accepted.
+- A standalone simple UI remains a deferred, evidence-gated candidate; this evidence did not justify starting it. See `docs/PHASE_7C_EVIDENCE.md` and [Issue #21](https://github.com/milad-seify/IntentOS/issues/21).
 
-### 7D — Additional adapters
+### 7D — Additional adapters — NOT STARTED
 
 - other IDEs and agent surfaces
 - community integrations

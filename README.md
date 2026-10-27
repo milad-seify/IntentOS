@@ -68,9 +68,9 @@ Current surfaces:
 - **VS Code extension (minimum slice)** — one `IntentOS: Prepare Task` command with temporary review and Copy Prepared Task.
 - **Agent Skills** — portable, reusable `SKILL.md` guidance.
 
-Planned next surface:
+Deferred candidate surface:
 
-- **Simple UI** — outcome-first experience for users who should not need CLI or prompt-engineering knowledge.
+- **Simple UI** — an outcome-first experience for users who should not need CLI or prompt-engineering knowledge. Phase 7C evidence did not justify starting it; any future work remains evidence-gated.
 
 Broader VS Code handoff/execution features remain gated by editor dogfooding rather than being assumed up front.
 
@@ -299,7 +299,7 @@ GitHub Actions runs the full core suite on Ubuntu with Python 3.11, 3.12, and 3.
 
 The initial Phase 0–6 roadmap and independent-audit stabilization gate are complete. **Phase 7A MCP parity is proven, and Phase 7B now has the minimum Prepare → Review → Copy VS Code workflow.** Editor expansion is gated by dogfooding this small flow rather than adding a sidebar or agent-specific execution bridge immediately.
 
-Current baseline: **81 unit tests + CLI smoke + MCP protocol/stdio parity checks + VS Code syntax smoke**, with Linux and Windows CI coverage.
+Current baseline: **95 Python unit tests + CLI smoke + MCP protocol/stdio parity checks + VS Code syntax smoke**, with Linux and Windows CI coverage.
 
 See [`docs/STATUS.md`](docs/STATUS.md) for the concise handoff, [`docs/DOGFOODING.md`](docs/DOGFOODING.md) for real-world findings, [`docs/MCP_DOGFOODING.md`](docs/MCP_DOGFOODING.md) for MCP parity evidence, [`docs/HUGGINGFACE_RESEARCH.md`](docs/HUGGINGFACE_RESEARCH.md) for the ecosystem research pass, [`docs/UX.md`](docs/UX.md) for usage/access principles, [`docs/INDEPENDENT_AUDIT.md`](docs/INDEPENDENT_AUDIT.md) for the review contract, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for the roadmap.
 
