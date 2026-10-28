@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "intentos-engineering"
-version = "0.1.0"
+version = "1.0.0"
 description = "Engineering intent into reliable AI execution."
 readme = "README.md"
 requires-python = ">=3.11"

@@ -42,7 +42,7 @@ class PublicContractTests(unittest.TestCase):
 
         self.assertIn("setuptools>=77", metadata["build-system"]["requires"])
         self.assertEqual(project["name"], "intentos-engineering")
-        self.assertEqual(project["version"], "0.1.0")
+        self.assertEqual(project["version"], "1.0.0")
         self.assertEqual(project["license"], "MIT")
         self.assertEqual(project["urls"]["Repository"], "https://github.com/milad-seify/IntentOS")
         self.assertEqual(project["scripts"]["intentos"], "intentos.cli:main")

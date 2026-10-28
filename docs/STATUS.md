@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Phase 7C COMPLETE — real-use evidence gate closed; no product change
+Stable v1 release prepared — publication pending. Phase 7C is complete; Phase 7D has not started.
 
 ## Implemented
 
@@ -30,11 +30,13 @@ Phase 7C COMPLETE — real-use evidence gate closed; no product change
 - Task 7 exposed a deterministic high-risk classification defect; the focused regression fix is incorporated
 - Task 8 exposed a pre-existing ARIS CRM CI/deployment baseline defect; it was not an IntentOS product defect
 - No Phase 7D or other feature phase has started
-- The stable-v1 public contract is defined in docs/PUBLIC_CONTRACT.md for release preparation; package version remains 0.1.0 and stable 1.0.0 has not been published
+- Final stable-v1 readiness gate passed (`READY`); the v1 public contract is frozen in docs/PUBLIC_CONTRACT.md
+- Package version 1.0.0 is prepared with release notes and a tag-only Trusted Publishing workflow
+- No PyPI publication, Git tag, or GitHub Release has been created
 
 ## Current verification baseline
 
-100 Python unit tests plus CLI smoke checks, plus dedicated integration checks (current full-suite run on this readiness branch):
+106 Python unit tests, including release identity, artifact, workflow permission, and main-history regressions, plus CLI smoke checks and dedicated integration checks:
 
 - in-memory MCP v2 protocol smoke
 - stdio subprocess MCP host-parity dogfood across four representative cases
@@ -110,8 +112,7 @@ The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-- Conduct the final stable-v1 readiness re-check against merged main after the release-readiness corrections pass.
-- Do not publish 1.0.0 or start Phase 7D without a separate explicit release decision; no product feature is authorized by this contract freeze.
+Configure release trust boundary and perform the explicitly approved v1.0.0 publication sequence. See [RELEASING.md](RELEASING.md) for manual setup and [RELEASE_NOTES_1.0.0.md](RELEASE_NOTES_1.0.0.md) for the prepared announcement. Publication requires separate explicit approval; Phase 7D remains unstarted.
 
 ## Constraints carried forward
 

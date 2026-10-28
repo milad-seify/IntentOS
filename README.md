@@ -92,7 +92,7 @@ intentos --help
 intentos optimize "Refactor the parser" --target codex
 ```
 
-The Python distribution is named `intentos-engineering`; its import package and CLI remain `intentos`. The stable package is not yet published. Until then, use the contributor checkout instructions below.
+The Python distribution is named `intentos-engineering`; its import package and CLI remain `intentos`. Package version 1.0.0 is prepared for PyPI publication and is not yet publicly available there. Until then, use the contributor checkout instructions below.
 
 ### Development checkout
 
@@ -140,7 +140,7 @@ Machine-readable output:
 intentos optimize "Review this architecture" --target claude --json
 ```
 
-JSON mode returns the versioned machine contract documented in [`docs/PUBLIC_CONTRACT.md`](docs/PUBLIC_CONTRACT.md). Schema versioning is independent from the Python package version. The contract is defined for stable-v1 release preparation; the package remains at version `0.1.0` and stable-v1 has not been published.
+JSON mode returns the versioned machine contract documented in [`docs/PUBLIC_CONTRACT.md`](docs/PUBLIC_CONTRACT.md). Schema versioning is independent from the Python package version. The v1 contract is frozen; package version `1.0.0` is prepared and publication is pending.
 
 Plan agent workspace maintenance without writing files:
 
@@ -187,7 +187,7 @@ MCP preparation does not execute the task, authorize a risky action, mutate the 
 
 ## VS Code extension
 
-The editable package installation in the VS Code guide is for local extension development. The stable package remains version 0.1.0 and is not yet published.
+The editable package installation in the VS Code guide is for local extension development. Package version 1.0.0 is prepared for PyPI publication and is not yet publicly available there.
 
 The first editor slice lives in `integrations/vscode` and intentionally has no npm runtime dependencies or build pipeline.
 
@@ -319,9 +319,9 @@ GitHub Actions runs the full core suite on Ubuntu with Python 3.11, 3.12, and 3.
 
 The initial Phase 0–6 roadmap and independent-audit stabilization gate are complete. **Phase 7A MCP parity is proven, and Phase 7B now has the minimum Prepare → Review → Copy VS Code workflow.** Editor expansion is gated by dogfooding this small flow rather than adding a sidebar or agent-specific execution bridge immediately.
 
-Current baseline: **100 Python unit tests + CLI smoke + MCP protocol/stdio parity checks + VS Code syntax smoke**, with Linux and Windows CI coverage. CI also builds and inspects wheel/sdist artifacts, then installs and smoke-tests each from clean environments without publishing.
+Current baseline: **106 Python unit tests + CLI smoke + MCP protocol/stdio parity checks + VS Code syntax smoke**, with Linux and Windows CI coverage. Release preparation includes focused release guard regressions. CI also builds and inspects wheel/sdist artifacts, then installs and smoke-tests each from clean environments without publishing.
 
-The stable-v1 public compatibility contract is defined in `docs/PUBLIC_CONTRACT.md` for release preparation. The package remains `0.1.0`; no stable `1.0.0` release has been published.
+Phase 7C is complete and the final stable-v1 readiness gate passed. The v1 public compatibility contract is frozen in `docs/PUBLIC_CONTRACT.md`. Package version `1.0.0` is prepared; publication is pending and Phase 7D has not started. See the [release notes](docs/RELEASE_NOTES_1.0.0.md) and [publication procedure](docs/RELEASING.md).
 
 See [`docs/STATUS.md`](docs/STATUS.md) for the concise handoff, [`docs/DOGFOODING.md`](docs/DOGFOODING.md) for real-world findings, [`docs/MCP_DOGFOODING.md`](docs/MCP_DOGFOODING.md) for MCP parity evidence, [`docs/HUGGINGFACE_RESEARCH.md`](docs/HUGGINGFACE_RESEARCH.md) for the ecosystem research pass, [`docs/UX.md`](docs/UX.md) for usage/access principles, [`docs/INDEPENDENT_AUDIT.md`](docs/INDEPENDENT_AUDIT.md) for the review contract, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for the roadmap.
 
