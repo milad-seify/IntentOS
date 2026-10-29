@@ -1,7 +1,5 @@
 # IntentOS 1.0.0
 
-Prepared release notes; publication is pending.
-
 IntentOS prepares bounded engineering contracts between human intent and AI execution.
 
 ## Core

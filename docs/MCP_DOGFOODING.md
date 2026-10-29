@@ -1,6 +1,6 @@
 # MCP Dogfooding
 
-After stable-v1 publication, install the MCP extra with `python -m pip install "intentos-engineering[mcp]"`. Until then, repository contributors can use `python -m pip install -e ".[mcp]"`; the stable distribution is not yet published.
+For a public installation, install the MCP extra with `python -m pip install "intentos-engineering[mcp]"`. For repository development, contributors can use `python -m pip install -e ".[mcp]"`.
 
 ## Goal
 

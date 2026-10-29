@@ -82,9 +82,9 @@ See [`docs/UX.md`](docs/UX.md) for the product usage and UX contract.
 
 Requires Python 3.11+.
 
-### Stable release installation (not yet published)
+### Stable release installation
 
-Once the stable package is published, install it without cloning the repository:
+IntentOS 1.0.0 is the current stable release. Install it without cloning the repository:
 
 ```bash
 python -m pip install intentos-engineering
@@ -92,7 +92,7 @@ intentos --help
 intentos optimize "Refactor the parser" --target codex
 ```
 
-The Python distribution is named `intentos-engineering`; its import package and CLI remain `intentos`. Package version 1.0.0 is prepared for PyPI publication and is not yet publicly available there. Until then, use the contributor checkout instructions below.
+The Python distribution is named `intentos-engineering`; its import package and CLI remain `intentos`. A clean public installation of version 1.0.0 was verified.
 
 ### Development checkout
 
@@ -140,7 +140,7 @@ Machine-readable output:
 intentos optimize "Review this architecture" --target claude --json
 ```
 
-JSON mode returns the versioned machine contract documented in [`docs/PUBLIC_CONTRACT.md`](docs/PUBLIC_CONTRACT.md). Schema versioning is independent from the Python package version. The v1 contract is frozen; package version `1.0.0` is prepared and publication is pending.
+JSON mode returns the versioned machine contract documented in [`docs/PUBLIC_CONTRACT.md`](docs/PUBLIC_CONTRACT.md). Schema versioning is independent from the Python package version. The v1 contract is frozen; package version `1.0.0` is the current stable release.
 
 Plan agent workspace maintenance without writing files:
 
@@ -163,13 +163,13 @@ python -m intentos optimize "Fix the failing parser test" --target codex
 
 MCP support is optional so the standard-library core remains lightweight.
 
-After stable-v1 publication, install the MCP extra without cloning:
+Install the MCP extra without cloning:
 
 ```bash
 python -m pip install "intentos-engineering[mcp]"
 ```
 
-Until publication, contributors can install the extra from a repository checkout with `python -m pip install -e ".[mcp]"`.
+For development, contributors can install the extra from a repository checkout with `python -m pip install -e ".[mcp]"`.
 
 A compatible local MCP host can launch:
 
@@ -187,7 +187,7 @@ MCP preparation does not execute the task, authorize a risky action, mutate the 
 
 ## VS Code extension
 
-The editable package installation in the VS Code guide is for local extension development. Package version 1.0.0 is prepared for PyPI publication and is not yet publicly available there.
+The editable package installation in the VS Code guide is for local extension development. IntentOS 1.0.0 is also available as the stable public package.
 
 The first editor slice lives in `integrations/vscode` and intentionally has no npm runtime dependencies or build pipeline.
 
@@ -321,7 +321,7 @@ The initial Phase 0–6 roadmap and independent-audit stabilization gate are com
 
 Current baseline: **106 Python unit tests + CLI smoke + MCP protocol/stdio parity checks + VS Code syntax smoke**, with Linux and Windows CI coverage. Release preparation includes focused release guard regressions. CI also builds and inspects wheel/sdist artifacts, then installs and smoke-tests each from clean environments without publishing.
 
-Phase 7C is complete and the final stable-v1 readiness gate passed. The v1 public compatibility contract is frozen in `docs/PUBLIC_CONTRACT.md`. Package version `1.0.0` is prepared; publication is pending and Phase 7D has not started. See the [release notes](docs/RELEASE_NOTES_1.0.0.md) and [publication procedure](docs/RELEASING.md).
+Phase 7C is complete and the final stable-v1 readiness gate passed. The v1 public compatibility contract is frozen in `docs/PUBLIC_CONTRACT.md`. IntentOS `1.0.0` is the current stable release; Phase 7D has not started. See the [release notes](docs/RELEASE_NOTES_1.0.0.md) and [release procedure](docs/RELEASING.md).
 
 See [`docs/STATUS.md`](docs/STATUS.md) for the concise handoff, [`docs/DOGFOODING.md`](docs/DOGFOODING.md) for real-world findings, [`docs/MCP_DOGFOODING.md`](docs/MCP_DOGFOODING.md) for MCP parity evidence, [`docs/HUGGINGFACE_RESEARCH.md`](docs/HUGGINGFACE_RESEARCH.md) for the ecosystem research pass, [`docs/UX.md`](docs/UX.md) for usage/access principles, [`docs/INDEPENDENT_AUDIT.md`](docs/INDEPENDENT_AUDIT.md) for the review contract, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for the roadmap.
 
