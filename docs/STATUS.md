@@ -2,7 +2,7 @@
 
 ## Current phase
 
-Stable v1 release prepared — publication pending. Phase 7C is complete; Phase 7D has not started.
+IntentOS 1.0.0 released — stable v1. Phase 7C is complete; Phase 7D has not started.
 
 ## Implemented
 
@@ -31,8 +31,11 @@ Stable v1 release prepared — publication pending. Phase 7C is complete; Phase 
 - Task 8 exposed a pre-existing ARIS CRM CI/deployment baseline defect; it was not an IntentOS product defect
 - No Phase 7D or other feature phase has started
 - Final stable-v1 readiness gate passed (`READY`); the v1 public contract is frozen in docs/PUBLIC_CONTRACT.md
-- Package version 1.0.0 is prepared with release notes and a tag-only Trusted Publishing workflow
-- No PyPI publication, Git tag, or GitHub Release has been created
+- IntentOS 1.0.0 is published on PyPI as `intentos-engineering`; a clean public installation was verified
+- GitHub tag [`v1.0.0`](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.0) points to accepted commit `daacb4e98e7c97694d9f645037ccc2eac949af2b`
+- GitHub Release [IntentOS 1.0.0](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.0) is published
+- The Trusted Publishing release workflow succeeded: [run 40918243836](https://github.com/milad-seify/IntentOS/actions/runs/40918243836)
+- Phase 7C remains complete; Phase 7D has not started
 
 ## Current verification baseline
 
@@ -112,7 +115,7 @@ The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-Configure release trust boundary and perform the explicitly approved v1.0.0 publication sequence. See [RELEASING.md](RELEASING.md) for manual setup and [RELEASE_NOTES_1.0.0.md](RELEASE_NOTES_1.0.0.md) for the prepared announcement. Publication requires separate explicit approval; Phase 7D remains unstarted.
+IntentOS 1.0.0 is released. Use [RELEASING.md](RELEASING.md) for future release procedures and [RELEASE_NOTES_1.0.0.md](RELEASE_NOTES_1.0.0.md) for the published announcement. Phase 7D remains unstarted.
 
 ## Constraints carried forward
 

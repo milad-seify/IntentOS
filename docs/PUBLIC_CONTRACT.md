@@ -1,6 +1,6 @@
 # Stable-v1 public contract
 
-This document defines the public compatibility surfaces prepared for IntentOS v1. The v1 contract is frozen and package version 1.0.0 is prepared; publication is pending. Internal modules and implementation details are not public contracts.
+This document defines the public compatibility surfaces for released IntentOS v1. The v1 contract is frozen and package version 1.0.0 is the current stable release. Internal modules and implementation details are not public contracts.
 
 ## Python API
 

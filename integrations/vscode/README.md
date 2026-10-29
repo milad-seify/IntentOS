@@ -4,7 +4,7 @@ This is the minimum Phase 7B editor surface. It remains a thin adapter over the 
 
 ## Current workflow
 
-The editable package installation below is for local extension development. Package version 1.0.0 is prepared for PyPI publication and is not yet publicly available there.
+The editable package installation below is for local extension development. IntentOS 1.0.0 is available on PyPI as `intentos-engineering`.
 
 1. Install IntentOS from the repository root so the `intentos` executable is available to VS Code:
 

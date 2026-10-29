@@ -1,10 +1,10 @@
 # Releasing IntentOS
 
-Version 1.0.0 is prepared; no PyPI publication, release tag, or GitHub Release has been created. This procedure requires separate explicit publication approval. Release preparation itself does not execute it.
+IntentOS 1.0.0 is released on PyPI as `intentos-engineering`. The [`v1.0.0` tag and GitHub Release](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.0) are published, and the [Trusted Publishing workflow succeeded](https://github.com/milad-seify/IntentOS/actions/runs/40918243836). A clean public installation was verified. This document preserves the release controls for future versions.
 
-## One-time trust setup
+## One-time trust setup (completed for 1.0.0)
 
-Before pushing `v1.0.0`, configure a **Pending Trusted Publisher** on the official [PyPI account publishing page](https://pypi.org/manage/account/publishing/) with exactly:
+The **Pending Trusted Publisher** was configured on the official [PyPI account publishing page](https://pypi.org/manage/account/publishing/) for the first release with exactly:
 
 | Field | Value |
 | --- | --- |
@@ -14,9 +14,9 @@ Before pushing `v1.0.0`, configure a **Pending Trusted Publisher** on the offici
 | Workflow filename | `release.yml` |
 | GitHub environment | `pypi` |
 
-A pending publisher does **not** reserve the project name or create the project until the first successful publication. Recheck availability immediately before release; stop on a collision rather than selecting another name. See [PyPI's pending publisher documentation](https://docs.pypi.org/trusted-publishers/creating-a-project-through-oidc/).
+A pending publisher does **not** reserve the project name or create the project until the first successful publication. This setup created the project with the successful 1.0.0 publication. Future releases use the existing Trusted Publisher; verify that it remains configured rather than creating a second publisher. See [PyPI's pending publisher documentation](https://docs.pypi.org/trusted-publishers/creating-a-project-through-oidc/).
 
-Create the GitHub environment `pypi` before the first tag push. Configure required reviewer/manual approval protection and restrict allowed deployment tags to the intended release tags. Protect release tags against unauthorized creation, movement, and deletion using repository rules. This environment is the maintainer approval boundary; the workflow does not configure it. No environment secrets, PyPI API token, password, or `.pypirc` are needed.
+The GitHub environment `pypi` was used for the first release. Before future releases, verify required reviewer/manual approval protection and restrict allowed deployment tags to the intended release tags. Protect release tags against unauthorized creation, movement, and deletion using repository rules. This environment is the maintainer approval boundary; the workflow does not configure it. No environment secrets, PyPI API token, password, or `.pypirc` are needed.
 
 ## Workflow boundary
 
@@ -28,7 +28,7 @@ Only the dependent `publish` job has `id-token: write`, under environment `pypi`
 
 The action is pinned to `7245906fb61fa33a13554f9d5fb856fe61758086`, verified against upstream's [v1.14.3 tag](https://github.com/pypa/gh-action-pypi-publish/releases/tag/v1.14.3) on 2026-10-28. Update pins only after verifying the upstream release and invocation. Duplicate-version uploads fail; `skip-existing` is not enabled.
 
-## Explicit first-publication sequence
+## First-publication sequence (completed for 1.0.0)
 
 1. Obtain publication approval and ensure the accepted release commit on `main` has green CI, including the shared artifact gate. Complete the repository's full validation, including real VS Code Extension Host workspace/no-workspace checks.
 2. Verify the release commit and `pyproject.toml`: name `intentos-engineering`, version `1.0.0`. Run `python tests/check_release_tag.py v1.0.0`. Confirm the commit is in `origin/main` history.
@@ -41,7 +41,11 @@ The action is pinned to `7245906fb61fa33a13554f9d5fb856fe61758086`, verified aga
 9. Verify PyPI metadata for `intentos-engineering` version `1.0.0`, its wheel/sdist, and their SHA-256 digests against the verified workflow artifacts. Expected filenames are `intentos_engineering-1.0.0-py3-none-any.whl` and `intentos_engineering-1.0.0.tar.gz`.
 10. In a new virtual environment outside the checkout, run `python -m pip install intentos-engineering`, then `intentos --help`, `intentos optimize "Write a short announcement" --target chatgpt --json`, and the equivalent `python -m intentos` invocation. Verify installed metadata reports version `1.0.0`.
 11. In another clean environment, run `python -m pip install "intentos-engineering[mcp]"`, then the repository's `tests/mcp_smoke.py` and `tests/mcp_stdio_parity.py` using that environment's Python and PATH. These exercise the installed `intentos-mcp` entry point.
-12. Only after successful PyPI verification, create the GitHub Release from the same `v1.0.0` tag using [RELEASE_NOTES_1.0.0.md](RELEASE_NOTES_1.0.0.md). Remove its publication-pending sentence for the published body and reconcile README/status publication wording.
+12. After successful PyPI verification, create the GitHub Release from the same `v1.0.0` tag using [RELEASE_NOTES_1.0.0.md](RELEASE_NOTES_1.0.0.md). This was completed; the release notes are the published announcement.
+
+## Future releases
+
+For each new version, obtain publication approval and confirm main CI and the shared artifact gate are green. Verify the project version and tag match with `python tests/check_release_tag.py vX.Y.Z`, and confirm the tagged commit is in `origin/main`. Create and push that annotated tag once; do not reuse or move tags. Inspect the tag workflow and approve deployment through the existing protected `pypi` environment and Trusted Publisher. Verify the package metadata and artifact digests from that run, confirm a clean public installation, then publish the GitHub Release from the same immutable tag with that version's release notes. The workflow boundary and failure/recovery rules below continue to apply.
 
 ## Failure and recovery
 
