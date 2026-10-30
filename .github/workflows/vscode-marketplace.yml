@@ -49,10 +49,6 @@ jobs:
           python -m unittest tests.test_vscode_extension_contract -v
           node --check integrations/vscode/extension.js
           node --check integrations/vscode/executable.js
-      - name: Run isolated real Extension Host checks
-        run: |
-          node tests/run_vscode_extension_host.js
-          node tests/run_vscode_extension_host.js --no-workspace
       - name: Package one VSIX
         working-directory: integrations/vscode
         run: |

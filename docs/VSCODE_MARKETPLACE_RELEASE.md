@@ -39,3 +39,5 @@ Do not add a Marketplace PAT, `VSCE_PAT`, or npm authentication token. The publi
 9. Complete post-release documentation housekeeping.
 
 The workflow packages with pinned `@vscode/vsce` 4.1.0, verifies the tag, identity, archive contents, and accepted `main` ancestry, and uploads the VSIX. Publishing downloads that artifact with digest-mismatch enforcement and publishes it with OIDC; it does not rebuild the package.
+
+The tag workflow runs the extension contract and JavaScript syntax checks. It does not start a real Extension Host because GitHub-hosted runners do not include an installed VS Code executable; run the workspace and no-workspace Extension Host checks during local development instead.

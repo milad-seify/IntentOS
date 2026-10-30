@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from fnmatch import fnmatchcase
 import io
 import subprocess
 import tarfile
@@ -21,6 +22,7 @@ class ReleasePreparationTests(unittest.TestCase):
         project = {"name": "intentos-engineering", "version": "1.0.0"}
         check_release_tag("v1.0.0", project)
         for tag in ("1.0.0", "v1.0.1", "v1.0.0rc1", "v1.0.0+local", "v01.0.0",
+                    "vscode-v0.1.0",
                     "v1.0", "refs/tags/v1.0.0", "v1.0.0\n", "v1.0.0; echo bad"):
             with self.subTest(tag=tag), self.assertRaises(ValueError):
                 check_release_tag(tag, project)
@@ -65,8 +67,22 @@ class ReleasePreparationTests(unittest.TestCase):
     def test_release_trigger_and_privilege_boundary(self) -> None:
         workflow = (ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
         header, jobs = workflow.split("\njobs:\n")
-        self.assertEqual(header, 'name: Release\n\non:\n  push:\n    tags: ["v*"]\n'
+        self.assertEqual(header, 'name: Release\n\non:\n  push:\n    tags:\n      - "v*"\n      - "!vscode-v*"\n'
                          '\npermissions:\n  contents: read\n')
+        project = {"name": "intentos-engineering", "version": "1.0.0"}
+
+        check_release_tag("v1.0.0", project)
+
+        def python_release_accepts(tag: str) -> bool:
+            return fnmatchcase(tag, "v*") and not fnmatchcase(tag, "vscode-v*")
+
+        self.assertTrue(python_release_accepts("v1.0.0"))
+        self.assertFalse(python_release_accepts("vscode-v0.1.0"))
+        self.assertTrue(fnmatchcase("vscode-v0.1.0", "vscode-v*"))
+        with self.assertRaises(ValueError):
+            check_release_tag("vscode-v0.1.0", project)
+        marketplace = (ROOT / ".github/workflows/vscode-marketplace.yml").read_text(encoding="utf-8")
+        self.assertIn('tags:\n      - "vscode-v*"', marketplace)
         build, publish = jobs.split("\n  publish:\n")
         self.assertNotIn("id-token", build)
         self.assertEqual(workflow.count("id-token: write"), 1)
