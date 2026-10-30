@@ -4,7 +4,22 @@
   "description": "Prepare bounded AI execution tasks with IntentOS.",
   "version": "0.1.0",
   "publisher": "milad-seify",
-  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/milad-seify/IntentOS.git",
+    "directory": "integrations/vscode"
+  },
+  "homepage": "https://github.com/milad-seify/IntentOS/tree/main/integrations/vscode",
+  "bugs": {
+    "url": "https://github.com/milad-seify/IntentOS/issues"
+  },
+  "pricing": "Free",
+  "keywords": [
+    "intent",
+    "prompt engineering",
+    "ai"
+  ],
   "engines": {
     "vscode": "^1.90.0"
   },
