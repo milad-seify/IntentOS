@@ -7,6 +7,9 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import zipfile
+
+from tests.validate_vscode_marketplace_package import validate as validate_vscode_marketplace_package
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -76,6 +79,68 @@ command().then(() => process.stdout.write(JSON.stringify(observed)))
         self.assertNotIn("viewsContainers", manifest["contributes"])
         self.assertNotIn("dependencies", manifest)
         self.assertNotIn("devDependencies", manifest)
+
+    def test_marketplace_manifest_metadata_keeps_the_extension_identity(self) -> None:
+        manifest = json.loads((EXTENSION_DIR / "package.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(
+            (manifest["publisher"], manifest["name"], manifest["displayName"], manifest["version"]),
+            ("milad-seify", "intentos-vscode", "IntentOS", "0.1.0"),
+        )
+        self.assertNotIn("private", manifest)
+        self.assertEqual(manifest["license"], "MIT")
+        self.assertEqual(manifest["pricing"], "Free")
+        self.assertEqual(manifest["repository"]["directory"], "integrations/vscode")
+
+    def test_marketplace_workflow_is_tag_only_and_uses_oidc_for_exact_artifact(self) -> None:
+        workflow = (ROOT / ".github" / "workflows" / "vscode-marketplace.yml").read_text(encoding="utf-8")
+        publish_job = workflow.split("\n  publish:\n", maxsplit=1)[1]
+
+        self.assertIn('tags:\n      - "vscode-v*"', workflow)
+        self.assertNotIn("pull_request", workflow)
+        self.assertIn("id-token: write", publish_job)
+        self.assertIn("environment:\n      name: vscode-marketplace", publish_job)
+        self.assertIn("digest-mismatch: error", publish_job)
+        self.assertIn("publish --packagePath", publish_job)
+        self.assertIn("--oidc", publish_job)
+        self.assertNotIn("actions/checkout", publish_job)
+        self.assertNotIn("VSCE_PAT", workflow)
+        self.assertNotIn("--skip-duplicate", workflow)
+        self.assertNotIn("--force", workflow)
+
+    def test_marketplace_ignore_keeps_runtime_and_listing_files(self) -> None:
+        ignored = (EXTENSION_DIR / ".vscodeignore").read_text(encoding="utf-8")
+
+        for filename in ("extension.js", "executable.js", "package.json", "README.md", "CHANGELOG.md", "LICENSE"):
+            self.assertNotIn(filename, ignored)
+        self.assertIn("test/**", ignored)
+        self.assertIn("**/*.vsix", ignored)
+
+    def test_marketplace_package_validator_accepts_expected_identity_and_rejects_env_files(self) -> None:
+        manifest = (EXTENSION_DIR / "package.json").read_bytes()
+        required_files = {
+            "extension/changelog.md": b"0.1.0",
+            "extension/license.txt": b"MIT License",
+            "extension/readme.md": b"IntentOS",
+            "extension/executable.js": b"module.exports",
+            "extension/extension.js": b"module.exports",
+            "extension/package.json": manifest,
+        }
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            valid_vsix = Path(temp_dir) / "intentos-vscode-0.1.0.vsix"
+            with zipfile.ZipFile(valid_vsix, "w") as package:
+                for name, content in required_files.items():
+                    package.writestr(name, content)
+            validate_vscode_marketplace_package("vscode-v0.1.0", valid_vsix)
+
+            invalid_vsix = Path(temp_dir) / "intentos-vscode-0.1.0.vsix"
+            with zipfile.ZipFile(invalid_vsix, "w") as package:
+                for name, content in required_files.items():
+                    package.writestr(name, content)
+                package.writestr("extension/.env", b"unexpected")
+            with self.assertRaisesRegex(ValueError, "sensitive file"):
+                validate_vscode_marketplace_package("vscode-v0.1.0", invalid_vsix)
 
     def test_extension_stays_a_thin_cli_adapter(self) -> None:
         source = (EXTENSION_DIR / "extension.js").read_text(encoding="utf-8")
