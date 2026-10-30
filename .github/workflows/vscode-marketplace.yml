@@ -36,7 +36,7 @@ jobs:
           match = re.fullmatch(r"vscode-v(\d+\.\d+\.\d+)", tag)
           manifest = json.loads(Path("integrations/vscode/package.json").read_text())
           assert match and manifest["version"] == match.group(1), "Tag version must match extension package.json"
-          assert manifest["publisher"] == "milad-seify" and manifest["name"] == "intentos-vscode", "Unexpected extension identity"
+          assert manifest["publisher"] == "milad-seyfi" and manifest["name"] == "intentos-vscode", "Unexpected extension identity"
           PY
           git fetch --no-tags https://github.com/${{ github.repository }}.git +refs/heads/main:refs/remotes/origin/main
           git merge-base --is-ancestor HEAD refs/remotes/origin/main

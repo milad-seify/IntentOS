@@ -85,7 +85,7 @@ command().then(() => process.stdout.write(JSON.stringify(observed)))
 
         self.assertEqual(
             (manifest["publisher"], manifest["name"], manifest["displayName"], manifest["version"]),
-            ("milad-seify", "intentos-vscode", "IntentOS", "0.1.0"),
+            ("milad-seyfi", "intentos-vscode", "IntentOS", "0.1.0"),
         )
         self.assertNotIn("private", manifest)
         self.assertEqual(manifest["license"], "MIT")
@@ -97,6 +97,7 @@ command().then(() => process.stdout.write(JSON.stringify(observed)))
         publish_job = workflow.split("\n  publish:\n", maxsplit=1)[1]
 
         self.assertIn('tags:\n      - "vscode-v*"', workflow)
+        self.assertIn('manifest["publisher"] == "milad-seyfi"', workflow)
         self.assertNotIn("pull_request", workflow)
         self.assertIn("id-token: write", publish_job)
         self.assertIn("environment:\n      name: vscode-marketplace", publish_job)
