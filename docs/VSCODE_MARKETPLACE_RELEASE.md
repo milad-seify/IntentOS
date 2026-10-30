@@ -6,11 +6,11 @@ The extension manifest is `integrations/vscode/package.json`; its independent ve
 
 ## Configure Trusted Publishing after merge
 
-In the Visual Studio Marketplace publisher management page, configure a Trusted Publishing policy with:
+In the Visual Studio Marketplace publisher management page, configure a Trusted Publishing policy with these separate identities: the Marketplace publisher is `milad-seyfi`, while the GitHub repository owner remains `milad-seify`.
 
 | Field | Value |
 | --- | --- |
-| Publisher | `milad-seify` |
+| Marketplace Publisher | `milad-seyfi` |
 | Repository owner | `milad-seify` |
 | Repository | `IntentOS` |
 | Workflow | `vscode-marketplace.yml` |
@@ -29,9 +29,9 @@ Do not add a Marketplace PAT, `VSCE_PAT`, or npm authentication token. The publi
 ## Future release sequence
 
 1. Merge the release-preparation PR.
-2. Create or verify the `milad-seify` Marketplace publisher.
+2. Create or verify the `milad-seyfi` Marketplace publisher.
 3. Configure Marketplace Trusted Publishing and the protected GitHub environment above.
-4. Recheck that `milad-seify.intentos-vscode` is available before release.
+4. Recheck that `milad-seyfi.intentos-vscode` is available before release.
 5. Create an annotated `vscode-v0.1.0` tag on an accepted `main` commit and push only that tag.
 6. Review the workflow's build-and-verify result and approve the protected publish job.
 7. Confirm that the workflow publishes the exact verified VSIX.

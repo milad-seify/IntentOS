@@ -6,7 +6,7 @@ const path = require('path');
 const vscode = require('vscode');
 const { workspaceCwd, localExecutablePath, resolveExecutable, formatSpawnError } = require('../executable');
 
-const extensionId = 'milad-seify.intentos-vscode';
+const extensionId = 'milad-seyfi.intentos-vscode';
 const request = 'Codex: refactor the parser without changing behavior';
 
 function normalizedPath(value) {

@@ -11,7 +11,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "integrations" / "vscode" / "package.json"
-EXPECTED_PUBLISHER = "milad-seify"
+EXPECTED_PUBLISHER = "milad-seyfi"
 EXPECTED_NAME = "intentos-vscode"
 REQUIRED_FILES = {
     "extension/changelog.md",
