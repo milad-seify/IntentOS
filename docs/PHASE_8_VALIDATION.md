@@ -30,7 +30,7 @@ Observe the whole journey:
 5. Launch through the visible IntentOS status-bar item or existing Command Palette command; record which path the user finds.
 6. Observe a missing-target clarification and whether the user understands how to supply the missing information and retry.
 7. Reach Ready with a target specified or detected.
-8. Ask the user to explain risk, approval boundaries, and verification in their own words; record confusion descriptively.
+8. Ask the user to explain risk, approval boundaries, and verification in their own words. Ask what they think IntentOS does and what value, if any, the review adds to their existing AI workflow. Record answers and confusion in notes without coaching toward the desired positioning or inventing UX scores.
 9. Copy Prepared Task and confirm the clipboard contains the intended prepared task.
 10. Hand it to an external AI tool. Confirm the user understands that IntentOS prepares the task and that execution happens in that tool. Successful handoff does not establish downstream correctness.
 

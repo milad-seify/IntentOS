@@ -1,12 +1,14 @@
 # IntentOS
 
-**Engineering intent into reliable AI execution.**
+**Reliable AI Delegation**
 
 [![CI](https://github.com/milad-seify/IntentOS/actions/workflows/ci.yml/badge.svg)](https://github.com/milad-seify/IntentOS/actions/workflows/ci.yml)
 
-IntentOS is an open-source engineering layer between **human intent** and **AI execution**. It turns rough requests into bounded, context-aware, engineering-aware execution contracts for AI assistants and agents such as Codex, Claude Code, ChatGPT, Claude, Gemini, Cursor, and future tools.
+**IntentOS makes AI delegation controlled, portable, and verifiable.**
 
-It is not just another prompt rewriter.
+IntentOS is an open-source, vendor-neutral control and trust layer between **human intent** and **AI execution**. It turns rough goals into reviewable delegation contracts: what should be done, relevant context, constraints, risk, approval boundaries, an appropriate execution target/process, and evidence needed to establish completion. The chosen AI tool or agent performs the work.
+
+Software engineering and DevOps are the initial product wedge and current domain-policy support. The [long-term vision](docs/VISION.md) serves professionals across domains without requiring expertise in prompt engineering, model routing, MCP, or agent internals. Wider domain support requires evidence and separately scoped work.
 
 ```text
 Intent
@@ -23,15 +25,15 @@ Intent
 
 ## Why IntentOS?
 
-A well-worded prompt is not enough for serious engineering work.
+A delegation needs a clear goal, relevant context, constraints, risk awareness, and a way to verify the result.
 
-A coding or DevOps agent also needs the right scope, project context, risk controls, approval boundaries, engineering expectations, model capability, verification criteria, and a way to learn from repeated failures without endlessly growing the prompt.
+For software engineering and DevOps, that includes engineering expectations, capability/effort guidance, and evidence from actual outcomes. IntentOS makes these concerns explicit in the existing Prepare → Review → Copy workflow and portable preparation artifacts.
 
-IntentOS makes those concerns explicit and composable.
+Trust comes from explicit interpretation, traceable context, visible assumptions, constraints, consequential human approval, verification criteria, and outcome evidence. IntentOS does not guarantee AI correctness; its preparation guidance does not enforce an agent's permissions or certify completed work.
 
 ### What makes it different
 
-- **Prompt engineering, not prompt inflation** — preserve and sharpen intent instead of adding boilerplate.
+- **Intent contracts** — preserve and clarify the goal, scope, constraints, and success criteria in a reviewable execution prompt or portable Skill.
 - **Context-aware engineering** — KISS/YAGNI by default; SOLID, DRY, Clean Code, security, and DevOps guidance only when the task actually benefits from them.
 - **Risk-aware delegation** — production, security, schema, destructive, and persistent changes get stronger approval boundaries.
 - **Minimal project context** — rank, deduplicate, and budget repository context instead of dumping the whole repo into the agent.

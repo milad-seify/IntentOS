@@ -2,6 +2,8 @@
 
 IntentOS uses a small vendor-neutral core with replaceable profiles and integration surfaces. Product access may expand, but core decision logic should remain shared.
 
+The product role is the control and trust layer described in [VISION.md](VISION.md). The existing pipeline supports intent/context governance, risk and approval boundaries, portable handoff, verification, and outcome evidence; these responsibilities do not require a new architecture.
+
 ## Core pipeline
 
 ```text
@@ -25,6 +27,12 @@ Output / Agent Handoff
    ↓
 Evaluation + Run Record
 ```
+
+## Delegation and execution boundary
+
+IntentOS prepares a reviewable delegation contract and receives externally supplied outcome evidence. The AI tool or agent executes the work and owns its filesystem/browser access, indexing, memory, tools, planning, and execution runtime.
+
+Approval guidance states boundaries; it is not a permission-enforcement mechanism. Humans and the execution system enforce consequential approvals. A prepared verification contract specifies what must be checked; it does not certify that checks ran or guarantee a correct result. The current CLI/MCP/VS Code preparation surfaces do not execute or send tasks to agents.
 
 ## Usage architecture
 

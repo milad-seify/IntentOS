@@ -1,47 +1,48 @@
 # Vision
 
-IntentOS exists to make delegation to AI systems more reliable and easier to use.
+**Reliable AI Delegation**
 
-Humans often express goals informally. AI tools, especially agents that can edit code, run commands, browse systems, or change infrastructure, work better when intent is translated into explicit context, scope, constraints, risk boundaries, and verifiable outcomes.
+**IntentOS makes AI delegation controlled, portable, and verifiable.**
 
-IntentOS is the layer that performs that translation.
+Its long-term role is a vendor-neutral control and trust layer between human intent and AI execution. A user expresses a goal; IntentOS helps make the delegation explicit and reviewable; the selected AI tool or agent performs the work.
 
 ## North Star
 
-A user should be able to express a rough goal in natural language and receive the smallest sufficient execution contract for the selected AI system **without needing to understand prompt engineering, model routing, MCP, or agent internals**.
+A user should be able to express a goal in ordinary language and obtain the smallest sufficient, portable and reviewable contract for AI delegation **without needing to understand prompt engineering, model routing, MCP, or agent internals**.
 
-That contract should preserve the user's intent while adding only the engineering structure needed to execute safely and successfully.
+The contract should preserve intent and make explicit what should be done, what context matters, which constraints apply, the risks, permitted autonomous actions, required human approval, the appropriate execution target/process, and the evidence needed to establish success.
 
 IntentOS should be reachable from the environment appropriate to the user — terminal, code editor, compatible agent, or a simpler user interface — while all surfaces share the same core decisions.
 
-## Product thesis
+## Durable responsibilities
 
-Better AI work comes from more than better wording.
+These responsibilities guide the existing shared core; they are not a new module layout or a promise of additional runtime capabilities.
 
-Reliable delegation combines:
+| Responsibility | Purpose |
+| --- | --- |
+| Intent Contract | Explicit interpretation, goal, scope, constraints, assumptions, and success criteria. |
+| Context Governance | Relevant, bounded, traceable context with visible sources and limits; current context is explicitly supplied. |
+| Risk & Approval Boundaries | Risk awareness, allowed actions, consequential human decisions, and process/capability guidance. |
+| Verification Contract | Criteria and evidence required to establish completion. |
+| Portable Agent Handoff | Reviewable prompts, Agent Skills, and machine contracts usable across execution tools. |
+| Outcome Evidence / Learning | Externally observed results, privacy-minimal run records, and reviewable improvement proposals. |
 
-1. intent extraction
-2. relevant context selection
-3. task and risk classification
-4. domain-aware engineering policy
-5. AI/model-aware prompt construction
-6. explicit action and approval boundaries
-7. verification and Definition of Done
-8. feedback from real outcomes
-9. an access experience appropriate to the user's expertise and environment
+Intent normalization, task/risk classification, context selection, contextual engineering policy, capability/effort routing, verification, and evaluation remain the underlying mechanics. Execution, filesystem/browser/computer access, project indexing, memory, MCP/tool use, planning, multi-agent execution, and model/provider capabilities belong to agents and execution platforms. IntentOS should use their capabilities without rebuilding a competing agent runtime.
 
-IntentOS should make these capabilities reusable across AI vendors, project types, and user surfaces.
+## Trust through evidence
 
-## Long-term direction
+Trust must come from explicit interpretation, relevant and traceable context, visible assumptions, constraints, risk awareness, consequential human approval, verification criteria, and observed outcomes. Preparing a contract does not establish that an AI answer is correct or that the task was completed successfully.
 
-IntentOS should evolve into an open, extensible intent-to-execution layer with a small core and pluggable profiles/adapters for:
+The current classifier and approval guidance are advisory. People and execution systems enforce permissions and approval decisions; IntentOS does not grant execution authority or guarantee correctness.
 
-- AI tools and model families
-- software engineering domains
-- DevOps and infrastructure workflows
-- security-sensitive workflows
-- project/repository conventions
-- evaluation strategies
-- CLI, MCP, editor, agent, and simple-user access surfaces
+## Users and domain boundary
 
-The core must remain vendor-neutral and should degrade gracefully when model-specific information is unavailable. Ease of use should come from good defaults, thin integrations, and progressive disclosure rather than duplicated logic or hidden unsafe behavior.
+The long-term audience includes developers, DevOps/platform engineers, architects, analysts, researchers, managers, designers, and domain specialists. Many will delegate professional work without understanding AI internals. The product should make the contract understandable and controllable for them.
+
+Software engineering and DevOps remain the initial wedge, validation environment, and currently implemented domain-policy support. Broader professional use is a vision, not a claim of validated specialist policies or correctness in other domains. Domain expansion requires real-use evidence and separately scoped work.
+
+## Adoption and future UX
+
+The desired experience is a delegation control surface where users can understand goal, context, risk, approval boundaries, target/capability, verification, and eventual outcome. Exact UI design remains evidence-gated; the accepted current workflow is Prepare → Review → Copy.
+
+[Phase 8 — Adoption & Outcome Validation](PHASE_8_VALIDATION.md) continues under its existing protocol and quantitative gate. Its evidence can test whether users understand and value this delegation role. This vision adds no UI, adapter, domain policy, or execution feature. Ease of use should come from good defaults, thin integrations, and progressive disclosure over one vendor-neutral core, with deterministic fallbacks when model metadata is unavailable.
