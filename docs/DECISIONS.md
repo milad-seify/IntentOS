@@ -133,3 +133,11 @@ The first MCP integration uses the official stable Python SDK as an optional pac
 **Status:** Accepted
 
 Do not implement additional IDE, agent, provider, MCP, or access-surface adapters merely to fill a roadmap slot. The existing shared-core access surfaces are sufficient until repeated real usage demonstrates a concrete need. A deferred evidence-gated item may be closed without implementation when its promotion threshold is not met. This preserves KISS/YAGNI, evidence-backed development, and avoids broad shallow integrations.
+
+## D-023 — Reliable AI delegation through contracts and evidence
+
+**Status:** Accepted
+
+IntentOS is a vendor-neutral control and trust layer between human intent and AI execution. Its durable responsibilities are the intent contract, context governance, risk/approval boundaries, verification contract, portable handoff, and outcome evidence/learning described in [VISION.md](VISION.md). Agents execute the work; humans and execution systems enforce permissions and approvals. Trust comes from explicit boundaries and verification evidence, not guaranteed AI correctness.
+
+Software engineering and DevOps remain the initial implemented domains. Broader professional adoption is a long-term vision, with new domains and UX subject to evidence and separate scope approval. This positioning clarifies the existing architecture and does not authorize new runtime capabilities.

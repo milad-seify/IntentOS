@@ -8,6 +8,14 @@ The product principle is:
 
 Ease of use is a product requirement, not a wrapper to add after the core is complete.
 
+## Delegation control surface
+
+The [Reliable AI Delegation vision](VISION.md) serves professionals across domains; software engineering and DevOps remain the currently implemented domain-policy support. Users should understand and control the delegation: goal, supplied context and provenance, assumptions, risk, permitted actions and human approval boundaries, target agent/capability, verification, and eventual outcome evidence.
+
+The desired future UX organizes those decisions and evidence rather than adding another generic chat interface. This is a product direction, not a committed sidebar, screen layout, or new access surface. Phase 8 adoption evidence should inform the exact UX. Prepare → Review → Copy remains the accepted workflow; outcome evidence is supplied externally rather than automatically captured by the current editor UI.
+
+Trust comes from understanding boundaries and checking outcomes. Ready means the request is ready for handoff, not that the downstream work is correct. Approval guidance does not grant an agent permission to act; the user and executing system retain that authority.
+
 ## One core, multiple surfaces
 
 All user-facing surfaces should call the same IntentOS core rather than reimplementing routing, policy, context, or verification logic.
@@ -34,16 +42,18 @@ The surfaces are adapters. The core remains vendor-, IDE-, and transport-neutral
 
 The user should be able to state the desired outcome in ordinary language and receive useful guidance without understanding prompt frameworks, model families, context windows, engineering policies, or MCP.
 
-Default experience:
+Current accepted experience:
 
 ```text
 Describe what you want
         ↓
 IntentOS analyzes intent, risk, context, and target
         ↓
-Review a short recommendation
+Review the delegation contract
         ↓
-Copy / send / execute through a connected agent
+Copy Prepared Task
+        ↓
+Hand off to an external AI tool for execution
 ```
 
 Advanced details remain available but are not required for common use.
@@ -58,7 +68,7 @@ Useful editor actions may include:
 - prepare a task for Codex, Claude Code, or another connected agent
 - preview task type, risk, selected context, and verification expectations
 - inspect proposed `AGENTS.md` or related context updates
-- copy or send the prepared contract to an agent
+- copy the prepared contract for use in an external AI tool
 - expose warnings before destructive, production, security, or migration work
 
 The VS Code extension should remain a thin UX layer over the core.
@@ -73,16 +83,7 @@ The CLI remains a first-class interface because it is portable, scriptable, test
 
 Agents should be able to consume IntentOS capabilities through an interoperability layer such as MCP rather than requiring custom integration with every agent product.
 
-A future MCP adapter may expose bounded operations such as:
-
-- optimize or prepare a task
-- classify task and risk
-- select relevant project context
-- obtain engineering/DevOps policy
-- build a portable Skill
-- plan agent workspace maintenance
-- obtain verification criteria
-- create a run-record payload
+The implemented MCP adapter exposes exactly one `prepare_task` tool over local stdio. Additional operations remain candidates subject to demonstrated demand; the product direction does not approve broader MCP scope.
 
 MCP is an integration surface; IntentOS should not become a general MCP runtime.
 
@@ -93,10 +94,10 @@ The default UI should expose only the information needed for the current decisio
 For example, an everyday user may initially see:
 
 ```text
-Request: Add login to this project
+Request: Refactor this function without changing behavior
 Risk: Medium
-Recommendation: Prepare for coding agent
-[Review] [Send to Agent]
+Target: Codex
+[Review] [Copy Prepared Task]
 ```
 
 An advanced view may reveal:
@@ -117,7 +118,7 @@ Complexity should be available, not mandatory.
 
 ### Outcome-first language
 
-Prefer user goals such as `Prepare this task`, `Send to Agent`, or `Review risk` over internal terms such as compiler passes, policies, routing metadata, or prompt frameworks.
+Prefer user goals such as `Prepare this task`, `Review risk`, or `Copy Prepared Task` over internal terms such as compiler passes, policies, routing metadata, or prompt frameworks.
 
 ### Safe defaults
 
