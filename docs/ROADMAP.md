@@ -188,7 +188,25 @@ Initial editor-slice exit gate:
 
 Other IDE, agent, community, and provider/model adapters were candidates, not mandatory deliverables. Phase 7C did not demonstrate enough repeated demand to justify them. KISS/YAGNI therefore requires stopping here. These integrations remain possible future candidates and may be reopened when real adoption evidence establishes a concrete need.
 
-The absence of sufficient demand is the Phase 7 decision, not a failed or abandoned direction. Phase 7 overall is complete; no Phase 8 or other follow-on phase is defined here.
+The absence of sufficient demand is the Phase 7 decision, not a failed or abandoned direction. Phase 7 overall is complete.
+
+## Phase 8 — Adoption & Outcome Validation — IN PROGRESS — validation protocol
+
+Goal: determine whether first-time users can adopt IntentOS independently and under which real-task conditions preparation improves downstream outcomes. Phase 8 operationalizes existing Phase 5 evaluation primitives; it does not duplicate evaluation algorithms or require a new product feature.
+
+The current approval covers the [validation protocol](PHASE_8_VALIDATION.md) only. No slice is complete and no new runtime capability is approved.
+
+### 8A — First-use validation — GATED; NOT COMPLETE
+
+Observe public installations outside the IntentOS checkout through preparation and external handoff. Target 3 sessions, at least 2 first-time users, Windows and POSIX coverage, and at least 2 independent completions. Fix only demonstrated blockers; sessions require a subsequent task.
+
+### 8B — Outcome evidence workflow — GATED; NOT COMPLETE
+
+Start with the protocol's bounded manual worksheet for shared conditions and raw/prepared outcomes. Reuse existing evaluation/run-record primitives, preserve unknown metrics and privacy, and record evidence-entry friction. A comparison CLI remains conditional; it is not implemented or approved by this protocol.
+
+### 8C — External evidence gate — GATED; NOT COMPLETE
+
+Target 20 new distinct task observations, at least 2 users including a non-maintainer, at least 3 projects, and at least 12 eligible controlled pairs across multiple task types and risk levels. Do not recount Phase 7C tasks or lower collection targets silently. Correctness outranks efficiency; unchanged product and insufficient evidence are valid outcomes. Full controls and promotion rules live in the protocol.
 
 ## Later ecosystem directions
 

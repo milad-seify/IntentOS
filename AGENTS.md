@@ -55,7 +55,9 @@ Use focused checks first, then the broader relevant test suite when available.
 
 ## Current phase
 
-Phase 7 is **complete**. Phase 7A MCP parity, Phase 7B VS Code access, and the Phase 7C real-use evidence gate are complete. Phase 7D was intentionally deferred and closed without implementation because additional adapter demand did not meet the evidence threshold. No follow-on phase is defined or started.
+Phase 7 is **complete**. Phase 7A MCP parity, Phase 7B VS Code access, and the Phase 7C real-use evidence gate are complete. Phase 7D was intentionally deferred and closed without implementation because additional adapter demand did not meet the evidence threshold.
+
+Phase 8 — Adoption & Outcome Validation is **in progress — validation protocol**. Read `docs/PHASE_8_VALIDATION.md` for the approved first-use and outcome-evidence protocol. Current approval is documentation only: no new runtime capability or comparison CLI, and no automatic start of user sessions or Phase 8B implementation.
 
 The completed evidence and decision are recorded in `docs/PHASE_7C_EVIDENCE.md`. Any future product proposal requires a new evidence-backed planning decision.
 

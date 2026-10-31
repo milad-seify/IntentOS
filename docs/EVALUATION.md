@@ -45,6 +45,12 @@ The comparison calls a task-local winner only when correctness is established an
 
 Paired results contain outcomes and metrics, not request text. Existing `RunRecord` values continue to hash prepared prompts and context rather than storing their raw contents.
 
+## Real-task outcome validation
+
+Phase 5 supplies these evaluation mechanics; Phase 8 applies them to externally executed real-task workflows through the [validation protocol](PHASE_8_VALIDATION.md). `evaluate_result()` checks the generated preparation contract, not downstream engineering correctness. Downstream outcomes require independent acceptance evidence; real-task observations and synthetic regression fixtures are separate evidence categories.
+
+Preserve the raw arm as the original request. Do not re-prepare it to manufacture a `PromptResult` or matching `RunRecord`: that would change the comparison variable. Existing paired-run primitives hold external outcomes, while run records remain separate preparation provenance. This protocol adds no comparison CLI, runtime contract, or schema.
+
 ## Learning proposals
 
 A failed case may carry a reusable lesson hint. `propose_lessons()` promotes a hint only after it repeats across a configurable minimum number of failures. The result is a proposal with evidence cases, not an automatic mutation of policy or profiles.
