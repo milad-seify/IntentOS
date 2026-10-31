@@ -187,7 +187,23 @@ MCP preparation does not execute the task, authorize a risky action, mutate the 
 
 ## VS Code extension
 
-The editable package installation in the VS Code guide is for local extension development. IntentOS 1.0.0 is also available as the stable public package.
+Install the [IntentOS extension from the Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=milad-seyfi.intentos-vscode). First install the local CLI:
+
+```bash
+python -m pip install intentos-engineering
+```
+
+Then install the extension from the Marketplace and use this flow:
+
+```text
+Request
+→ IntentOS preparation
+→ Review
+→ Copy Prepared Task
+→ hand off to Codex / ChatGPT / Claude / Gemini / Cursor / another AI tool
+```
+
+The extension uses the editable package installation only for local development. IntentOS 1.0.0 is also available as the stable public package.
 
 The first editor slice lives in `integrations/vscode` and intentionally has no npm runtime dependencies or build pipeline.
 
