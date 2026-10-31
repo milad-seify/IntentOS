@@ -1,14 +1,10 @@
 # IntentOS for VS Code
 
-IntentOS helps turn a rough engineering request into a bounded task you can review before handing it to an AI assistant.
+Install [IntentOS from the Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=milad-seyfi.intentos-vscode). The extension turns a rough engineering request into a bounded task you can review before handing it to an AI assistant.
 
-```text
-Request → IntentOS preparation → Review → Copy Prepared Task → paste into your AI tool
-```
+## Install the IntentOS CLI
 
-## Install IntentOS CLI
-
-The extension uses the local IntentOS command-line application. Install it first:
+The extension requires the local IntentOS CLI. Install it with:
 
 ```bash
 python -m pip install intentos-engineering
@@ -24,7 +20,7 @@ intentos --help
 
 1. Select a request in an editor, or leave text unselected to enter a request when prompted.
 2. Open the Command Palette and run **IntentOS: Prepare Task**.
-3. Review the interpretation, risk, context summary, and verification guidance.
+3. Review the interpretation, risk, approval boundaries, context summary, and verification guidance.
 4. Choose **Copy Prepared Task**.
 5. Paste the prepared task into Codex, ChatGPT, Claude, Gemini, Cursor, or another AI tool.
 

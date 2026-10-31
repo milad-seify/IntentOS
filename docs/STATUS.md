@@ -36,7 +36,9 @@ IntentOS 1.0.0 released — stable v1. Phase 7C is complete; Phase 7D has not st
 - GitHub Release [IntentOS 1.0.0](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.0) is published
 - The Trusted Publishing release workflow succeeded: [run 40918243836](https://github.com/milad-seify/IntentOS/actions/runs/40918243836)
 - Phase 7C remains complete; Phase 7D has not started
-- VS Code Marketplace 0.1.0 release preparation is in progress; the extension remains the Phase 7B minimum Prepare → Review → Copy slice, and Phase 7D has not started
+- VS Code extension `0.1.0` is published on the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=milad-seyfi.intentos-vscode) as `milad-seyfi.intentos-vscode`; tag `vscode-v0.1.0` was published through Marketplace Trusted Publishing / OIDC
+- The published extension was manually installed from the Marketplace and verified through the Prepare → Review → Copy workflow
+- The Phase 7B Prepare → Review → Copy workflow remains the accepted extension experience; Phase 7D has not started
 
 ## Current verification baseline
 
