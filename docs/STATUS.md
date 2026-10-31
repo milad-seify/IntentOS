@@ -2,7 +2,7 @@
 
 ## Current phase
 
-IntentOS 1.0.0 released — stable v1. Phase 7 is complete.
+IntentOS Core 1.0.0 and VS Code extension 0.1.1 are released. Phase 7 is complete. Phase 8 — Adoption & Outcome Validation is IN PROGRESS — validation protocol.
 
 ## Implemented
 
@@ -39,6 +39,12 @@ IntentOS 1.0.0 released — stable v1. Phase 7 is complete.
 - Marketplace run [41219940660](https://github.com/milad-seify/IntentOS/actions/runs/41219940660) published the exact verified VSIX with digest `sha256:1aee46d84ea9c5251658bde351b701e51e4b5766e8a103b942030821974e7b13`
 - Version 0.1.1 adds the visible IntentOS status-bar launcher, approved icon, and genuine Review screenshot while preserving Command Palette support and the Prepare → Review → Copy boundary
 - The published extension was manually installed from the Marketplace and verified through the Prepare → Review → Copy workflow
+
+## Phase 8 — validation protocol
+
+The approved first slice defines first-use validation, a manual outcome-evidence worksheet, comparison controls, and an external evidence gate in [PHASE_8_VALIDATION.md](PHASE_8_VALIDATION.md). It uses existing Phase 5 evaluation mechanics. No new runtime capability has been approved; `intentos compare` remains conditional and is not implemented.
+
+No slice is complete: 8A sessions have not begun, 8B is at the manual-template stage, and 8C task collection has not begun. First-use targets are 3 sessions and at least 2 first-time users, covering Windows and POSIX, with at least 2 independent completions. The external gate targets 20 new task observations and at least 12 eligible controlled pairs across users/projects; the protocol defines the full coverage and promotion rules.
 
 ## Current verification baseline
 
@@ -118,7 +124,7 @@ The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-Phase 7 is complete. Future product work requires a new evidence-backed planning decision; no subsequent phase is defined or started. Use [RELEASING.md](RELEASING.md) for future release procedures and [RELEASE_NOTES_1.0.0.md](RELEASE_NOTES_1.0.0.md) for the published core announcement.
+Phase 8 starts with the validation protocol, not feature expansion. A separate task must authorize observed first-use sessions; do not begin sessions, downstream task runs, or Phase 8B implementation automatically. Runtime changes require demonstrated evidence and separate scope approval. Existing release procedures remain in [RELEASING.md](RELEASING.md).
 
 ## Constraints carried forward
 
