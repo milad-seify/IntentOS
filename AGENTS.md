@@ -55,11 +55,11 @@ Use focused checks first, then the broader relevant test suite when available.
 
 ## Current phase
 
-Phase 7A MCP/core parity is proven and Phase 7B minimum VS Code UX is complete. Phase 7C is now an **evidence-gathering gate**, not permission to add the next feature.
+Phase 7 is **complete**. Phase 7A MCP parity, Phase 7B VS Code access, and the Phase 7C real-use evidence gate are complete. Phase 7D was intentionally deferred and closed without implementation because additional adapter demand did not meet the evidence threshold. No follow-on phase is defined or started.
 
-Read `docs/PHASE_7C_EVIDENCE.md` before proposing new editor/UI/agent workflow capabilities.
+The completed evidence and decision are recorded in `docs/PHASE_7C_EVIDENCE.md`. Any future product proposal requires a new evidence-backed planning decision.
 
-During Phase 7C:
+Carry forward these evidence requirements for future product proposals:
 
 - use real tasks to record concrete friction, rework, context gaps, verification gaps, and outcome evidence
 - promote correctness, safety, or public-contract failures directly into focused regressions
@@ -68,6 +68,6 @@ During Phase 7C:
 - prefer a small paired evaluation when outcome quality is uncertain rather than subjective prompt tuning
 - keep optional measures such as cost, tokens, time, code size, and test results manual or already-available; do not add telemetry infrastructure just to collect them
 
-Preserve the Phase 7B one-command Prepare → Review → Copy workflow until repeated real use demonstrates a concrete gap.
+Preserve the Phase 7B Prepare → Review → Copy workflow until repeated real use demonstrates a concrete gap.
 
-Do not add another MCP tool, Streamable HTTP deployment, automatic filesystem/context discovery, workspace mutation, agent-specific Send/Execute wiring, VS Code sidebar/activity-bar UI, packaging/Marketplace infrastructure, settings frameworks, hosted services, plugin systems, LLM classification, embeddings/vector search, provider discovery, telemetry infrastructure, autonomous multi-agent orchestration/checkers, benchmark-framework dependencies, or a standalone simple UI unless real usage demonstrates a concrete need.
+Do not add another MCP tool, Streamable HTTP deployment, automatic filesystem/context discovery, workspace mutation, agent-specific Send/Execute wiring, VS Code sidebar/activity-bar UI, broaden the current Marketplace release workflow, add settings frameworks, hosted services, plugin systems, LLM classification, embeddings/vector search, provider discovery, telemetry infrastructure, autonomous multi-agent orchestration/checkers, benchmark-framework dependencies, or a standalone simple UI unless real usage demonstrates a concrete need.

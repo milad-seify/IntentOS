@@ -2,7 +2,7 @@
 
 ## Current phase
 
-IntentOS 1.0.0 released — stable v1. Phase 7C is complete; Phase 7D has not started.
+IntentOS 1.0.0 released — stable v1. Phase 7 is complete.
 
 ## Implemented
 
@@ -19,30 +19,30 @@ IntentOS 1.0.0 released — stable v1. Phase 7C is complete; Phase 7D has not st
 - Independent audit: verdict `NEEDS STABILIZATION`; no architectural redesign or P0 emergency defect was identified
 - Stabilization pass 3: preserve user content/output requirements, harden deterministic risk classification, context/workspace safety, structured results, and evaluation evidence contracts
 - Review dogfood regressions: documentation work stays lightweight without losing topic taxonomy; combined mutation requests remain high risk; distinct context ranks by relevance while authoritative duplicates still win
-- Phase 7A: optional MCP v2 stdio adapter with exactly one `prepare_task` tool over the shared core
+- Phase 7A COMPLETE: optional MCP v2 stdio adapter with exactly one `prepare_task` tool over the shared core
 - Phase 7A parity dogfood: installed `intentos-mcp` launched as a real stdio subprocess and produced exact structured-result parity with CLI and Python API across four representative cases
-- Phase 7B minimum editor slice: one `IntentOS: Prepare Task` Command Palette action, selected-text/input capture, temporary review panel, progressive advanced details, and Copy Prepared Task handoff
+- Phase 7B COMPLETE: VS Code extension with Command Palette action, visible status-bar launcher, selected-text/input capture, temporary review panel, progressive advanced details, and Copy Prepared Task handoff
 - Phase 7B runtime reliability: dependency-free real Extension Host integration tests pass with the repository workspace and with no workspace; both resolve and run the repository-local `.venv` CLI
 - Phase 7B manual dogfood: `Ctrl+F5`, input-box request, Review Panel, and Copy Prepared Task passed; copied output was valid and preserved the requested goal
 - Phase 7C-A evaluation pilot: task-local raw/prepared run comparison reuses `VariantRun` and `RunMetrics`; it records deltas without executing agents or claiming empirical improvement
-- Phase 7C real-use evidence: 10/10 distinct tasks collected; paired outcomes were 3 prepared, 2 raw, and 5 inconclusive
+- Phase 7C COMPLETE: 10/10 distinct real tasks collected; paired outcomes were 3 prepared, 2 raw, and 5 inconclusive
 - Phase 7C decision: no new capability met the promotion threshold; the Phase 7B Prepare → Review → Copy workflow remains accepted
 - Task 7 exposed a deterministic high-risk classification defect; the focused regression fix is incorporated
 - Task 8 exposed a pre-existing ARIS CRM CI/deployment baseline defect; it was not an IntentOS product defect
-- No Phase 7D or other feature phase has started
+- Phase 7D was intentionally deferred and closed without implementation because no demonstrated demand crossed the evidence threshold; Phase 7 overall is COMPLETE
 - Final stable-v1 readiness gate passed (`READY`); the v1 public contract is frozen in docs/PUBLIC_CONTRACT.md
 - IntentOS 1.0.0 is published on PyPI as `intentos-engineering`; a clean public installation was verified
 - GitHub tag [`v1.0.0`](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.0) points to accepted commit `daacb4e98e7c97694d9f645037ccc2eac949af2b`
 - GitHub Release [IntentOS 1.0.0](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.0) is published
 - The Trusted Publishing release workflow succeeded: [run 40918243836](https://github.com/milad-seify/IntentOS/actions/runs/40918243836)
-- Phase 7C remains complete; Phase 7D has not started
-- VS Code extension `0.1.0` is published on the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=milad-seyfi.intentos-vscode) as `milad-seyfi.intentos-vscode`; tag `vscode-v0.1.0` was published through Marketplace Trusted Publishing / OIDC
+- VS Code extension `0.1.1` is published on the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=milad-seyfi.intentos-vscode) as `milad-seyfi.intentos-vscode`; tag `vscode-v0.1.1` was published through Marketplace Trusted Publishing / OIDC
+- Marketplace run [41219940660](https://github.com/milad-seify/IntentOS/actions/runs/41219940660) published the exact verified VSIX with digest `sha256:1aee46d84ea9c5251658bde351b701e51e4b5766e8a103b942030821974e7b13`
+- Version 0.1.1 adds the visible IntentOS status-bar launcher, approved icon, and genuine Review screenshot while preserving Command Palette support and the Prepare → Review → Copy boundary
 - The published extension was manually installed from the Marketplace and verified through the Prepare → Review → Copy workflow
-- The Phase 7B Prepare → Review → Copy workflow remains the accepted extension experience; Phase 7D has not started
 
 ## Current verification baseline
 
-106 Python unit tests, including release identity, artifact, workflow permission, and main-history regressions, plus CLI smoke checks and dedicated integration checks:
+113 Python unit tests, including release identity, artifact, workflow permission, Marketplace package, launcher, and main-history regressions, plus CLI smoke checks and dedicated integration checks:
 
 - in-memory MCP v2 protocol smoke
 - stdio subprocess MCP host-parity dogfood across four representative cases
@@ -70,7 +70,7 @@ The first VS Code slice intentionally stays thin and local.
 
 It currently:
 
-- exposes one user-facing command: `IntentOS: Prepare Task`
+- exposes the existing `IntentOS: Prepare Task` command through the Command Palette and visible `$(sparkle) IntentOS` status-bar launcher
 - uses selected editor text when present, otherwise asks for the request
 - invokes `intentos optimize ... --json` rather than reimplementing core logic
 - shows interpretation, risk, consequential approval boundaries, context summary, and verification in a temporary review panel
@@ -118,7 +118,7 @@ The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-IntentOS 1.0.0 is released. Use [RELEASING.md](RELEASING.md) for future release procedures and [RELEASE_NOTES_1.0.0.md](RELEASE_NOTES_1.0.0.md) for the published announcement. Phase 7D remains unstarted.
+Phase 7 is complete. Future product work requires a new evidence-backed planning decision; no subsequent phase is defined or started. Use [RELEASING.md](RELEASING.md) for future release procedures and [RELEASE_NOTES_1.0.0.md](RELEASE_NOTES_1.0.0.md) for the published core announcement.
 
 ## Constraints carried forward
 
