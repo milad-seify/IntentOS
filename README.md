@@ -333,11 +333,11 @@ GitHub Actions runs the full core suite on Ubuntu with Python 3.11, 3.12, and 3.
 
 ## Project status
 
-The initial Phase 0–6 roadmap and independent-audit stabilization gate are complete. **Phase 7A MCP parity is proven, and Phase 7B now has the minimum Prepare → Review → Copy VS Code workflow.** Editor expansion is gated by dogfooding this small flow rather than adding a sidebar or agent-specific execution bridge immediately.
+The initial Phase 0–6 roadmap and independent-audit stabilization gate are complete. **Phase 7 is complete:** MCP parity was proven, VS Code is publicly distributed with a visible status-bar launcher, and the accepted workflow remains Prepare → Review → Copy. The evidence gate did not justify additional adapters or execution capabilities.
 
-Current baseline: **106 Python unit tests + CLI smoke + MCP protocol/stdio parity checks + VS Code syntax smoke**, with Linux and Windows CI coverage. Release preparation includes focused release guard regressions. CI also builds and inspects wheel/sdist artifacts, then installs and smoke-tests each from clean environments without publishing.
+Current baseline: **113 Python unit tests + CLI smoke + MCP protocol/stdio parity checks + VS Code contract, syntax, and package checks**, with Linux and Windows CI coverage. CI also builds and inspects wheel/sdist artifacts, then installs and smoke-tests each from clean environments without publishing.
 
-Phase 7C is complete and the final stable-v1 readiness gate passed. The v1 public compatibility contract is frozen in `docs/PUBLIC_CONTRACT.md`. IntentOS `1.0.0` is the current stable release; Phase 7D has not started. See the [release notes](docs/RELEASE_NOTES_1.0.0.md) and [release procedure](docs/RELEASING.md).
+The v1 public compatibility contract is frozen in `docs/PUBLIC_CONTRACT.md`. IntentOS `1.0.0` is the current stable core release; VS Code extension `0.1.1` is published. Phase 7D was intentionally deferred and closed without implementation because no additional adapter demand met the evidence threshold. Phase 7 is formally complete. Future product work requires a new evidence-backed planning decision; no subsequent phase is defined here. See the [release notes](docs/RELEASE_NOTES_1.0.0.md) and [release procedure](docs/RELEASING.md).
 
 See [`docs/STATUS.md`](docs/STATUS.md) for the concise handoff, [`docs/DOGFOODING.md`](docs/DOGFOODING.md) for real-world findings, [`docs/MCP_DOGFOODING.md`](docs/MCP_DOGFOODING.md) for MCP parity evidence, [`docs/HUGGINGFACE_RESEARCH.md`](docs/HUGGINGFACE_RESEARCH.md) for the ecosystem research pass, [`docs/UX.md`](docs/UX.md) for usage/access principles, [`docs/INDEPENDENT_AUDIT.md`](docs/INDEPENDENT_AUDIT.md) for the review contract, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for the roadmap.
 

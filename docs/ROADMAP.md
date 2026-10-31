@@ -98,11 +98,11 @@ Completed:
 
 Independent audit verdict: **NEEDS STABILIZATION**, not architectural redesign. The required preparation-contract stabilization was completed before access-surface implementation began.
 
-## Phase 7 — Access and Agent Interoperability
+## Phase 7 — Access and Agent Interoperability — COMPLETE
 
 Goal: make IntentOS easy to use across environments while preserving one shared core.
 
-### 7A — Minimal MCP adapter — IMPLEMENTED + PARITY GATE PASSED
+### 7A — Minimal MCP adapter — COMPLETE; PARITY GATE PASSED
 
 The first MCP slice exposes exactly **one tool: `prepare_task`** through an optional local stdio adapter using the official stable MCP Python SDK.
 
@@ -158,6 +158,8 @@ Implemented:
 - one temporary review panel rather than a permanent sidebar
 - concise interpretation, risk, consequential approval boundaries, context summary, and verification by default
 - Copy Prepared Task handoff
+- visible `$(sparkle) IntentOS` status-bar launcher reusing the existing prepare command
+- public Marketplace distribution as `milad-seyfi.intentos-vscode` (0.1.1), with approved icon and genuine Review screenshot
 - advanced routing/context details collapsed by default
 - one optional executable-path setting for PATH/virtual-environment cases
 - no duplicated classifier/router/policy/context logic in the extension
@@ -170,9 +172,9 @@ Current constraints:
 - no MCP client embedded in the extension
 - no npm runtime dependency, TypeScript compiler, bundler, telemetry, background service, or provider configuration
 
-Exit gate before editor expansion:
+Initial editor-slice exit gate:
 
-> Passed: manual Extension Development Host dogfood verified input, Review Panel, and Copy Prepared Task; automated real Extension Host tests verify CLI resolution and execution with and without a workspace. Further editor work remains gated on concrete product evidence. Do not add a sidebar, agent execution bridge, automatic context discovery, packaging/Marketplace work, or broader settings merely because VS Code supports them.
+> Passed: manual Extension Development Host dogfood verified input, Review Panel, and Copy Prepared Task; automated real Extension Host tests verify CLI resolution and execution with and without a workspace. The later 0.1.1 release added a status-bar entry point and Marketplace assets without changing the Prepare → Review → Copy workflow. Further capabilities remain evidence-gated.
 
 ### 7C — Real-use evidence gate — COMPLETE
 
@@ -182,13 +184,11 @@ Exit gate before editor expansion:
 - Decision: no IntentOS product change; the Phase 7B Prepare → Review → Copy workflow remains accepted.
 - A standalone simple UI remains a deferred, evidence-gated candidate; this evidence did not justify starting it. See `docs/PHASE_7C_EVIDENCE.md` and [Issue #21](https://github.com/milad-seify/IntentOS/issues/21).
 
-### 7D — Additional adapters — NOT STARTED
+### 7D — Additional adapters — DEFERRED BY EVIDENCE / CLOSED WITHOUT IMPLEMENTATION
 
-- other IDEs and agent surfaces
-- community integrations
-- provider/model metadata adapters where real usage requires them
+Other IDE, agent, community, and provider/model adapters were candidates, not mandatory deliverables. Phase 7C did not demonstrate enough repeated demand to justify them. KISS/YAGNI therefore requires stopping here. These integrations remain possible future candidates and may be reopened when real adoption evidence establishes a concrete need.
 
-Add these only from demonstrated demand; do not build broad shallow integrations for their own sake.
+The absence of sufficient demand is the Phase 7 decision, not a failed or abandoned direction. Phase 7 overall is complete; no Phase 8 or other follow-on phase is defined here.
 
 ## Later ecosystem directions
 

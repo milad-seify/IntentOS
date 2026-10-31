@@ -127,3 +127,9 @@ IntentOS must be usable without prompt-engineering, model-routing, or MCP expert
 **Status:** Accepted
 
 The first MCP integration uses the official stable Python SDK as an optional package extra so the core keeps no third-party runtime dependency. It exposes exactly one local stdio tool, `prepare_task`, which calls the shared preparation core and returns the shared machine result contract. Caller-supplied project context is bounded and passed as content; MCP does not gain arbitrary filesystem access, execution authority, workspace mutation, orchestration, or additional tools until real usage demonstrates a need.
+
+## D-022 — Evidence gates adapter expansion
+
+**Status:** Accepted
+
+Do not implement additional IDE, agent, provider, MCP, or access-surface adapters merely to fill a roadmap slot. The existing shared-core access surfaces are sufficient until repeated real usage demonstrates a concrete need. A deferred evidence-gated item may be closed without implementation when its promotion threshold is not met. This preserves KISS/YAGNI, evidence-backed development, and avoids broad shallow integrations.

@@ -116,9 +116,9 @@ Phase 7B UX dogfooding passes when all four cases behave as expected in a real d
 
 ## Dogfood result
 
-Phase 7B passed manual dogfooding: Ctrl+F5 launched the Extension Development Host, `IntentOS: Prepare Task` accepted input-box text, the IntentOS Review panel opened, and Copy Prepared Task produced valid output preserving the requested goal. The runtime executable issue is also covered by automated real Extension Host runs with both the repository workspace open and no workspace open; each resolved and ran the repository-local CLI and returned `ready`.
+The initial Phase 7B dogfood passed: Ctrl+F5 launched the Extension Development Host, `IntentOS: Prepare Task` accepted input-box text, the IntentOS Review panel opened, and Copy Prepared Task produced valid output preserving the requested goal. Automated real Extension Host runs with both the repository workspace and no workspace resolve and run the repository-local CLI and return `ready`.
 
-Phase 7B is complete. Further editor work remains gated on concrete product evidence. This completion does not authorize a sidebar, Send-to-Agent wiring, automatic context discovery, Marketplace packaging, or additional MCP tools.
+The later approved 0.1.1 refinement added a visible status-bar launcher, approved icon, and genuine Review screenshot while preserving the Command Palette command and Prepare → Review → Copy workflow. Phase 7 overall is complete; additional editor, MCP, or agent capabilities remain closed unless new real-use evidence justifies a separately planned change.
 
 Do not add a sidebar, agent-specific execution bridge, automatic context discovery, or additional settings in response to preference alone. Promote only observed failures/friction into focused regressions or the smallest reversible UX change.
 

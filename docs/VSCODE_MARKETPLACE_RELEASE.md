@@ -23,7 +23,15 @@ The accepted user flow remains:
 Request → IntentOS preparation → Review → Copy Prepared Task → hand off to an AI tool
 ```
 
-The extension does not execute or send tasks to an agent. Phase 7D has not started.
+The extension does not execute or send tasks to an agent. Phase 7D was intentionally deferred and closed without implementation after the Phase 7C evidence gate.
+
+## 0.1.1 publication complete
+
+Version `0.1.1` of `milad-seyfi.intentos-vscode` was published from tag `vscode-v0.1.1` on main commit `69df3f598e2b6f48fab4f3b65be857848f984546`. [GitHub Actions run 41219940660](https://github.com/milad-seify/IntentOS/actions/runs/41219940660) completed both build-and-verify and publish successfully through Marketplace Trusted Publishing / OIDC.
+
+The workflow published the exact verified VSIX artifact, with digest `sha256:1aee46d84ea9c5251658bde351b701e51e4b5766e8a103b942030821974e7b13`.
+
+The release adds a visible `$(sparkle) IntentOS` status-bar launcher, the approved extension icon at `integrations/vscode/assets/icon.png`, and a genuine Review screenshot at `integrations/vscode/assets/review-ready.png`. The existing Command Palette path remains available, and the product boundary remains Prepare → Review → Copy; this release does not add agent execution or automatic context integration.
 
 ## Trusted Publishing configuration
 
