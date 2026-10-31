@@ -33,6 +33,7 @@ const vscode = {
     showInputBox: async () => 'Codex: refactor the parser without changing behavior',
     withProgress: async (_options, callback) => callback(),
     createWebviewPanel: () => ({ webview: { html: '', onDidReceiveMessage() {} } }),
+    createStatusBarItem: () => ({ show() {}, dispose() {} }),
     showErrorMessage: (message) => { throw new Error(message); },
   },
   workspace: {
@@ -43,6 +44,7 @@ const vscode = {
     registerCommand: (_id, callback) => { command = callback; return { dispose() {} }; },
   },
   ProgressLocation: { Notification: 1 },
+  StatusBarAlignment: { Right: 2 },
   ViewColumn: { Beside: 2 },
 };
 Module._load = function (request, parent, isMain) {
@@ -70,6 +72,7 @@ command().then(() => process.stdout.write(JSON.stringify(observed)))
     def test_manifest_exposes_only_prepare_task_command(self) -> None:
         manifest = json.loads((EXTENSION_DIR / "package.json").read_text(encoding="utf-8"))
 
+        self.assertIn("onStartupFinished", manifest["activationEvents"])
         commands = manifest["contributes"]["commands"]
         self.assertEqual(
             commands,
@@ -85,12 +88,81 @@ command().then(() => process.stdout.write(JSON.stringify(observed)))
 
         self.assertEqual(
             (manifest["publisher"], manifest["name"], manifest["displayName"], manifest["version"]),
-            ("milad-seyfi", "intentos-vscode", "IntentOS", "0.1.0"),
+            ("milad-seyfi", "intentos-vscode", "IntentOS", "0.1.1"),
         )
         self.assertNotIn("private", manifest)
         self.assertEqual(manifest["license"], "MIT")
         self.assertEqual(manifest["pricing"], "Free")
         self.assertEqual(manifest["repository"]["directory"], "integrations/vscode")
+
+    def test_status_bar_launcher_reuses_and_disposes_prepare_command(self) -> None:
+        node = shutil.which("node")
+        if node is None:
+            self.skipTest("Node.js is required to exercise the VS Code adapter")
+
+        script = r"""
+const assert = require('assert');
+const Module = require('module');
+const originalLoad = Module._load;
+let registered;
+let launcher;
+const vscode = {
+  window: {
+    createStatusBarItem: (alignment, priority) => {
+      launcher = {
+        alignment, priority, visible: false, disposed: false,
+        show() { this.visible = true; },
+        dispose() { this.disposed = true; },
+      };
+      return launcher;
+    },
+  },
+  commands: {
+    registerCommand: (id, callback) => {
+      registered = { id, callback, disposed: false };
+      return { dispose() { registered.disposed = true; } };
+    },
+  },
+  StatusBarAlignment: { Right: 2 },
+};
+Module._load = function (request, parent, isMain) {
+  if (request === 'vscode') return vscode;
+  return originalLoad.call(this, request, parent, isMain);
+};
+const subscriptions = [];
+require(process.argv[1]).activate({
+  subscriptions,
+  extensionUri: { fsPath: '/repo/integrations/vscode' },
+});
+assert.strictEqual(registered.id, 'intentos.prepareTask');
+assert.strictEqual(launcher.command, registered.id);
+assert.strictEqual(launcher.text, '$(sparkle) IntentOS');
+assert.strictEqual(launcher.tooltip, 'Prepare a task with IntentOS');
+assert.strictEqual(launcher.visible, true);
+assert.strictEqual(subscriptions.includes(launcher), true);
+subscriptions.forEach((subscription) => subscription.dispose());
+assert.strictEqual(launcher.disposed, true);
+assert.strictEqual(registered.disposed, true);
+"""
+        subprocess.run(
+            [node, "-e", script, str(EXTENSION_DIR / "extension.js")],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+    def test_status_launcher_does_not_add_agent_or_provider_capabilities(self) -> None:
+        source = (EXTENSION_DIR / "extension.js").read_text(encoding="utf-8").lower()
+        manifest = json.loads((EXTENSION_DIR / "package.json").read_text(encoding="utf-8"))
+
+        self.assertEqual(
+            manifest["contributes"]["commands"],
+            [{"command": "intentos.prepareTask", "title": "IntentOS: Prepare Task"}],
+        )
+        self.assertNotIn("telemetry", source)
+        self.assertNotIn("sendtoagent", source)
+        self.assertNotIn("providercredentials", source)
+        self.assertNotIn("executecommand", source)
 
     def test_marketplace_workflow_is_tag_only_and_uses_oidc_for_exact_artifact(self) -> None:
         workflow = (ROOT / ".github" / "workflows" / "vscode-marketplace.yml").read_text(encoding="utf-8")
@@ -120,6 +192,8 @@ command().then(() => process.stdout.write(JSON.stringify(observed)))
 
     def test_marketplace_package_validator_accepts_expected_identity_and_rejects_env_files(self) -> None:
         manifest = (EXTENSION_DIR / "package.json").read_bytes()
+        version = json.loads(manifest)["version"]
+        tag = f"vscode-v{version}"
         required_files = {
             "extension/changelog.md": b"0.1.0",
             "extension/license.txt": b"MIT License",
@@ -130,19 +204,21 @@ command().then(() => process.stdout.write(JSON.stringify(observed)))
         }
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            valid_vsix = Path(temp_dir) / "intentos-vscode-0.1.0.vsix"
+            valid_vsix = Path(temp_dir) / f"intentos-vscode-{version}.vsix"
             with zipfile.ZipFile(valid_vsix, "w") as package:
                 for name, content in required_files.items():
                     package.writestr(name, content)
-            validate_vscode_marketplace_package("vscode-v0.1.0", valid_vsix)
+            validate_vscode_marketplace_package(tag, valid_vsix)
 
-            invalid_vsix = Path(temp_dir) / "intentos-vscode-0.1.0.vsix"
+            invalid_directory = Path(temp_dir) / "invalid"
+            invalid_directory.mkdir()
+            invalid_vsix = invalid_directory / f"intentos-vscode-{version}.vsix"
             with zipfile.ZipFile(invalid_vsix, "w") as package:
                 for name, content in required_files.items():
                     package.writestr(name, content)
                 package.writestr("extension/.env", b"unexpected")
             with self.assertRaisesRegex(ValueError, "sensitive file"):
-                validate_vscode_marketplace_package("vscode-v0.1.0", invalid_vsix)
+                validate_vscode_marketplace_package(tag, invalid_vsix)
 
     def test_extension_stays_a_thin_cli_adapter(self) -> None:
         source = (EXTENSION_DIR / "extension.js").read_text(encoding="utf-8")
