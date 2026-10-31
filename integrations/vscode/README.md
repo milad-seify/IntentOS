@@ -26,6 +26,8 @@ intentos --help
 
 The status bar is the easy entry point; the Command Palette remains available for keyboard-oriented use.
 
+![IntentOS Review showing a ready Codex task, risk, approval boundaries, verification, and Copy Prepared Task](assets/review-ready.png)
+
 The extension does not send the task to an AI tool or execute it.
 
 ## Configuration

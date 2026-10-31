@@ -94,6 +94,14 @@ command().then(() => process.stdout.write(JSON.stringify(observed)))
         self.assertEqual(manifest["license"], "MIT")
         self.assertEqual(manifest["pricing"], "Free")
         self.assertEqual(manifest["repository"]["directory"], "integrations/vscode")
+        self.assertEqual(manifest["icon"], "assets/icon.png")
+
+    def test_marketplace_readme_uses_the_real_review_screenshot(self) -> None:
+        readme = (EXTENSION_DIR / "README.md").read_text(encoding="utf-8")
+
+        self.assertIn("![IntentOS Review", readme)
+        self.assertIn("](assets/review-ready.png)", readme)
+        self.assertTrue((EXTENSION_DIR / "assets" / "review-ready.png").is_file())
 
     def test_status_bar_launcher_reuses_and_disposes_prepare_command(self) -> None:
         node = shutil.which("node")
@@ -198,6 +206,8 @@ assert.strictEqual(registered.disposed, true);
             "extension/changelog.md": b"0.1.0",
             "extension/license.txt": b"MIT License",
             "extension/readme.md": b"IntentOS",
+            "extension/assets/icon.png": (EXTENSION_DIR / "assets" / "icon.png").read_bytes(),
+            "extension/assets/review-ready.png": (EXTENSION_DIR / "assets" / "review-ready.png").read_bytes(),
             "extension/executable.js": b"module.exports",
             "extension/extension.js": b"module.exports",
             "extension/package.json": manifest,

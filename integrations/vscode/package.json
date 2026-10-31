@@ -4,6 +4,7 @@
   "description": "Prepare bounded AI execution tasks with IntentOS.",
   "version": "0.1.1",
   "publisher": "milad-seyfi",
+  "icon": "assets/icon.png",
   "license": "MIT",
   "repository": {
     "type": "git",
