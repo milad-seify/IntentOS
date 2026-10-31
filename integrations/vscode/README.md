@@ -19,10 +19,14 @@ intentos --help
 ## Use the extension
 
 1. Select a request in an editor, or leave text unselected to enter a request when prompted.
-2. Open the Command Palette and run **IntentOS: Prepare Task**.
+2. Click **IntentOS** in the VS Code status bar, or open the Command Palette and run **IntentOS: Prepare Task**.
 3. Review the interpretation, risk, approval boundaries, context summary, and verification guidance.
 4. Choose **Copy Prepared Task**.
 5. Paste the prepared task into Codex, ChatGPT, Claude, Gemini, Cursor, or another AI tool.
+
+The status bar is the easy entry point; the Command Palette remains available for keyboard-oriented use.
+
+![IntentOS Review showing a ready Codex task, risk, approval boundaries, verification, and Copy Prepared Task](assets/review-ready.png)
 
 The extension does not send the task to an AI tool or execute it.
 

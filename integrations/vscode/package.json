@@ -2,8 +2,9 @@
   "name": "intentos-vscode",
   "displayName": "IntentOS",
   "description": "Prepare bounded AI execution tasks with IntentOS.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "milad-seyfi",
+  "icon": "assets/icon.png",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -28,7 +29,8 @@
   ],
   "main": "./extension.js",
   "activationEvents": [
-    "onCommand:intentos.prepareTask"
+    "onCommand:intentos.prepareTask",
+    "onStartupFinished"
   ],
   "contributes": {
     "commands": [

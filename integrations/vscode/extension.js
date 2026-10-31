@@ -204,6 +204,13 @@ function activate(context) {
   context.subscriptions.push(
     vscode.commands.registerCommand('intentos.prepareTask', () => prepareTask(extensionPath))
   );
+
+  const launcher = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+  launcher.text = '$(sparkle) IntentOS';
+  launcher.tooltip = 'Prepare a task with IntentOS';
+  launcher.command = 'intentos.prepareTask';
+  launcher.show();
+  context.subscriptions.push(launcher);
 }
 
 function deactivate() {}

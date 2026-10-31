@@ -17,6 +17,8 @@ REQUIRED_FILES = {
     "extension/changelog.md",
     "extension/license.txt",
     "extension/readme.md",
+    "extension/assets/icon.png",
+    "extension/assets/review-ready.png",
     "extension/executable.js",
     "extension/extension.js",
     "extension/package.json",
