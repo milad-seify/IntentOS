@@ -91,6 +91,17 @@ _CODING_TERMS = (
     "ماژول",
 )
 
+_REVIEW_ACTION_TERMS = (
+    "review", "analyze", "analyse", "inspect", "evaluate", "recommend", "propose",
+)
+
+_MUTATION_ACTION_TERMS = (
+    "implement", "fix", "refactor", "deploy", "apply", "execute", "run", "correct",
+    "change", "modify", "update", "add", "remove", "delete", "drop", "truncate",
+    "wipe", "build", "create", "write", "install", "commit", "push", "merge", "make changes",
+    "implementing", "fixing", "refactoring", "deploying", "applying", "changing", "modifying",
+)
+
 _HIGH_RISK_TERMS = (
     "production",
     "prod",
@@ -298,6 +309,27 @@ def is_documentation_only(intent: NormalizedIntent) -> bool:
     return _has_unnegated_documentation_scope(action) or _looks_like_documentation_edit(action)
 
 
+def is_review_only(intent: NormalizedIntent) -> bool:
+    # Use requested actions, never background context, to recognize a bounded
+    # review. Be conservative: an affirmative mutation keeps the normal path.
+    action = _action_text(intent)
+    if not any(
+        re.search(r"(?:^|[.!?;:,\n])\s*(?:please\s+)?$", action[:match.start()])
+        for term in _REVIEW_ACTION_TERMS
+        for match in _term_matches(action, term)
+    ):
+        return False
+    for term in _MUTATION_ACTION_TERMS:
+        for match in _term_matches(action, term):
+            prefix = action[:match.start()]
+            if re.search(r"\b(?:do not|don't|never|without)\s+$", prefix):
+                continue
+            if re.search(r"\b(?:recommend|propose)(?:\s+(?:only|a|an|the))*\s+$", prefix):
+                continue
+            return False
+    return True
+
+
 def has_devops_signals(intent: NormalizedIntent) -> bool:
     return _contains_any(_all_text(intent), _DEVOPS_TERMS)
 
@@ -318,7 +350,9 @@ def classify_task(intent: NormalizedIntent) -> tuple[TaskType, RiskLevel]:
     all_text = _all_text(intent)
     docs_only = is_documentation_only(intent)
 
-    if _contains_any(action, _SECURITY_TERMS):
+    if is_review_only(intent):
+        task = TaskType.GENERAL
+    elif _contains_any(action, _SECURITY_TERMS):
         task = TaskType.SECURITY
     elif _contains_any(action, _DEVOPS_TERMS):
         task = TaskType.DEVOPS
@@ -340,7 +374,7 @@ def classify_task(intent: NormalizedIntent) -> tuple[TaskType, RiskLevel]:
     elif (
         _contains_any(all_text, _HIGH_RISK_TERMS)
         or has_concurrency_mutation_risk(intent)
-        or task is TaskType.SECURITY
+        or _contains_any(action, _SECURITY_TERMS)
     ):
         risk = RiskLevel.HIGH
     elif task in {TaskType.ARCHITECTURE, TaskType.DEVOPS, TaskType.REFACTOR, TaskType.CODING}:

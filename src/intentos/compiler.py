@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 
+from .classifier import is_review_only
 from .models import ExecutionPolicy, NormalizedIntent, PromptResult
 from .profiles import resolve_profile
 
@@ -50,19 +51,32 @@ def compile_prompt(
     }
 
     if profile.name in {"codex", "claude-code"}:
+        review_only = is_review_only(intent)
         sections["Scope"] = _section(
             "Scope",
-            ("Change only what is required to satisfy the goal; avoid unrelated refactors.",),
+            (
+                "Review and recommend only; do not implement changes."
+                if review_only
+                else "Change only what is required to satisfy the goal; avoid unrelated refactors.",
+            ),
         )
         if not sections["Verification"]:
             sections["Verification"] = _section(
                 "Verification",
-                ("Run the smallest relevant checks and report concrete results.",),
+                (
+                    "Support findings with evidence and report verification gaps; do not claim unperformed checks passed."
+                    if review_only
+                    else "Run the smallest relevant checks and report concrete results.",
+                ),
             )
         if not sections["Done"]:
             sections["Done"] = _section(
                 "Done",
-                ("Summarize changed files, checks run, results, and remaining risks.",),
+                (
+                    "Summarize findings, evidence, and remaining uncertainties."
+                    if review_only
+                    else "Summarize changed files, checks run, results, and remaining risks.",
+                ),
             )
 
     rendered = [sections[name] for name in profile.section_order if sections.get(name)]

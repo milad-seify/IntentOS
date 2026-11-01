@@ -28,6 +28,7 @@ IntentOS Core 1.0.0 and VS Code extension 0.1.1 are released. Phase 7 is complet
 - Phase 7C COMPLETE: 10/10 distinct real tasks collected; paired outcomes were 3 prepared, 2 raw, and 5 inconclusive
 - Phase 7C decision: no new capability met the promotion threshold; the Phase 7B Prepare → Review → Copy workflow remains accepted
 - Task 7 exposed a deterministic high-risk classification defect; the focused regression fix is incorporated
+- Review-only technical requests use the existing general task type and read-only, evidence-based policy; mixed review/implementation requests keep their normal classification and risk checks
 - Task 8 exposed a pre-existing ARIS CRM CI/deployment baseline defect; it was not an IntentOS product defect
 - Phase 7D was intentionally deferred and closed without implementation because no demonstrated demand crossed the evidence threshold; Phase 7 overall is COMPLETE
 - Final stable-v1 readiness gate passed (`READY`); the v1 public contract is frozen in docs/PUBLIC_CONTRACT.md
@@ -48,7 +49,7 @@ No slice is complete: 8A sessions have not begun, 8B is at the manual-template s
 
 ## Current verification baseline
 
-113 Python unit tests, including release identity, artifact, workflow permission, Marketplace package, launcher, and main-history regressions, plus CLI smoke checks and dedicated integration checks:
+120 Python unit tests, including review-only classification/policy, release identity, artifact, workflow permission, Marketplace package, launcher, and main-history regressions, plus CLI smoke checks and dedicated integration checks:
 
 - in-memory MCP v2 protocol smoke
 - stdio subprocess MCP host-parity dogfood across four representative cases

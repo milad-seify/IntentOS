@@ -1,6 +1,11 @@
 from __future__ import annotations
 
-from .classifier import has_devops_signals, has_persistent_data_signals, is_documentation_only
+from .classifier import (
+    has_devops_signals,
+    has_persistent_data_signals,
+    is_documentation_only,
+    is_review_only,
+)
 from .models import ExecutionPolicy, NormalizedIntent, RiskLevel, TaskType
 
 
@@ -9,6 +14,21 @@ def build_execution_policy(
     task_type: TaskType,
     risk_level: RiskLevel,
 ) -> ExecutionPolicy:
+    if is_review_only(intent):
+        return ExecutionPolicy(
+            task_type=task_type,
+            risk_level=risk_level,
+            engineering_rules=(
+                "Keep the review read-only; do not modify files or perform mutating operations.",
+                "Ground findings and recommendations in available evidence; state assumptions and gaps.",
+            ),
+            approval_boundaries=("Ask before implementing changes or performing mutating operations.",),
+            done_criteria=tuple(dict.fromkeys((
+                "Findings and recommendations cite evidence and distinguish observations from assumptions.",
+                *intent.success_criteria,
+            ))),
+        )
+
     engineering: list[str] = []
     approvals: list[str] = []
     done: list[str] = []
