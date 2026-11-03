@@ -2,9 +2,18 @@
 
 ## Current phase
 
-IntentOS Core 1.0.1 and VS Code extension 0.1.1 are released. Phase 7 is complete. Phase 8 — Adoption & Outcome Validation is IN PROGRESS — validation protocol.
+IntentOS Core 1.0.1 and VS Code extension 0.1.1 are released. Phase 7 is complete. Phase 8 — Adoption & Outcome Validation has an approved protocol; operational execution is deferred until final validation after feature freeze.
 
 Core 1.0.1 is the current public PyPI release, distributing the merged review-only classification/policy correction from PR #38. [Release notes](RELEASE_NOTES_1.0.1.md), [tag and GitHub Release](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.1), and the [successful Trusted Publishing run](https://github.com/milad-seify/IntentOS/actions/runs/41685995740) are verified. A clean external Windows/Python 3.13 installation confirmed the CLI and read-only review behavior. Core 1.0.0 remains preserved as the previous release.
+
+## Post-Phase-7 development program
+
+- **Current stage:** Stage A — baseline, capability-gap assessment, governance alignment, and finite planning (documentation-only; planning PR pending acceptance).
+- **Source of truth:** verified main + accepted decisions + observed evidence. Main at the planning baseline: `ac75ef714d524076ec7ee755f1ecc1eab9d7105a` ([green main CI](https://github.com/milad-seify/IntentOS/actions/runs/41689868111), seven jobs).
+- **Active scope:** planning the candidate Project Compass, project-state/decision continuity, and conditional lifecycle governance in [POST_PHASE_7_PROGRAM.md](POST_PHASE_7_PROGRAM.md); evidence/status inventory in [FUTURE_CAPABILITIES.md](FUTURE_CAPABILITIES.md).
+- **No implementation authority yet:** no new runtime, API, CLI, MCP tool, editor surface, automatic state write, or agent orchestration. Stage B's first read-only slice requires a new explicit scope approval.
+- **Blocked/unknown:** independent, repeated new-product evidence for the proposed continuity features is not yet established; Phase 7C explicitly did not promote a new capability. A bounded pilot or separately approved reversible prototype must justify promotion.
+- **Deferred:** Phase 8 8A/8B/8C sessions and Idea-to-Production dogfooding until feature freeze; adaptive routing, token budgets/recovery, feedback-based routing and cross-agent execution handoff unless justified and independently approved.
 
 ## Implemented
 
@@ -43,7 +52,7 @@ Core 1.0.1 is the current public PyPI release, distributing the merged review-on
 - Version 0.1.1 adds the visible IntentOS status-bar launcher, approved icon, and genuine Review screenshot while preserving Command Palette support and the Prepare → Review → Copy boundary
 - The published extension was manually installed from the Marketplace and verified through the Prepare → Review → Copy workflow
 
-## Phase 8 — validation protocol
+## Phase 8 — final validation protocol (execution deferred)
 
 The approved first slice defines first-use validation, a manual outcome-evidence worksheet, comparison controls, and an external evidence gate in [PHASE_8_VALIDATION.md](PHASE_8_VALIDATION.md). It uses existing Phase 5 evaluation mechanics. No new runtime capability has been approved; `intentos compare` remains conditional and is not implemented.
 
@@ -127,7 +136,7 @@ The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-Phase 8 starts with the validation protocol, not feature expansion. A separate task must authorize observed first-use sessions; do not begin sessions, downstream task runs, or Phase 8B implementation automatically. Runtime changes require demonstrated evidence and separate scope approval. Existing release procedures remain in [RELEASING.md](RELEASING.md).
+Review/merge the Stage A planning PR after relevant checks. Present its capability gap analysis, bounded first Project Compass slice, evidence needs, relative complexity and acceptance criteria for **separate user approval**. Do not implement that slice, begin another candidate, or run operational Phase 8 automatically. Accepted slices culminate in a recorded feature freeze, then separately authorized Phase 8 plus genuine Idea-to-Production dogfooding. Release procedures remain in [RELEASING.md](RELEASING.md).
 
 ## Constraints carried forward
 

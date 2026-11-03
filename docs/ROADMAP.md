@@ -190,11 +190,23 @@ Other IDE, agent, community, and provider/model adapters were candidates, not ma
 
 The absence of sufficient demand is the Phase 7 decision, not a failed or abandoned direction. Phase 7 overall is complete.
 
-## Phase 8 — Adoption & Outcome Validation — IN PROGRESS — validation protocol
+## Post-Phase-7 Capability Evolution Program — STAGE A PLANNING
+
+This is a finite, evidence-gated development program between completed Phase 7 and operational Phase 8. It is **not a renumbered official Phase**. The [Stage A baseline/plan](POST_PHASE_7_PROGRAM.md) and [candidate capability inventory](FUTURE_CAPABILITIES.md) distinguish planning priorities from approved implementation.
+
+- **Stage A — Planning, Baseline & Governance Alignment (active; docs-only):** verify repository and existing implementation, preserve a small reproducible baseline, record capability gaps and the revised Phase 8 sequence. Exit: reviewed/accepted finite roadmap, evidence gates and separately approvable first slice.
+- **Stage B — Project Continuity Foundation (candidate):** read-only Project Compass/Scope Guardian first; controlled state/decision proposals only in later separately approved slices. Exit: source-grounded project status, scope and decisions survive fresh sessions without unsupported completion claims.
+- **Stage C — Project Lifecycle Governance (conditional):** minimal requirement-to-milestone alignment, contextual Definition of Done and launch evidence. Exit: a bounded multi-step project scenario passes predeclared acceptance/approval gates, or the candidate is documented as deferred.
+- **Stage D — Adaptive Delegation & Resilience (conditional):** only evidence-promoted routing, budget and recoverable-handoff proposals; at most one separately approved adaptive experiment in this program. Exit: accepted measurable results or documented deferral, without new execution/runtime platform.
+- **Stage E — Stabilization & Feature Freeze:** focused regressions, security, compatibility, documentation, accepted limitations and a pinned final validation build. Exit: feature freeze explicitly recorded; no routine feature additions during final validation.
+
+Bounded initial implementation candidates: B1 read-only Project Compass; B2 state/decision update **proposals** only if justified; C1 lifecycle/quality-gate review only if justified; D1 a single evidence-supported adaptive slice at most. There is no mandate to implement every candidate. Each slice needs new scope authorization, tests, review, and independent closeout. The sequence may end early with documented deferrals; there is no indefinite feature loop.
+
+## Phase 8 — Adoption & Outcome Validation — PROTOCOL APPROVED; OPERATIONAL EXECUTION DEFERRED
 
 Goal: determine whether first-time users can adopt IntentOS independently and under which real-task conditions preparation improves downstream outcomes. Phase 8 operationalizes existing Phase 5 evaluation primitives; it does not duplicate evaluation algorithms or require a new product feature.
 
-The current approval covers the [validation protocol](PHASE_8_VALIDATION.md) only. No slice is complete and no new runtime capability is approved.
+The [validation protocol](PHASE_8_VALIDATION.md) and its numerical targets remain accepted, but operational 8A/8B/8C are scheduled **after Stage E feature freeze**, not immediately after Phase 7. No slice is complete and no new runtime capability is authorized by the protocol. Complementary final validation will dogfood one real project from idea to production, without treating one project as a substitute for the multi-user/multi-project evidence targets.
 
 ### 8A — First-use validation — GATED; NOT COMPLETE
 

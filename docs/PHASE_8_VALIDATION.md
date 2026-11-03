@@ -1,6 +1,8 @@
 # Phase 8 — Adoption & Outcome Validation
 
-**Status: IN PROGRESS — validation protocol.** This first slice defines the protocol only; first-use sessions and downstream task runs have not begun. No new runtime capability is approved.
+**Status: PROTOCOL APPROVED — OPERATIONAL EXECUTION DEFERRED UNTIL FINAL VALIDATION.** First-use sessions and downstream task runs have not begun. The Phase 8 methodology and numerical targets are unchanged; this is a sequencing decision, not an approved runtime capability.
+
+Under [decision D-024](DECISIONS.md), operational 8A/8B/8C work begins only after the bounded [post-Phase-7 program](POST_PHASE_7_PROGRAM.md) reaches an accepted feature freeze and receives separate session authorization. A lightweight pre-development baseline is kept distinct from Phase 8 evidence. Final validation will also dogfood one genuine Idea-to-Production project; its observations count toward protocol targets only when they independently satisfy the same criteria, with no double counting. This scheduling update does not change any worksheet, eligibility criterion, comparison control, privacy rule, or promotion threshold.
 
 Phase 8 asks:
 
@@ -168,4 +170,4 @@ A single preference or complaint does not become a global rule. A task-local win
 
 Valid outcomes are a focused improvement, heuristic correction, unchanged product, a demonstrated new access need, or insufficient evidence. Phase 8 does not require a feature to be successful.
 
-This protocol authorizes no agent execution, Send-to-Agent, automatic repository crawling, additional IDE/provider adapter or MCP tool, large sidebar, standalone UI, provider SDK/credentials, telemetry backend, hosted database, model hosting, vector database, plugin framework, or orchestration framework. Public runtime contracts and schemas remain unchanged. User sessions and Phase 8B implementation require a subsequent task; do not begin them automatically after this protocol PR.
+This protocol authorizes no agent execution, Send-to-Agent, automatic repository crawling, additional IDE/provider adapter or MCP tool, large sidebar, standalone UI, provider SDK/credentials, telemetry backend, hosted database, model hosting, vector database, plugin framework, or orchestration framework. Public runtime contracts and schemas remain unchanged. User sessions and Phase 8B implementation require a separate authorization after feature freeze; do not begin them automatically from this protocol or the Stage A planning PR.
