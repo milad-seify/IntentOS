@@ -1,6 +1,6 @@
 # IntentOS 1.0.1
 
-Patch release preparation. Tagging and publication require separate maintainer authorization; 1.0.0 remains the published Core release until then.
+Published Core patch release ([v1.0.1](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.1)) on PyPI as `intentos-engineering==1.0.1`. [Release workflow](https://github.com/milad-seify/IntentOS/actions/runs/41685995740) passed; a clean Windows/Python 3.13 installation verified the CLI and read-only review behavior.
 
 ## Review-only classification and policy correction
 
