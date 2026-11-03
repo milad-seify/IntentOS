@@ -12,23 +12,31 @@ from .models import ContextDocument
 
 
 _MAX_DOCUMENTS = 32
-_MAX_CHARS = 6000
+_MAX_CHARS = 36000
 _HEADING = re.compile(r"^#{2,3}\s+(.+?)\s*$")
 _SINGLE = {"goal", "current_phase", "next_action"}
 _ALIASES = {
     "project goal": "goal",
     "north star": "goal",
+    "product intent": "goal",
+    "mission": "goal",
+    "purpose": "goal",
     "current phase": "current_phase",
     "next meaningful action": "next_action",
     "next action": "next_action",
+    "next": "next_action",
     "in scope": "in_scope",
     "out of scope": "out_of_scope",
+    "v1 outcomes": "in_scope",
+    "v1 non-goals": "out_of_scope",
     "completed": "completed",
+    "completed milestones": "completed",
     "in progress": "in_progress",
     "blocked": "blocked",
     "deferred": "deferred",
     "decisions": "decisions",
     "important decisions": "decisions",
+    "durable boundaries still in force": "decisions",
 }
 _FIELDS = (
     "goal", "current_phase", "completed", "in_progress",
@@ -84,13 +92,15 @@ def _sections(doc: ContextDocument) -> list[tuple[str, list[tuple[int, str]]]]:
     for line_no, raw in enumerate(doc.content.splitlines(), 1):
         heading = _HEADING.match(raw)
         if heading:
-            key = heading.group(1).strip().casefold()
+            key = re.sub(r"^\\d+[.)]\\s*", "", heading.group(1).strip().casefold())
             if key == "evidence freshness" or key in _ALIASES:
                 current = []
                 sections.append((key, current))
             else:
                 current = None
-        elif current is not None and raw.strip():
+        elif current is not None:
+            # Preserve blank lines so single-value fields use the first paragraph,
+            # not an entire section containing unrelated progress bullets.
             current.append((line_no, raw.strip()))
     return sections
 
@@ -99,13 +109,24 @@ def _facts(key: str, lines: list[tuple[int, str]], doc: ContextDocument, stale: 
     if not lines:
         return []
     if key in _SINGLE:
-        # Do not synthesize a summary from several unrelated claims.
-        content = " ".join(text.removeprefix("- ").strip() for _, text in lines)
-        return [SourceFact(content, doc.path, lines[0][0], stale)]
+        # Use only the first non-empty paragraph as the asserted single fact.
+        # In real STATUS files, later bullets describe different phases/states.
+        first: list[tuple[int, str]] = []
+        for line, text in lines:
+            if not text:
+                if first:
+                    break
+                continue
+            first.append((line, text))
+        if not first:
+            return []
+        content = " ".join(text.removeprefix("- ").strip() for _, text in first)
+        return [SourceFact(content, doc.path, first[0][0], stale)]
     return [
         SourceFact(text[2:].strip() if text.startswith(("- ", "* ")) else text, doc.path, line, stale)
         for line, text in lines
         if text.strip("-* ").strip()
+        and (key not in {"in_scope", "out_of_scope"} or text.startswith(("- ", "* ")))
     ]
 
 
@@ -138,7 +159,7 @@ def review_project_compass(
     if len(documents) > _MAX_DOCUMENTS:
         raise ValueError("too many project context documents")
     if sum(len(doc.content) for doc in documents) > _MAX_CHARS:
-        raise ValueError("project context exceeds 6000 characters")
+        raise ValueError("project compass input exceeds 36000 characters")
     paths = [doc.path.replace("\\", "/").casefold() for doc in documents]
     if len(set(paths)) != len(paths):
         raise ValueError("duplicate project context paths")
