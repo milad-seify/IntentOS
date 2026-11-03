@@ -337,7 +337,9 @@ GitHub Actions runs the full core suite on Ubuntu with Python 3.11, 3.12, and 3.
 
 The initial Phase 0–6 roadmap and independent-audit stabilization gate are complete. **Phase 7 is complete:** MCP parity was proven, VS Code is publicly distributed with a visible status-bar launcher, and the accepted workflow remains Prepare → Review → Copy. The evidence gate did not justify additional adapters or execution capabilities.
 
-Current baseline: **113 Python unit tests + CLI smoke + MCP protocol/stdio parity checks + VS Code contract, syntax, and package checks**, with Linux and Windows CI coverage. CI also builds and inspects wheel/sdist artifacts, then installs and smoke-tests each from clean environments without publishing.
+Current baseline: **120 Python unit tests + CLI smoke + MCP protocol/stdio parity checks + VS Code contract, syntax, and package checks**, with Linux and Windows CI coverage. CI also builds and inspects wheel/sdist artifacts, then installs and smoke-tests each from clean environments without publishing.
+
+Core `1.0.1` is in patch-release preparation for the review-only classification/policy correction. See the [1.0.1 release notes](docs/RELEASE_NOTES_1.0.1.md); tagging and publication await separate maintainer authorization.
 
 The v1 public compatibility contract is frozen in `docs/PUBLIC_CONTRACT.md`. IntentOS `1.0.0` is the current stable core release; VS Code extension `0.1.1` is published. Phase 7D was intentionally deferred and closed without implementation because no additional adapter demand met the evidence threshold. Phase 7 is formally complete. [Phase 8 — Adoption & Outcome Validation](docs/PHASE_8_VALIDATION.md) is in progress at the validation-protocol stage; no new runtime capability is approved. See the [release notes](docs/RELEASE_NOTES_1.0.0.md) and [release procedure](docs/RELEASING.md).
 
