@@ -119,22 +119,22 @@ class ProjectCompassPilotTests(unittest.TestCase):
         # 79e47b259e2372c9527bfce8ee8fbf7ae4e1b625.
         agent = ContextDocument(
             "AGENTS.md",
-            "## 1. Mission\\n"
-            "Build DSS QFZ as a secure, maintainable organizational system.\\n"
-            "\\n## 4. Architectural invariants\\n- Do not add Redis without measured need.\\n",
+            "## 1. Mission\n"
+            "Build DSS QFZ as a secure, maintainable organizational system.\n"
+            "\n## 4. Architectural invariants\n- Do not add Redis without measured need.\n",
         )
         product = ContextDocument(
             "docs/PRODUCT.md",
-            "## V1 outcomes\\nV1 should provide:\\n- responsive Persian RTL dashboards\\n"
-            "\\n## V1 non-goals\\nUnless scope is changed:\\n- Redis/Celery/Kafka\\n",
+            "## V1 outcomes\nV1 should provide:\n- responsive Persian RTL dashboards\n"
+            "\n## V1 non-goals\nUnless scope is changed:\n- Redis/Celery/Kafka\n",
         )
         status = ContextDocument(
             "docs/STATUS.md",
-            "## Current phase\\n\\n**Pre-5 Demo & Product Validation — IN PROGRESS.**\\n\\n"
-            "- **Pre-5A — COMPLETE / MERGED:** synthetic demo.\\n"
-            "- **Pre-5C — IN PROGRESS:** integration PR.\\n"
-            "\\n## Completed milestones\\n- Phase 4D — COMPLETE / MERGED\\n"
-            "\\n## Next action\\nComplete PR #14 integration and exact-head CI.\\n",
+            "## Current phase\n\n**Pre-5 Demo & Product Validation — IN PROGRESS.**\n\n"
+            "- **Pre-5A — COMPLETE / MERGED:** synthetic demo.\n"
+            "- **Pre-5C — IN PROGRESS:** integration PR.\n"
+            "\n## Completed milestones\n- Phase 4D — COMPLETE / MERGED\n"
+            "\n## Next action\nComplete PR #14 integration and exact-head CI.\n",
         )
         reviewed = review_project_compass((agent, product, status), proposed_task="Redis/Celery/Kafka")
         self.assertEqual(reviewed.field("goal").status, "known")
@@ -151,9 +151,9 @@ class ProjectCompassPilotTests(unittest.TestCase):
     def test_current_phase_uses_first_paragraph_not_later_bullets(self):
         doc = ContextDocument(
             "docs/STATUS.md",
-            "## Current phase\\n\\nPhase 7 complete, B1 pilot under review.\\n\\n"
-            "- Phase 7A complete\\n- Phase 8 deferred\\n"
-            "## Next\\n\\nReview B1 evidence before merge.\\n"
+            "## Current phase\n\nPhase 7 complete, B1 pilot under review.\n\n"
+            "- Phase 7A complete\n- Phase 8 deferred\n"
+            "## Next\n\nReview B1 evidence before merge.\n"
         )
         result = review_project_compass((doc,))
         self.assertEqual(result.field("current_phase").value, "Phase 7 complete, B1 pilot under review.")
@@ -164,7 +164,7 @@ class ProjectCompassPilotTests(unittest.TestCase):
         # 6000-character limit. This internal parser remains capped at 36000.
         large = ContextDocument(
             "docs/STATUS.md",
-            "## Current phase\\nMVP review\\n\\n## Completed milestones\\n" + "- item\\n" * 2300,
+            "## Current phase\nMVP review\n\n## Completed milestones\n" + "- item\n" * 2300,
         )
         self.assertGreater(len(large.content), 6000)
         self.assertEqual(review_project_compass((large,)).field("current_phase").value, "MVP review")
