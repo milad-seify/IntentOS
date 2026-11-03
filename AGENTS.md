@@ -57,9 +57,9 @@ Use focused checks first, then the broader relevant test suite when available.
 
 Phase 7 is **complete**. Phase 7A MCP parity, Phase 7B VS Code access, and the Phase 7C real-use evidence gate are complete. Phase 7D was intentionally deferred and closed without implementation because additional adapter demand did not meet the evidence threshold.
 
-Phase 8 — Adoption & Outcome Validation is **in progress — validation protocol**. Read `docs/PHASE_8_VALIDATION.md` for the approved first-use and outcome-evidence protocol. Current approval is documentation only: no new runtime capability or comparison CLI, and no automatic start of user sessions or Phase 8B implementation.
+Phase 8 — Adoption & Outcome Validation has an **approved protocol; operational execution is deferred until final validation after a separately accepted feature freeze**. Preserve every existing first-use, controlled-comparison, external-evidence, privacy and promotion criterion in `docs/PHASE_8_VALIDATION.md`. Do not begin Phase 8 sessions or implement Phase 8B tooling without a separate authorization.
 
-The completed evidence and decision are recorded in `docs/PHASE_7C_EVIDENCE.md`. Any future product proposal requires a new evidence-backed planning decision.
+The completed Phase 7 evidence and decision are recorded in `docs/PHASE_7C_EVIDENCE.md`. The authorized post-Phase-7 **Stage A is documentation/planning only**: follow `docs/POST_PHASE_7_PROGRAM.md` and the candidate inventory in `docs/FUTURE_CAPABILITIES.md`. Confirm actual `main`, accepted decisions, and observed evidence before each new scope decision. Implementation candidates require their own evidence/feasibility review, bounded acceptance criteria, exit gate, and explicit approval; Stage A does not approve new runtime features. External agents own execution and runtime checkpoints; IntentOS remains an advisory control/trust layer. Do not automatically start subsequent slices.
 
 Carry forward these evidence requirements for future product proposals:
 
