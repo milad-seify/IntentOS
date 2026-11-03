@@ -141,3 +141,22 @@ Do not implement additional IDE, agent, provider, MCP, or access-surface adapter
 IntentOS is a vendor-neutral control and trust layer between human intent and AI execution. Its durable responsibilities are the intent contract, context governance, risk/approval boundaries, verification contract, portable handoff, and outcome evidence/learning described in [VISION.md](VISION.md). Agents execute the work; humans and execution systems enforce permissions and approvals. Trust comes from explicit boundaries and verification evidence, not guaranteed AI correctness.
 
 Software engineering and DevOps remain the initial implemented domains. Broader professional adoption is a long-term vision, with new domains and UX subject to evidence and separate scope approval. This positioning clarifies the existing architecture and does not authorize new runtime capabilities.
+
+
+## D-024 — Defer operational Phase 8 until final validation
+
+**Status:** Accepted (2026-11-03, post-Phase-7 program scheduling)
+
+Phase 8's existing Adoption & Outcome Validation protocol remains approved and its 8A/8B/8C targets, paired-comparison controls, privacy rules and promotion thresholds remain unchanged. Operational sessions and outcome collection are explicitly rescheduled to **after a recorded feature freeze** for the bounded post-Phase-7 capability program. Before development, only a lightweight, explicitly provenance-labeled baseline is allowed; it is not Phase 8 evidence. Add one independently scoped Idea-to-Production dogfooding project as a complementary final track, not as a replacement for the established multi-user/multi-project targets. No Phase 8 activity may start automatically, and its status must not be called complete without observed evidence.
+
+**Rationale:** Evaluate the selected evolution as a coherent product after development, without bypassing correctness-first evidence discipline or repeatedly resetting evaluation assumptions.
+
+**Consequences:** Update roadmap/agent guidance/status only now; retain the original methodology in `PHASE_8_VALIDATION.md`. Any subsequent capability or operational session requires separate approval.
+
+## D-025 — Time-bounded, evidence-gated capability evolution
+
+**Status:** Accepted as a development-program boundary and planning authorization; **individual runtime slices not approved**
+
+A finite Stage A–E program may plan project continuity, scope review, decision history, lifecycle governance, and conditional adaptive delegation before Phase 8. Existing context selection, workspace proposals, routing, run records, tests and shared access surfaces must be reused before introducing new modules or contracts. [Candidate priorities](FUTURE_CAPABILITIES.md) are hypotheses, not backlog commitments; Phase 7C did not promote new features. Development may begin only after an evidence/feasibility gate and separate, narrowly scoped acceptance. An early reversible prototype before repeated evidence is an exception requiring explicit recorded authorization and cannot silently enter stable v1.
+
+IntentOS remains a **vendor-neutral, advisory control-and-trust layer**. External agents own execution, runtime planning, browser/filesystem actions, and checkpoints. No autonomous orchestrator, database, provider/telemetry framework, new adapter or public schema is authorized by Stage A. The accepted [VISION.md](VISION.md) North Star is not replaced by the candidate Idea-to-Production program tagline. Each independently accepted slice must be closed or deferred before the next; Stage E freezes features.
