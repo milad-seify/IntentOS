@@ -1,6 +1,6 @@
 # Post-Phase-7 Capability Evolution Program
 
-**Status:** Stage A planning / awaiting review. **Implementation authorization:** none.  
+**Status:** Stage A accepted ([PR #41](https://github.com/milad-seify/IntentOS/pull/41)); B1 read-only internal pilot authorized for feasibility review only. **Public/stable implementation authorization:** none.  
 **Planning baseline date:** 2026-11-03. **Main commit:** `ac75ef714d524076ec7ee755f1ecc1eab9d7105a`.
 
 ## Purpose and boundaries
@@ -44,8 +44,8 @@ No new task-pair experiment or first-time-user session was performed in Stage A.
 
 | Stage | Status | Candidate scope (not blanket authorization) | Exit / stop rule |
 | --- | --- | --- | --- |
-| A — Plan, Baseline & Governance | **Active, docs only** | Verify source, document gaps and Phase 8 sequence, propose scoped first slice | Planning PR accepted with evidence, decision log, risks, bounded first slice and clear stop point |
-| B — Project Continuity Foundation | Candidate | B1 read-only Project Compass/scope review; B2 proposal-first state/decision continuity only if justified | Fresh-session, conflicting-source and drift scenarios pass without fabricated state or writes; otherwise defer |
+| A — Plan, Baseline & Governance | **Complete (PR #41)** | Verify source, document gaps and Phase 8 sequence, propose scoped first slice | Planning PR accepted with evidence, decision log, risks, bounded first slice and clear stop point |
+| B — Project Continuity Foundation | **B1 internal pilot in review; stable promotion gated** | B1 read-only Project Compass/scope review; B2 proposal-first state/decision continuity only if justified | Fresh-session, conflicting-source and drift scenarios pass without fabricated state or writes; otherwise defer |
 | C — Project Lifecycle Governance | Conditional | C1 requirements/milestone and contextual completion/launch-gate **review** | A bounded multi-step scenario with fixed requirements and verification checks passes, or C1 is deferred |
 | D — Adaptive Delegation & Resilience | Conditional | At most one of routing/budget/resume/evidence refinement, only with sound outcome/feasibility evidence | Correctness-first comparable results or documented deferral; no false token reserve or autonomous runtime |
 | E — Stabilization & Feature Freeze | Required closeout | Regression, security/privacy, compatibility, release/doc consistency, known limitations | Named commit/build pinned, all accepted slices complete or deferred; freeze recorded before Phase 8 |
@@ -75,7 +75,7 @@ No new task-pair experiment or first-time-user session was performed in Stage A.
 
 **Relative effort/complexity:** B1 **medium**, primarily deterministic provenance and conflicting-state interpretation; no infrastructure. B2 **medium**, mainly safe proposal boundaries. C1 **medium–high** depending on project schema, conditional. D1 **uncertain/high** if external provider/runtime information is unavailable; normally defer.
 
-**Exit/approval:** Stage A does **not** implement B1. After this planning PR is reviewed and accepted, present a fresh B1 scope/evidence record and obtain explicit approval. Do not automatically start B2, C1, D1 or Phase 8.
+**Exit/approval:** Stage A did **not** implement B1. After PR #41 was merged, B1 received a separate go-ahead for a small, reversible **non-public pilot** despite the absence of repeated promotion evidence. Its exact scope, fixtures, risks and stop gate are in [B1_PROJECT_COMPASS_PILOT.md](B1_PROJECT_COMPASS_PILOT.md). CI success alone does not promote it to a stable capability. Do not automatically start B2, C1, D1 or Phase 8.
 
 ## Final validation (only after feature freeze)
 
