@@ -1,12 +1,12 @@
 # Releasing IntentOS
 
-IntentOS 1.0.0 is released on PyPI as `intentos-engineering`. The [`v1.0.0` tag and GitHub Release](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.0) are published, and the [Trusted Publishing workflow succeeded](https://github.com/milad-seify/IntentOS/actions/runs/40918243836). A clean public installation was verified. This document preserves the release controls for future versions.
+IntentOS Core 1.0.1 is the current PyPI release as `intentos-engineering`. The [`v1.0.1` tag and GitHub Release](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.1) are published, the [Trusted Publishing workflow succeeded](https://github.com/milad-seify/IntentOS/actions/runs/41685995740), and a clean external public installation was verified. Version 1.0.0 and its [original release](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.0) remain preserved. This document retains the release controls for future versions.
 
-## Patch 1.0.1 preparation
+## Patch 1.0.1 publication (completed)
 
-Core package metadata is `intentos-engineering` version `1.0.1`; [RELEASE_NOTES_1.0.1.md](RELEASE_NOTES_1.0.1.md) describes the existing review-only classification/policy correction. Preparation does not authorize tagging or publication. Validate with `python tests/check_release_tag.py v1.0.1`, complete the full checks including both real Extension Host modes and the shared wheel/sdist gate, and obtain green PR/main CI before an authorized release. Expected artifacts are `intentos_engineering-1.0.1-py3-none-any.whl` and `intentos_engineering-1.0.1.tar.gz`.
+Core package metadata is `intentos-engineering` version `1.0.1`; [RELEASE_NOTES_1.0.1.md](RELEASE_NOTES_1.0.1.md) documents the review-only classification/policy correction. The authorized annotated tag `v1.0.1` points to accepted main commit `52dbb4dbd1cca6a30ccb68cff7272109286887b8`. Main CI passed all seven jobs, including the shared wheel/sdist validation, and the recorded real Extension Host checks passed in workspace and no-workspace modes.
 
-After separate maintainer authorization, follow the future-release procedure below using the existing `pypi` environment and Trusted Publisher. Preserve `v1.0.0` and the independently versioned VS Code extension `0.1.1`. Phase 8 public-install validation should use the corrected package after publication; preparation alone does not update PyPI.
+The protected `pypi` deployment received maintainer approval and [Release run 41685995740](https://github.com/milad-seify/IntentOS/actions/runs/41685995740) completed both build-and-verify and publish successfully. Public installation of `intentos-engineering==1.0.1` in a clean Windows/Python 3.13 environment verified package identity, CLI help, and read-only review preparation. The [GitHub Release](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.1) is published. Preserve the historical `v1.0.0` release and independently versioned VS Code extension `0.1.1`; Phase 8 public-install validation should use Core 1.0.1.
 
 ## One-time trust setup (completed for 1.0.0)
 
