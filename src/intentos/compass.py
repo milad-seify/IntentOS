@@ -56,7 +56,7 @@ class SourceFact:
 @dataclass(frozen=True, slots=True)
 class CompassField:
     name: str
-    status: str  # known | missing | conflicting | stale
+    status: str  # known | missing | unresolved | stale
     evidence: tuple[SourceFact, ...]
 
     @property
@@ -140,7 +140,9 @@ def _field(name: str, evidence: tuple[SourceFact, ...]) -> CompassField:
     elif any(fact.stale for fact in evidence):
         status = "stale"
     elif name in _SINGLE and len({_norm(item.text) for item in evidence}) > 1:
-        status = "conflicting"
+        # Different wording is not proof of a logical contradiction.
+        # Preserve evidence and require human reconciliation.
+        status = "unresolved"
     else:
         status = "known"
     return CompassField(name, status, evidence)
