@@ -2,9 +2,9 @@
 
 ## Current phase
 
-IntentOS Core 1.0.0 and VS Code extension 0.1.1 are released. Phase 7 is complete. Phase 8 — Adoption & Outcome Validation is IN PROGRESS — validation protocol.
+IntentOS Core 1.0.1 and VS Code extension 0.1.1 are released. Phase 7 is complete. Phase 8 — Adoption & Outcome Validation is IN PROGRESS — validation protocol.
 
-Core 1.0.1 is in patch-release preparation to distribute the merged review-only classification/policy correction from PR #38. [Release notes](RELEASE_NOTES_1.0.1.md) are prepared; tagging and publication await separate maintainer authorization. Core 1.0.0 remains the public PyPI release until publication.
+Core 1.0.1 is the current public PyPI release, distributing the merged review-only classification/policy correction from PR #38. [Release notes](RELEASE_NOTES_1.0.1.md), [tag and GitHub Release](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.1), and the [successful Trusted Publishing run](https://github.com/milad-seify/IntentOS/actions/runs/41685995740) are verified. A clean external Windows/Python 3.13 installation confirmed the CLI and read-only review behavior. Core 1.0.0 remains preserved as the previous release.
 
 ## Implemented
 
