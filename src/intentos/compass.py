@@ -92,7 +92,7 @@ def _sections(doc: ContextDocument) -> list[tuple[str, list[tuple[int, str]]]]:
     for line_no, raw in enumerate(doc.content.splitlines(), 1):
         heading = _HEADING.match(raw)
         if heading:
-            key = re.sub(r"^\\d+[.)]\\s*", "", heading.group(1).strip().casefold())
+            key = re.sub(r"^\d+[.)]\s*", "", heading.group(1).strip().casefold())
             if key == "evidence freshness" or key in _ALIASES:
                 current = []
                 sections.append((key, current))
