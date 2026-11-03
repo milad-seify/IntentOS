@@ -86,7 +86,7 @@ Requires Python 3.11+.
 
 ### Stable release installation
 
-IntentOS 1.0.0 is the current stable release. Install it without cloning the repository:
+IntentOS 1.0.1 is the current stable release. Install it without cloning the repository:
 
 ```bash
 python -m pip install intentos-engineering
@@ -94,7 +94,7 @@ intentos --help
 intentos optimize "Refactor the parser" --target codex
 ```
 
-The Python distribution is named `intentos-engineering`; its import package and CLI remain `intentos`. A clean public installation of version 1.0.0 was verified.
+The Python distribution is named `intentos-engineering`; its import package and CLI remain `intentos`. A clean public installation of version 1.0.1 was verified.
 
 ### Development checkout
 
@@ -142,7 +142,7 @@ Machine-readable output:
 intentos optimize "Review this architecture" --target claude --json
 ```
 
-JSON mode returns the versioned machine contract documented in [`docs/PUBLIC_CONTRACT.md`](docs/PUBLIC_CONTRACT.md). Schema versioning is independent from the Python package version. The v1 contract is frozen; package version `1.0.0` is the current stable release.
+JSON mode returns the versioned machine contract documented in [`docs/PUBLIC_CONTRACT.md`](docs/PUBLIC_CONTRACT.md). Schema versioning is independent from the Python package version. The v1 contract is frozen; package version `1.0.1` is the current stable release.
 
 Plan agent workspace maintenance without writing files:
 
@@ -205,7 +205,7 @@ Request
 → hand off to Codex / ChatGPT / Claude / Gemini / Cursor / another AI tool
 ```
 
-The extension uses the editable package installation only for local development. IntentOS 1.0.0 is also available as the stable public package.
+The extension uses the editable package installation only for local development. IntentOS 1.0.1 is also available as the stable public package.
 
 The first editor slice lives in `integrations/vscode` and intentionally has no npm runtime dependencies or build pipeline.
 
@@ -339,9 +339,9 @@ The initial Phase 0–6 roadmap and independent-audit stabilization gate are com
 
 Current baseline: **120 Python unit tests + CLI smoke + MCP protocol/stdio parity checks + VS Code contract, syntax, and package checks**, with Linux and Windows CI coverage. CI also builds and inspects wheel/sdist artifacts, then installs and smoke-tests each from clean environments without publishing.
 
-Core `1.0.1` is in patch-release preparation for the review-only classification/policy correction. See the [1.0.1 release notes](docs/RELEASE_NOTES_1.0.1.md); tagging and publication await separate maintainer authorization.
+Core `1.0.1` is published on PyPI and GitHub, packaging the review-only classification/policy correction. See the [1.0.1 release notes](docs/RELEASE_NOTES_1.0.1.md) and [GitHub Release](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.1).
 
-The v1 public compatibility contract is frozen in `docs/PUBLIC_CONTRACT.md`. IntentOS `1.0.0` is the current stable core release; VS Code extension `0.1.1` is published. Phase 7D was intentionally deferred and closed without implementation because no additional adapter demand met the evidence threshold. Phase 7 is formally complete. [Phase 8 — Adoption & Outcome Validation](docs/PHASE_8_VALIDATION.md) is in progress at the validation-protocol stage; no new runtime capability is approved. See the [release notes](docs/RELEASE_NOTES_1.0.0.md) and [release procedure](docs/RELEASING.md).
+The v1 public compatibility contract is frozen in `docs/PUBLIC_CONTRACT.md`. IntentOS `1.0.1` is the current stable core release; VS Code extension `0.1.1` is published. Phase 7D was intentionally deferred and closed without implementation because no additional adapter demand met the evidence threshold. Phase 7 is formally complete. [Phase 8 — Adoption & Outcome Validation](docs/PHASE_8_VALIDATION.md) is in progress at the validation-protocol stage; no new runtime capability is approved. See the [release notes](docs/RELEASE_NOTES_1.0.1.md) and [release procedure](docs/RELEASING.md).
 
 See [`docs/STATUS.md`](docs/STATUS.md) for the concise handoff, [`docs/DOGFOODING.md`](docs/DOGFOODING.md) for real-world findings, [`docs/MCP_DOGFOODING.md`](docs/MCP_DOGFOODING.md) for MCP parity evidence, [`docs/HUGGINGFACE_RESEARCH.md`](docs/HUGGINGFACE_RESEARCH.md) for the ecosystem research pass, [`docs/UX.md`](docs/UX.md) for usage/access principles, [`docs/INDEPENDENT_AUDIT.md`](docs/INDEPENDENT_AUDIT.md) for the review contract, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for the roadmap.
 
