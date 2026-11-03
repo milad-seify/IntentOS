@@ -76,11 +76,21 @@ class ProjectCompassPilotTests(unittest.TestCase):
             ),
         )
         result = review_project_compass(docs, proposed_task="Add Redis cache")
-        self.assertEqual(result.field("current_phase").status, "conflicting")
+        self.assertEqual(result.field("current_phase").status, "unresolved")
         self.assertIsNone(result.field("current_phase").value)
         self.assertEqual(len(result.field("current_phase").evidence), 2)
         self.assertEqual(result.task_scope.status, "conflicting")
         self.assertTrue(result.task_scope.approval_required)
+
+    def test_different_worded_goals_are_unresolved_not_false_conflict(self):
+        docs = (
+            ContextDocument("AGENTS.md", "## 1. Mission\nBuild a secure organizational KPI dashboard.\n"),
+            ContextDocument("docs/PRODUCT.md", "## Purpose\nDeliver trusted dashboards for managers.\n"),
+        )
+        result = review_project_compass(docs)
+        self.assertEqual(result.field("goal").status, "unresolved")
+        self.assertIsNone(result.field("goal").value)
+        self.assertEqual({item.path for item in result.field("goal").evidence}, {"AGENTS.md", "docs/PRODUCT.md"})
 
     def test_stale_source_is_not_reported_as_accepted_phase(self):
         doc = ContextDocument(
