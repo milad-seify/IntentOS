@@ -8,10 +8,10 @@ Core 1.0.1 is the current public PyPI release, distributing the merged review-on
 
 ## Post-Phase-7 development program
 
-- **Current stage:** Stage A — baseline, capability-gap assessment, governance alignment, and finite planning (documentation-only; planning PR pending acceptance).
+- **Current stage:** Stage A **completed and merged** in [PR #41](https://github.com/milad-seify/IntentOS/pull/41); Stage B1 **read-only internal pilot in review**, not stable-product promotion.
 - **Source of truth:** verified main + accepted decisions + observed evidence. Main at the planning baseline: `ac75ef714d524076ec7ee755f1ecc1eab9d7105a` ([green main CI](https://github.com/milad-seify/IntentOS/actions/runs/41689868111), seven jobs).
-- **Active scope:** planning the candidate Project Compass, project-state/decision continuity, and conditional lifecycle governance in [POST_PHASE_7_PROGRAM.md](POST_PHASE_7_PROGRAM.md); evidence/status inventory in [FUTURE_CAPABILITIES.md](FUTURE_CAPABILITIES.md).
-- **No implementation authority yet:** no new runtime, API, CLI, MCP tool, editor surface, automatic state write, or agent orchestration. Stage B's first read-only slice requires a new explicit scope approval.
+- **Active scope:** only the explicitly authorized, reversible [B1 Project Compass pilot](B1_PROJECT_COMPASS_PILOT.md) with deterministic fixtures, plus the existing [finite program](POST_PHASE_7_PROGRAM.md) and [candidate registry](FUTURE_CAPABILITIES.md).
+- **Authorization boundary:** B1 internal, read-only feasibility prototype approved separately; no stable release, public API/CLI/MCP/editor surface, automatic state write or agent orchestration. CI, review and product-promotion evidence are still required.
 - **Blocked/unknown:** independent, repeated new-product evidence for the proposed continuity features is not yet established; Phase 7C explicitly did not promote a new capability. A bounded pilot or separately approved reversible prototype must justify promotion.
 - **Deferred:** Phase 8 8A/8B/8C sessions and Idea-to-Production dogfooding until feature freeze; adaptive routing, token budgets/recovery, feedback-based routing and cross-agent execution handoff unless justified and independently approved.
 
@@ -136,7 +136,7 @@ The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-Review/merge the Stage A planning PR after relevant checks. Present its capability gap analysis, bounded first Project Compass slice, evidence needs, relative complexity and acceptance criteria for **separate user approval**. Do not implement that slice, begin another candidate, or run operational Phase 8 automatically. Accepted slices culminate in a recorded feature freeze, then separately authorized Phase 8 plus genuine Idea-to-Production dogfooding. Release procedures remain in [RELEASING.md](RELEASING.md).
+Review the B1 prototype PR and exact-head CI. Record B1 feasibility and explicit limitations; **do not merge or present it as a stable feature before independent review and a documented promotion decision**. If demand does not clear the evidence gate, retain only an explicitly bounded experiment or revert. Do not start B2/C1/D1 or operational Phase 8 automatically. Accepted slices culminate in feature freeze, then separately authorized Phase 8 and Idea-to-Production dogfooding. Release procedures remain in [RELEASING.md](RELEASING.md).
 
 ## Constraints carried forward
 
