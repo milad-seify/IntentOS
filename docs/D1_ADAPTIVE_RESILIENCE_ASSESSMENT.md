@@ -1,6 +1,6 @@
 # D1 — Adaptive Delegation & Resilience: Needs and Scope Assessment
 
-**Status:** assessment only; **no implementation, experiment or product promotion authorized**.  
+**Status:** assessment merged in [PR #45](https://github.com/milad-seify/IntentOS/pull/45); implementation **deferred pending evidence**. No experiment or product promotion authorized.  
 **Date:** 2026-11-04. **Pinned IntentOS baseline:** `milad-seify/IntentOS` main `371e4b8d17b64a852d85c68216c42a04550f54cc`; [main CI 41804283608](https://github.com/milad-seify/IntentOS/actions/runs/41804283608) completed successfully (seven jobs). No open PR at start.  
 **Program boundary:** Stage A [PR #41](https://github.com/milad-seify/IntentOS/pull/41) accepted; B1 [PR #42](https://github.com/milad-seify/IntentOS/pull/42) merged as internal-only prototype; B2 [PR #43](https://github.com/milad-seify/IntentOS/pull/43) and C1 [PR #44](https://github.com/milad-seify/IntentOS/pull/44) assessed with runtime deferred. See [finite program](POST_PHASE_7_PROGRAM.md), [candidate inventory](FUTURE_CAPABILITIES.md), [Phase 7C evidence](PHASE_7C_EVIDENCE.md), and [v1 public contract](PUBLIC_CONTRACT.md).
 
@@ -54,6 +54,6 @@ For a possible handoff-guidance experiment, pin a completed/partially completed 
 
 ## Program decision and next gate
 
-**Recommendation:** mark D1 **DEFERRED PENDING EVIDENCE**, and complete the documentation-only assessment. Preserve existing routing and evaluator contracts. A separate owner decision may either (a) collect narrowly scoped real-use D1 evidence with the existing tooling, or (b) move to **Stage E stabilization planning** after accepted deferrals, with no feature work. Do not treat this assessment as automatically approving D1 implementation, Stage E/feature freeze, Phase 8 8A/8B/8C, Idea-to-Production dogfooding or a product release.
+**Recommendation:** mark D1 **DEFERRED PENDING EVIDENCE**, and complete the documentation-only assessment. Preserve existing routing and evaluator contracts. A separate owner decision may either (a) collect narrowly scoped real-use D1 evidence with the existing tooling, or (b) conduct the separately authorized [Stage E source-freeze readiness review](STAGE_E_FREEZE_READINESS.md) after accepted deferrals, with no feature work; freeze is not automatically declared. Do not treat this assessment as automatically approving D1 implementation, Stage E/feature freeze, Phase 8 8A/8B/8C, Idea-to-Production dogfooding or a product release.
 
 This document is **planning/evidence discipline**, not a claim of completed adaptive experimentation, live model benchmarking or successful runtime recovery.

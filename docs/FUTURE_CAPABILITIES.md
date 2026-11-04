@@ -2,6 +2,8 @@
 
 **Status:** Stage A inventory, **not approved implementation**. Based on `main` at `ac75ef714d524076ec7ee755f1ecc1eab9d7105a`. Use with [finite program](POST_PHASE_7_PROGRAM.md), [decisions](DECISIONS.md) and existing [Phase 7C evidence](PHASE_7C_EVIDENCE.md). Existing/partial/missing below describes **observed code coverage**, not proven user value. Priority is planning order, not runtime authorization.
 
+**Current status addendum (2026-11-04):** the table remains a historical Stage A baseline. B1 was merged **only as an internal prototype** (PR #42); B2, C1 and D1 were assessed (PRs #43–#45) and their implementations are **deferred pending evidence**. [Stage E readiness](STAGE_E_FREEZE_READINESS.md) reviews an exact source pin. Do not misread the table's old “missing B1” wording as a current claim, or treat priority as a new development authorization.
+
 ## Coverage and dependencies
 
 | ID | Desired outcome / problem | Current verified coverage and status | Priority | Smallest useful candidate, dependency and public contract | Required evidence, risk and exit |
