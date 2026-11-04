@@ -56,3 +56,30 @@ Preserve the raw arm as the original request. Do not re-prepare it to manufactur
 A failed case may carry a reusable lesson hint. `propose_lessons()` promotes a hint only after it repeats across a configurable minimum number of failures. The result is a proposal with evidence cases, not an automatic mutation of policy or profiles.
 
 This keeps learning reviewable and prevents a single unusual failure from permanently bloating prompts.
+
+Under the later owner-approved full-scope [D-031](DECISIONS.md) development program, an unreleased `intentos outcome` CLI now provides explicit caller-supplied record, paired comparison and repeated-lesson review access to these existing primitives. It does not revise the historical Phase 8 evidence protocol or count synthetic development tests as real use. A recorded check may remain unknown; comparisons with unknown checks or changed experimental conditions are inconclusive. Approval saves a proposal with evidence references and a content-bound digest, without changing policy or profiles.
+
+A minimal caller-supplied record input is:
+
+```json
+{
+  "schema_version": 1,
+  "task_id": "TASK-1",
+  "variant": "raw",
+  "conditions": {
+    "executor": "Codex CLI",
+    "model": "model-name-as-used",
+    "effort": "high",
+    "base_revision": "exact-base-sha",
+    "context": "same-project-context",
+    "permissions": "read-only",
+    "environment": "same-test-environment"
+  },
+  "checks": [{"name": "focused tests", "passed": true, "evidence_ref": "CI run #123"}],
+  "execution_success": true,
+  "metrics": {"input_tokens": null},
+  "source_ref": "issue #123"
+}
+```
+
+Use `intentos outcome record --file raw-input.json --output raw-record.json --json` for each arm, then `intentos outcome compare --raw raw-record.json --prepared prepared-record.json --json`. Keep unavailable measures `null`; do not estimate them. Use `intentos outcome learn --record raw-record.json --record other-record.json --json` to inspect repeated failure hints, then save only a reviewed proposal with the exact displayed `--approve-digest`, external `--approval-ref`, and new `--output`. The CLI never runs tests, validates external evidence independently, or changes execution policy.

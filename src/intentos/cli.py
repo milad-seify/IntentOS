@@ -16,6 +16,7 @@ from .continuity_store import apply_continuity_proposal, proposal_approval_diges
 from .governance import CheckEvidence, Milestone, MilestoneRequirement, review_project_gates
 from .handoff import PlanStep, VerifiedStep, checkpoint_from_dict, handoff_from_dict, make_agent_handoff, make_checkpoint, review_resume
 from .models import CapabilityClass, ContextDocument, CostClass, IntentRequest, ModelMetadata
+from .outcome_capture import capture_outcome, compare_outcomes, learning_approval_digest, learning_review
 from .project import optimize_project_prompt
 from .result_contract import RESULT_SCHEMA_VERSION, error_dict, result_dict
 from .router import review_route
@@ -151,6 +152,23 @@ def _build_parser() -> argparse.ArgumentParser:
     dispatch.add_argument("--approve-digest", help="Exact digest from a reviewed dispatch preview.")
     dispatch.add_argument("--timeout", type=int, default=1800, help="Seconds, 1–3600.")
     dispatch.add_argument("--json", action="store_true")
+
+    outcome = subparsers.add_parser("outcome", help="Capture external results, compare pairs, or review repeated lessons.")
+    outcome_actions = outcome.add_subparsers(dest="outcome_action", required=True)
+    record = outcome_actions.add_parser("record")
+    record.add_argument("--file", required=True, help="Caller-supplied outcome evidence JSON.")
+    record.add_argument("--output", required=True, help="New normalized record path; will not overwrite.")
+    record.add_argument("--json", action="store_true")
+    compare = outcome_actions.add_parser("compare")
+    compare.add_argument("--raw", required=True, help="Saved raw-arm record.")
+    compare.add_argument("--prepared", required=True, help="Saved prepared-arm record.")
+    compare.add_argument("--json", action="store_true")
+    learn = outcome_actions.add_parser("learn")
+    learn.add_argument("--record", action="append", required=True, help="Saved outcome record; repeatable.")
+    learn.add_argument("--approve-digest", help="Approve the exact displayed learning proposal.")
+    learn.add_argument("--approval-ref", help="External owner approval reference for a saved proposal.")
+    learn.add_argument("--output", help="New approved-proposal JSON path; will not overwrite.")
+    learn.add_argument("--json", action="store_true")
 
     return parser
 
@@ -755,6 +773,44 @@ def _run_handoff(args: argparse.Namespace) -> int:
     return 0 if response["status"] in {"saved", "approval_required", "completed_unverified"} else 2
 
 
+def _run_outcome(args: argparse.Namespace) -> int:
+    if args.outcome_action == "record":
+        record = capture_outcome(_read_small_json(args.file))
+        with Path(args.output).open("x", encoding="utf-8", newline="\n") as stream:
+            json.dump(record, stream, ensure_ascii=False, indent=2)
+            stream.write("\n")
+        payload = {"status": "recorded", "path": str(Path(args.output)), "task_id": record["task_id"],
+                   "variant": record["variant"], "source_ref": record["source_ref"]}
+    elif args.outcome_action == "compare":
+        payload = compare_outcomes(_read_small_json(args.raw), _read_small_json(args.prepared))
+    else:
+        if len(args.record) > 128:
+            raise ValueError("learning review exceeds 128 records")
+        review = learning_review(tuple(_read_small_json(path) for path in args.record))
+        digest = learning_approval_digest(review)
+        if args.approve_digest is None:
+            payload = {**review, "approval_digest": digest}
+        else:
+            if args.approve_digest != digest or not review["proposals"]:
+                raise ValueError("learning approval digest does not match a repeated proposal")
+            if (not args.approval_ref or not args.approval_ref.strip() or len(args.approval_ref) > 500
+                    or any(char in "\n\r\v\f\x85\u2028\u2029" or ord(char) < 32 or ord(char) == 127
+                           for char in args.approval_ref)
+                    or not args.output):
+                raise ValueError("saving a learning proposal requires an approval reference and new output path")
+            approved = {"schema_version": 1, "status": "approved_proposal", "approval_ref": args.approval_ref.strip(),
+                        "approval_digest": digest, "proposals": review["proposals"],
+                        "evidence_sha256": review["evidence_sha256"],
+                        "runtime_policy_changed": False}
+            with Path(args.output).open("x", encoding="utf-8", newline="\n") as stream:
+                json.dump(approved, stream, ensure_ascii=False, indent=2)
+                stream.write("\n")
+            payload = {"status": "approved_proposal", "path": str(Path(args.output)),
+                       "approval_digest": digest, "runtime_policy_changed": False}
+    print(json.dumps(payload, ensure_ascii=False, indent=2) if args.json else f"Outcome {payload['status']}: {payload.get('reason', payload.get('path', ''))}")
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     _configure_output_encoding()
     args = _build_parser().parse_args(argv)
@@ -777,6 +833,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_checkpoint(args)
         if args.command == "handoff":
             return _run_handoff(args)
+        if args.command == "outcome":
+            return _run_outcome(args)
     except (OSError, ValueError) as error:
         if getattr(args, "json", False):
             print(json.dumps(error_dict(error), indent=2, ensure_ascii=False))
