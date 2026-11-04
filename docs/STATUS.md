@@ -2,7 +2,7 @@
 
 ## Current phase
 
-IntentOS Core 1.0.1 and VS Code extension 0.1.1 are released. **Phase 7 is complete. Stage E source-freeze readiness passed, but formal final Feature Freeze is NOT EFFECTIVE**: the stale closeout PR #48 was closed unmerged, per accepted [D-029](DECISIONS.md). Operational Phase 8A/8B/8C and the final Idea-to-Production dogfood are **DEFERRED / NOT STARTED** while scope is settled and real-user testing is unavailable. All Phase 8 numerical and privacy criteria remain unchanged.
+IntentOS Core 1.0.1 and VS Code extension 0.1.1 are released; **Phase 7 is complete**. Stage E source-freeze readiness is verified, but **final Feature Freeze is only a [D-030](DECISIONS.md) candidate until separately approved Merge and green exact-SHA main CI**. The bounded pre-validation scope consists of accepted functionality plus internal read-only B1; B2/C1/D1 are deferred and do **not** block this cutoff. Operational Phase 8A/8B/8C and owner-led Idea-to-Production dogfood are **DEFERRED / NOT STARTED**, with all criteria unchanged.
 
 Core 1.0.1 is the current public PyPI release, distributing the merged review-only classification/policy correction from PR #38. [Release notes](RELEASE_NOTES_1.0.1.md), [tag and GitHub Release](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.1), and the [successful Trusted Publishing run](https://github.com/milad-seify/IntentOS/actions/runs/41685995740) are verified. A clean external Windows/Python 3.13 installation confirmed the CLI and read-only review behavior. Core 1.0.0 remains preserved as the previous release.
 
@@ -136,9 +136,9 @@ The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-1. **Current operation:** review and accept the narrowly scoped docs reconciliation recorded under [D-029](DECISIONS.md); check exact-head CI, merge only after approval, then verify post-merge `main` CI. No code or new runtime capability is included.
-2. **Product decision after that:** identify one concrete unmet outcome with evidence, scope/non-goals, regression/exit checks, and separate maintainer approval; otherwise preserve the current product and defer new features. Do not count the one B2-OBS-001 task as repeated demand.
-3. **Final gates when feasible:** after any accepted scope work (or explicit decision for no change), reassess and pin formal Feature Freeze on the then-current source with review/CI. Operational Phase 8 and Idea-to-Production dogfood still need separate authorization and real participants. No publishing `1.0.1` with changed source contents or representing B1 as publicly released.
+**One terminal pre-validation gate, not another feature-planning loop:** review [D-030](DECISIONS.md) and its final-scope documentation PR; after the maintainer's separate Merge authorization and passing exact-head CI, Merge and independently verify seven green jobs on the new `main` SHA. Pin that SHA, the CI link, and acceptance in a **closeout comment on the same PR**. Only then may the scoped source be called **Feature Frozen**. No additional backlog issue, synthetic B2 evidence, speculative prototype or new runtime work is required to reach this cutoff. [Issue #52](https://github.com/milad-seify/IntentOS/issues/52) is closed for this cutoff; future evidence may justify a *new* separately approved slice.
+
+**After the gate: STOP before operational validation.** Keep Phase 8A/8B/8C and the Idea-to-Production dogfood deferred until the owner can conduct the genuine sessions under the existing [protocol](PHASE_8_VALIDATION.md) and explicitly authorizes them. Public Core 1.0.1 / VS Code 0.1.1 remain unchanged; B1 source pilot is not in the public artifact.
 
 ## Constraints carried forward
 
