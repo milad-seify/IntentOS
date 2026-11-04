@@ -1,6 +1,6 @@
 # Post-Phase-7 Capability Evolution Program
 
-**Status:** Stage A accepted ([PR #41](https://github.com/milad-seify/IntentOS/pull/41)); B1 read-only internal pilot authorized for feasibility review only. **Public/stable implementation authorization:** none.  
+**Status:** Stage A accepted ([PR #41](https://github.com/milad-seify/IntentOS/pull/41)); B1 read-only internal prototype merged in [PR #42](https://github.com/milad-seify/IntentOS/pull/42); [B2 needs assessment](B2_CONTINUITY_ASSESSMENT.md) only. **Public/stable implementation authorization:** none.  
 **Planning baseline date:** 2026-11-03. **Main commit:** `ac75ef714d524076ec7ee755f1ecc1eab9d7105a`.
 
 ## Purpose and boundaries
@@ -45,7 +45,7 @@ No new task-pair experiment or first-time-user session was performed in Stage A.
 | Stage | Status | Candidate scope (not blanket authorization) | Exit / stop rule |
 | --- | --- | --- | --- |
 | A — Plan, Baseline & Governance | **Complete (PR #41)** | Verify source, document gaps and Phase 8 sequence, propose scoped first slice | Planning PR accepted with evidence, decision log, risks, bounded first slice and clear stop point |
-| B — Project Continuity Foundation | **B1 internal pilot in review; stable promotion gated** | B1 read-only Project Compass/scope review; B2 proposal-first state/decision continuity only if justified | Fresh-session, conflicting-source and drift scenarios pass without fabricated state or writes; otherwise defer |
+| B — Project Continuity Foundation | **B1 internal pilot merged; B2 assessment only** | B1 read-only Project Compass/scope review; B2 proposal-first state/decision continuity only if justified | Fresh-session, conflicting-source and drift scenarios pass without fabricated state or writes; otherwise defer |
 | C — Project Lifecycle Governance | Conditional | C1 requirements/milestone and contextual completion/launch-gate **review** | A bounded multi-step scenario with fixed requirements and verification checks passes, or C1 is deferred |
 | D — Adaptive Delegation & Resilience | Conditional | At most one of routing/budget/resume/evidence refinement, only with sound outcome/feasibility evidence | Correctness-first comparable results or documented deferral; no false token reserve or autonomous runtime |
 | E — Stabilization & Feature Freeze | Required closeout | Regression, security/privacy, compatibility, release/doc consistency, known limitations | Named commit/build pinned, all accepted slices complete or deferred; freeze recorded before Phase 8 |

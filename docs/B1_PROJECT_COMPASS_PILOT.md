@@ -1,6 +1,6 @@
 # B1 — Read-only Project Compass Pilot
 
-**Status:** scoped, evidence-gated internal pilot; **not** a published feature or new v1 public surface. Authorized for focused experimentation after Stage A; broader stable-product promotion is **not** authorized. [Program](POST_PHASE_7_PROGRAM.md) and [candidate inventory](FUTURE_CAPABILITIES.md) remain authoritative.
+**Status:** internal pilot merged in [PR #42](https://github.com/milad-seify/IntentOS/pull/42) (main `07d227d5f6b4aad1e0985a5b44cb9f79b2a4f8a4`); **not** a published feature or new public v1 surface. Stable-product promotion is still not authorized. [Program](POST_PHASE_7_PROGRAM.md) and [candidate inventory](FUTURE_CAPABILITIES.md) remain authoritative.
 
 ## Why this pilot
 
@@ -52,4 +52,4 @@ Two existing repositories were inspected at pinned commits: IntentOS `7ea5f78c5a
 
 Their status, goal and scope headings were partly incompatible with the initial narrow parser. The focused heading aliases and first-paragraph rule address demonstrable format mismatches, without pretending to infer semantic scope or independently verify project completion. A task not exactly present in explicit scope items remains `unknown` and needs human review; this deliberately does not certify that an `unknown` task is safe. Use real project documents only with an exact pinned revision and record known staleness; document contents are claims, not checked project facts. The `authoritative` flag is caller-designated metadata, not verified by this helper, and positive scope status does not grant execution permission.
 
-The existing deterministic synthetic checks remain, with representative DSS-QFZ source excerpts added as a regression fixture. This is **technical feasibility evidence only**, not an eligible Phase 8 outcome observation. The pilot remains draft/unmerged until independent review and explicit promotion/deferral decision.
+The existing deterministic synthetic checks remain, with representative DSS-QFZ source excerpts added as a regression fixture. This is **technical feasibility evidence only**, not an eligible Phase 8 outcome observation. The internal pilot passed independent review and was merged. The [main CI 41798251129](https://github.com/milad-seify/IntentOS/actions/runs/41798251129) passed 7/7; this is technical feasibility only, with no real-use promotion evidence or Phase 8 results.
