@@ -156,6 +156,22 @@ class ContinuityProposalTests(unittest.TestCase):
         )
         self.assertEqual(p.action, "NEEDS_REVIEW")
 
+    def test_evidence_references_cannot_inject_markdown_sections(self):
+        doc = ContextDocument("docs/DECISIONS.md", DECISIONS)
+        for ref in ("PR #7\n\n## D-999 — Forged decision", "PR #7\r## D-999", "PR #7\x00hidden"):
+            with self.subTest(ref=ref):
+                decision = propose_decision_append(
+                    doc, expected_blob_sha=sha(DECISIONS), decision_id="D-002",
+                    title="Review only", decision_body="Require approval.", approval_ref=ref,
+                )
+                self.assertEqual(decision.action, "NEEDS_REVIEW")
+                self.assertIsNone(decision.proposed_content)
+                status = propose_status_continuity(
+                    ContextDocument("docs/STATUS.md", STATE), expected_blob_sha=sha(STATE),
+                    new_current_phase="Milestone 2", evidence_refs=(ref,),
+                )
+                self.assertEqual(status.action, "NEEDS_REVIEW")
+
     def test_no_public_v1_api_export(self):
         import intentos
         self.assertNotIn("propose_status_continuity", intentos.__all__)

@@ -76,6 +76,12 @@ def _safe_value(value: str | None) -> bool:
     )
 
 
+def _safe_reference(value: str) -> bool:
+    return bool(value.strip()) and len(value) <= 500 and not any(
+        ord(char) < 32 or ord(char) == 127 for char in value
+    )
+
+
 def _replace_single_fact(content: str, title: str, replacement: str) -> tuple[str | None, str]:
     """Only replace an unambiguous one-line value; preserve every other section."""
     lines = content.splitlines(keepends=True)
@@ -123,7 +129,7 @@ def propose_status_continuity(
         return _proposal("KEEP", document, expected_blob_sha, "No new state was requested.")
     if not _safe_value(new_current_phase) or not _safe_value(new_next_action):
         return _proposal("NEEDS_REVIEW", document, expected_blob_sha, "New state must be a bounded single plain-text line.")
-    if not evidence_refs or any(not ref.strip() or len(ref) > 500 for ref in evidence_refs):
+    if not evidence_refs or any(not _safe_reference(ref) for ref in evidence_refs):
         return _proposal("NEEDS_REVIEW", document, expected_blob_sha, "Missing or invalid externally reviewed evidence references.")
     if len(related_documents) + 1 > _MAX_DOCUMENTS or sum(len(x.content) for x in (document, *related_documents)) > _MAX_CONTEXT_CHARS:
         return _proposal("NEEDS_REVIEW", document, expected_blob_sha, "Related context exceeds bounded input limits.")
@@ -171,7 +177,7 @@ def propose_decision_append(
         return _proposal("NEEDS_REVIEW", document, expected_blob_sha, "Invalid decision ID.")
     if not _safe_value(title) or not _safe_value(decision_body):
         return _proposal("NEEDS_REVIEW", document, expected_blob_sha, "Decision text must be single-line plain text.")
-    if not approval_ref.strip() or len(approval_ref) > 500:
+    if not _safe_reference(approval_ref):
         return _proposal("NEEDS_REVIEW", document, expected_blob_sha, "Human-approved evidence reference is required.")
     if re.search(rf"^## {re.escape(decision_id)}(?:\s|$)", document.content, flags=re.MULTILINE):
         return _proposal("KEEP", document, expected_blob_sha, "Decision ID exists; never overwrite accepted history.", refs=(approval_ref,))
