@@ -179,9 +179,9 @@ The [Stage E readiness review](STAGE_E_FREEZE_READINESS.md) checked `main` `976d
 
 Do not start Phase 8 or Idea-to-Production dogfooding without their separate authorizations. Material post-freeze correctness/security changes require an approved, re-verified freeze baseline, not a silent change.
 
-## D-028 — Formal Feature Freeze: final acceptance proposal
+## D-028 — Formal Feature Freeze: evidence-verified closeout pending final merge
 
-**Status:** **PROPOSED / NOT YET IN EFFECT** (2026-11-04). This is a reviewable decision candidate, not an implemented feature, release, or completed freeze.
+**Status:** **FINAL CLOSEOUT PROPOSED / NOT YET EFFECTIVE** (2026-11-04). PR #47 was accepted and merged; the remaining gate is explicit approval of this docs-only closeout, its exact-head CI, merge, successful post-merge main CI, and recording the resulting final SHA.
 
 **Pinned source-code baseline:** `28dc5c84ea4d154a99cf68c7446303648f076d52` — [merged PR #46](https://github.com/milad-seify/IntentOS/pull/46), [green post-merge CI 41807465709](https://github.com/milad-seify/IntentOS/actions/runs/41807465709) (7/7 jobs). [Stage E review](STAGE_E_FREEZE_READINESS.md) verified public-contract/packaging boundaries and recorded remaining risks. There are no new authorized runtime features in this closeout.
 
@@ -189,6 +189,8 @@ Do not start Phase 8 or Idea-to-Production dogfooding without their separate aut
 
 **Release distinction:** publicly distributed Core remains PyPI `intentos-engineering==1.0.1`, VS Code `milad-seyfi.intentos-vscode@0.1.1`. B1 is absent from the public `1.0.1` release even though post-release checkout metadata still says `1.0.1`; a rebuilt wheel would be **different content with the same version**, so do not publish or characterize it as the original artifact. Any B1 promotion or new version needs an independent decision.
 
-**Acceptance gate:** independently review this documentation-only final decision, approve the PR, pass its exact-head CI, merge it, verify the resulting `main` SHA and successful post-merge CI, then record that **exact final merge SHA** in a separately verified accepted closeout/status entry. This D-028 remains **proposed** until the gate is satisfied; documentation approval alone cannot substitute for CI. Changes to runtime or a material correctness/security defect require a reviewed regression and a new source pin.
+**Readiness evidence accepted:** [PR #47](https://github.com/milad-seify/IntentOS/pull/47) merged into `main` at `ac2a530c1a42e9fa0e270201fb08741895d49ccb`; exact [post-merge main CI 41809585163](https://github.com/milad-seify/IntentOS/actions/runs/41809585163) passed all **7/7** jobs. The source-code baseline is now pinned to that SHA (its changes relative to the earlier reviewed source were documentation only).
+
+**Final acceptance gate:** independently approve and merge this separate documentation-only D-028 closeout after exact-head CI; verify its post-merge main CI and record that **exact final merge SHA** in the PR closeout evidence and accepted status. The freeze becomes effective only after those conditions actually hold. Until then, status is **PENDING**, never silently reported as Frozen. A material correctness/security fix requires a focused regression and refreshed pin; no routine new features.
 
 **Phase 8:** operational 8A/8B/8C sessions and the separate Idea-to-Production dogfood remain **not started** and require **separate explicit approval after effective feature freeze**. Preserve [Phase 8 methodology](PHASE_8_VALIDATION.md), privacy, non-maintainer coverage, and correctness-first paired evidence; never count Phase 7C history as fresh Phase 8 observations.
