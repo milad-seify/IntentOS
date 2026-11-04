@@ -10,10 +10,11 @@ from pathlib import Path
 from typing import Sequence
 
 from .compass import review_project_compass
+from .codex_adapter import run_codex_handoff
 from .continuity import git_blob_sha, propose_decision_append, propose_scope_amendment, propose_status_continuity
 from .continuity_store import apply_continuity_proposal, proposal_approval_digest
 from .governance import CheckEvidence, Milestone, MilestoneRequirement, review_project_gates
-from .handoff import PlanStep, VerifiedStep, checkpoint_from_dict, make_checkpoint, review_resume
+from .handoff import PlanStep, VerifiedStep, checkpoint_from_dict, handoff_from_dict, make_agent_handoff, make_checkpoint, review_resume
 from .models import CapabilityClass, ContextDocument, CostClass, IntentRequest, ModelMetadata
 from .project import optimize_project_prompt
 from .result_contract import RESULT_SCHEMA_VERSION, error_dict, result_dict
@@ -129,6 +130,27 @@ def _build_parser() -> argparse.ArgumentParser:
             action_parser.add_argument("--ledger-reviewed", action="store_true", help="Assert external operation ledger was checked.")
             action_parser.add_argument("--executed-operation", action="append", default=[], help="Operation already executed; repeatable.")
             action_parser.add_argument("--accepted-approval", action="append", default=[], help="Externally accepted approval ID; repeatable.")
+
+    handoff = subparsers.add_parser("handoff", help="Prepare or explicitly dispatch a portable agent handoff.")
+    handoff_actions = handoff.add_subparsers(dest="handoff_action", required=True)
+    prepare = handoff_actions.add_parser("prepare")
+    prepare.add_argument("text", help="Raw user task.")
+    prepare.add_argument("--root", default=".", help="Git project root.")
+    prepare.add_argument("--target", required=True, help="Target agent, e.g. codex or claude-code.")
+    prepare.add_argument("--task-id", required=True, help="Bounded task identifier.")
+    prepare.add_argument("--constraint", action="append", default=[])
+    prepare.add_argument("--success", action="append", default=[])
+    prepare.add_argument("--context-file", action="append", default=[], help="Explicit project context file; repeatable.")
+    prepare.add_argument("--output", required=True, help="New portable handoff JSON path; will not overwrite.")
+    prepare.add_argument("--json", action="store_true")
+    dispatch = handoff_actions.add_parser("dispatch")
+    dispatch.add_argument("--root", default=".", help="Same Git project root as the prepared packet.")
+    dispatch.add_argument("--file", required=True, help="Saved handoff JSON.")
+    dispatch.add_argument("--sandbox", choices=("read-only", "workspace-write"), default="read-only")
+    dispatch.add_argument("--executable", default="codex", help="Codex CLI executable; included in approval digest.")
+    dispatch.add_argument("--approve-digest", help="Exact digest from a reviewed dispatch preview.")
+    dispatch.add_argument("--timeout", type=int, default=1800, help="Seconds, 1–3600.")
+    dispatch.add_argument("--json", action="store_true")
 
     return parser
 
@@ -628,6 +650,111 @@ def _run_checkpoint(args: argparse.Namespace) -> int:
     return 0 if payload["status"] in {"saved", "ready_for_owner_review"} else 2
 
 
+def _run_handoff(args: argparse.Namespace) -> int:
+    root = Path(args.root).resolve(strict=True)
+    revision = _git_project_revision(root)
+    if args.handoff_action == "prepare":
+        context_text = _checkpoint_context(root, args.context_file) if args.context_file else ""
+        context_files = [
+            (Path(raw) if Path(raw).is_absolute() else root / raw).resolve(strict=True).relative_to(root).as_posix()
+            for raw in args.context_file
+        ]
+        documents = tuple(
+            ContextDocument(path=label, content=(root / label).read_text(encoding="utf-8"))
+            for label in context_files
+        )
+        request = IntentRequest.from_values(
+            args.text, target_tool=args.target, constraints=args.constraint,
+            success_criteria=args.success,
+        )
+        result = optimize_project_prompt(request, documents)
+        if result.needs_clarification:
+            print(json.dumps(result_dict(result), ensure_ascii=False, indent=2) if args.json else "Clarification required: " + "; ".join(result.questions))
+            return 2
+        packet = make_agent_handoff(
+            result, target_tool=args.target, task_id=args.task_id,
+            source_revision=revision, next_step_id="execute",
+            context_digest=hashlib.sha256(context_text.encode("utf-8")).hexdigest(),
+        )
+        review = result_dict(result)
+        payload = {
+            "schema_version": 1, "handoff": packet.to_dict(), "review": review,
+            "request": {"raw_text": args.text, "target_tool": args.target,
+                        "constraints": args.constraint, "success_criteria": args.success},
+            "context_files": context_files,
+        }
+        with Path(args.output).open("x", encoding="utf-8", newline="\n") as stream:
+            json.dump(payload, stream, ensure_ascii=False, indent=2)
+            stream.write("\n")
+        response = {"status": "saved", "path": str(Path(args.output)), "target_tool": packet.target_tool,
+                    "risk_level": review["risk_level"], "approval_boundaries": review["approval_boundaries"]}
+    else:
+        raw_file = Path(args.file).read_bytes()
+        if len(raw_file) > 100_000:
+            raise ValueError("handoff file exceeds bounded size limit")
+        source = json.loads(raw_file)
+        if not isinstance(source, dict) or source.get("schema_version") != 1:
+            raise ValueError("handoff file is malformed or unsupported")
+        packet = handoff_from_dict(source.get("handoff"))
+        review = source.get("review")
+        saved_request = source.get("request")
+        context_files = source.get("context_files")
+        if (not isinstance(review, dict) or not isinstance(saved_request, dict)
+                or not isinstance(saved_request.get("raw_text"), str)
+                or saved_request.get("target_tool") != packet.target_tool
+                or not isinstance(saved_request.get("constraints"), list)
+                or not isinstance(saved_request.get("success_criteria"), list)
+                or any(not isinstance(item, str) for key in ("constraints", "success_criteria")
+                       for item in saved_request[key])
+                or not isinstance(context_files, list) or len(context_files) > 32
+                or any(not isinstance(item, str) for item in context_files)):
+            raise ValueError("handoff review or context is malformed")
+        current_context = _checkpoint_context(root, context_files) if context_files else ""
+        if revision != packet.source_revision or hashlib.sha256(current_context.encode("utf-8")).hexdigest() != packet.context_digest:
+            raise ValueError("handoff source revision or selected context changed; prepare again")
+        documents = tuple(ContextDocument(path=label, content=(root / label).read_text(encoding="utf-8"))
+                          for label in context_files)
+        actual = optimize_project_prompt(IntentRequest.from_values(
+            saved_request["raw_text"], target_tool=packet.target_tool,
+            constraints=saved_request["constraints"], success_criteria=saved_request["success_criteria"],
+        ), documents)
+        if actual.needs_clarification or result_dict(actual) != review or actual.prompt != packet.prepared_prompt:
+            raise ValueError("handoff does not match current IntentOS preparation; prepare again")
+        if packet.target_tool != "codex":
+            response = {"status": "unavailable", "target_tool": packet.target_tool,
+                        "reason": "Automatic dispatch is unavailable for this agent; copy the prepared task instead."}
+        else:
+            if review.get("risk_level") == "high" and args.sandbox == "workspace-write":
+                raise ValueError("high-risk handoffs require read-only dispatch or separate manual execution approval")
+            approval = hashlib.sha256(json.dumps({
+                "file_sha256": hashlib.sha256(raw_file).hexdigest(), "root": str(root),
+                "sandbox": args.sandbox, "executable": args.executable, "timeout": args.timeout,
+            }, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+            if args.approve_digest is None:
+                response = {"status": "approval_required", "approval_digest": approval,
+                            "target_tool": packet.target_tool, "risk_level": review["risk_level"],
+                            "sandbox": args.sandbox, "root": str(root),
+                            "goal": actual.intent.goal, "context_files": context_files,
+                            "done_criteria": review.get("done_criteria", []),
+                            "approval_boundaries": review.get("approval_boundaries", []),
+                            "reason": "Review the saved handoff and this dispatch boundary before approving."}
+            elif args.approve_digest != approval:
+                raise ValueError("dispatch approval digest does not match this exact handoff and boundary")
+            else:
+                if args.sandbox == "workspace-write":
+                    clean = subprocess.run(["git", "status", "--porcelain"], cwd=root, capture_output=True, check=False)
+                    if clean.returncode != 0 or clean.stdout:
+                        raise ValueError("workspace-write dispatch requires a clean Git working tree")
+                response = run_codex_handoff(
+                    packet, root=root, executable=args.executable,
+                    sandbox=args.sandbox, timeout_seconds=args.timeout,
+                )
+                response["target_tool"] = packet.target_tool
+                response["source_revision"] = revision
+    print(json.dumps(response, ensure_ascii=False, indent=2) if args.json else f"Handoff {response['status']}: {response.get('reason', response.get('path', ''))}")
+    return 0 if response["status"] in {"saved", "approval_required", "completed_unverified"} else 2
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     _configure_output_encoding()
     args = _build_parser().parse_args(argv)
@@ -648,6 +775,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_route(args)
         if args.command == "checkpoint":
             return _run_checkpoint(args)
+        if args.command == "handoff":
+            return _run_handoff(args)
     except (OSError, ValueError) as error:
         if getattr(args, "json", False):
             print(json.dumps(error_dict(error), indent=2, ensure_ascii=False))

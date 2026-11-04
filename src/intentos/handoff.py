@@ -231,14 +231,49 @@ def build_agent_handoff(
     target_tool: str,
 ) -> AgentHandoff:
     """Create a reviewable target-adaptable payload, never execute/send implicitly."""
+    _validate_checkpoint(checkpoint)
+    return make_agent_handoff(
+        result, target_tool=target_tool, task_id=checkpoint.task_id,
+        source_revision=checkpoint.source_revision, next_step_id=checkpoint.next_step_id,
+        context_digest=checkpoint.context_digest,
+    )
+
+
+def make_agent_handoff(
+    result: PromptResult, *, target_tool: str, task_id: str,
+    source_revision: str, next_step_id: str, context_digest: str,
+) -> AgentHandoff:
+    """Build a portable handoff without granting an executor permission to act."""
     if result.needs_clarification or not result.prompt:
         raise ValueError("cannot hand off unresolved intent")
-    if not target_tool.strip() or len(target_tool) > 80:
+    if not target_tool.strip() or len(target_tool) > 80 or not _key(task_id) or not _key(source_revision) or not _key(next_step_id):
         raise ValueError("target tool required")
     if result.intent.target_tool not in ("generic", target_tool):
         # Routing to a different agent requires an explicit new preparation step.
         raise ValueError("target does not match prepared intent; re-prepare for this agent")
+    if len(result.prompt) > 36000 or not re.fullmatch(r"[0-9a-f]{64}", context_digest):
+        raise ValueError("handoff prompt or context digest is invalid")
     return AgentHandoff(
-        1, checkpoint.task_id, target_tool.strip(), checkpoint.source_revision,
-        result.prompt, checkpoint.next_step_id, checkpoint.context_digest,
+        1, task_id, target_tool.strip(), source_revision,
+        result.prompt, next_step_id, context_digest,
     )
+
+
+def handoff_from_dict(data: dict[str, object]) -> AgentHandoff:
+    """Load a saved handoff with the same bounds used for new packets."""
+    if not isinstance(data, dict):
+        raise ValueError("handoff must be an object")
+    try:
+        packet = AgentHandoff(**data)
+        if (type(packet.schema_version) is not int or packet.schema_version != 1
+                or packet.requires_owner_approval is not True
+                or not _key(packet.task_id) or not _key(packet.source_revision)
+                or not _key(packet.next_step_id) or not isinstance(packet.target_tool, str)
+                or not packet.target_tool.strip() or len(packet.target_tool) > 80
+                or not isinstance(packet.prepared_prompt, str)
+                or not packet.prepared_prompt.strip() or len(packet.prepared_prompt) > 36000
+                or not re.fullmatch(r"[0-9a-f]{64}", packet.context_digest)):
+            raise ValueError("handoff is malformed or unsupported")
+        return packet
+    except (KeyError, TypeError, AttributeError) as error:
+        raise ValueError("handoff is malformed") from error

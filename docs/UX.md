@@ -91,6 +91,8 @@ The development `intentos route` review shows why a caller-supplied model is eli
 
 The development `intentos checkpoint` command saves a bounded, versioned approved plan, cited project-state summary, completed-step evidence and next action for an interrupted task. The CLI pins the actual Git HEAD and fingerprints only explicitly supplied local context files. A fresh process can review the checkpoint against current revision/context and caller-checked operation/approval records. Changed state, duplicate operation IDs or missing approvals block review. Even a passing check is only ready for owner review; it does not restart an agent or authorize execution. The command is not in Core 1.0.1.
 
+The development `intentos handoff` flow keeps preparation and execution separate. Prepare writes a portable, target-specific packet and the same review fields used elsewhere; a dispatch preview binds owner approval to its exact bytes, Git root, Codex executable and sandbox. Codex is the supported automatic adapter, with read-only as the default; high-risk work cannot use automatic workspace-write. Other agents receive a manual packet and an explicit unavailable automatic-dispatch result. A Codex completed turn is execution evidence only, never verification of the task outcome. No agent runs during prepare or preview.
+
 ### AI agent
 
 Agents should be able to consume IntentOS capabilities through an interoperability layer such as MCP rather than requiring custom integration with every agent product.
