@@ -190,7 +190,7 @@ Other IDE, agent, community, and provider/model adapters were candidates, not ma
 
 The absence of sufficient demand is the Phase 7 decision, not a failed or abandoned direction. Phase 7 overall is complete.
 
-## Post-Phase-7 Capability Evolution Program — A COMPLETE; B1 INTERNAL; B2/C1/D1 DEFERRED; E FREEZE REVIEW
+## Post-Phase-7 Capability Evolution Program — A COMPLETE; B1 INTERNAL; B2/C1/D1 DEFERRED; E FORMAL FREEZE DECISION PENDING
 
 This is a finite, evidence-gated development program between completed Phase 7 and operational Phase 8. It is **not a renumbered official Phase**. The [Stage A baseline/plan](POST_PHASE_7_PROGRAM.md) and [candidate capability inventory](FUTURE_CAPABILITIES.md) distinguish planning priorities from approved implementation.
 
@@ -198,7 +198,7 @@ This is a finite, evidence-gated development program between completed Phase 7 a
 - **Stage B — Project Continuity Foundation (B1 internal pilot merged; B2 assessment only):** read-only Project Compass/Scope Guardian feasibility first (see [pilot contract](B1_PROJECT_COMPASS_PILOT.md)); controlled state/decision proposals only in later separately approved slices. Exit: source-grounded project status, scope and decisions survive fresh sessions without unsupported completion claims.
 - **Stage C — Project Lifecycle Governance (C1 assessment merged; implementation deferred):** [C1 evidence assessment](C1_LIFECYCLE_ASSESSMENT.md) found no sufficient repeated need for runtime governance; use reviewed milestone/DoD/launch evidence manually unless a new scoped gate is met.
 - **Stage D — Adaptive Delegation & Resilience (D1 assessment merged; implementation deferred):** [D1 evidence assessment](D1_ADAPTIVE_RESILIENCE_ASSESSMENT.md) found no justified adaptive experiment. Preserve existing deterministic routing, external metrics and manual handoff. No execution/runtime platform.
-- **Stage E — Stabilization & Feature Freeze (readiness review active; not yet frozen):** verify current source against published v1, CI, scoped security/privacy, internal B1 boundaries and documentation; see [freeze-readiness gate](STAGE_E_FREEZE_READINESS.md). Exit: reviewed source pin, accepted limitation list, documentation-only PR with green exact-head and post-merge main CI, separately approved final SHA/feature-freeze record; no routine feature additions during final validation.
+- **Stage E — Stabilization & Feature Freeze (readiness verified; final freeze proposed):** [readiness PR #46](https://github.com/milad-seify/IntentOS/pull/46) merged, [post-merge CI](https://github.com/milad-seify/IntentOS/actions/runs/41807465709) green, candidate code SHA `28dc5c84ea4d154a99cf68c7446303648f076d52`. Proposed [D-028 freeze decision](DECISIONS.md) still needs approved final PR, exact-head and post-merge CI, and the final merge SHA recorded. No Phase 8 start by implication.
 
 Bounded initial implementation candidates: B1 read-only Project Compass; B2 state/decision update **proposals** only if justified; C1 lifecycle/quality-gate review only if justified; D1 a single evidence-supported adaptive slice at most. There is no mandate to implement every candidate. Each slice needs new scope authorization, tests, review, and independent closeout. The sequence may end early with documented deferrals; there is no indefinite feature loop.
 
