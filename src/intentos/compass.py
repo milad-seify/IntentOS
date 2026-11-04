@@ -51,6 +51,7 @@ class SourceFact:
     path: str
     line: int
     stale: bool = False
+    authoritative: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -121,9 +122,12 @@ def _facts(key: str, lines: list[tuple[int, str]], doc: ContextDocument, stale: 
         if not first:
             return []
         content = " ".join(text.removeprefix("- ").strip() for _, text in first)
-        return [SourceFact(content, doc.path, first[0][0], stale)]
+        return [SourceFact(content, doc.path, first[0][0], stale, doc.authoritative)]
     return [
-        SourceFact(text[2:].strip() if text.startswith(("- ", "* ")) else text, doc.path, line, stale)
+        SourceFact(
+            text[2:].strip() if text.startswith(("- ", "* ")) else text,
+            doc.path, line, stale, doc.authoritative,
+        )
         for line, text in lines
         if text.strip("-* ").strip()
         and (key not in {"in_scope", "out_of_scope"} or text.startswith(("- ", "* ")))
@@ -192,8 +196,14 @@ def review_project_compass(
         status, reason = "conflicting", "Supplied scope sources contradict each other."
     elif outside:
         status, reason = "out_of_scope", "Task exactly matches an explicit out-of-scope item."
+    elif inside and any(f.authoritative for f in inside):
+        status, reason = "in_scope", (
+            "Task exactly matches an in-scope item from a caller-designated authoritative source."
+        )
     elif inside:
-        status, reason = "in_scope", "Task exactly matches an explicit in-scope item."
+        status, reason = "unknown", (
+            "Only non-authoritative sources mark this task in scope; human review is required."
+        )
     else:
         status, reason = "unknown", "No exact explicit scope match; human review is required."
     return ProjectCompass(
