@@ -1,6 +1,6 @@
 # Stage E — Stabilization & Feature Freeze Readiness
 
-**Status:** source-freeze candidate **READY FOR MAINTAINER REVIEW**, **not yet accepted/frozen**. Do not start Phase 8 from this report.  
+**Status:** readiness review **MERGED and verified** ([PR #46](https://github.com/milad-seify/IntentOS/pull/46); [post-merge main CI 41807465709](https://github.com/milad-seify/IntentOS/actions/runs/41807465709), 7/7 passed). Final Feature Freeze remains **PROPOSED / NOT YET EFFECTIVE** under D-028. Do not start Phase 8 from this report.  
 **Audit date:** 2026-11-04. **Reviewed `main` source SHA:** `976db7ef888d26aca8804490147e384273cfa9b7`.  
 **Exact main CI:** [run 41805348708](https://github.com/milad-seify/IntentOS/actions/runs/41805348708) — completed successfully, seven of seven jobs. No open PRs when the assessment began.
 
@@ -46,7 +46,7 @@ A **formal Stage E feature freeze** may be recorded only after all of the follow
 4. B1 is recorded as internal, B2/C1/D1 are deferred with their evidence decisions, stable v1/public tags are unchanged, and there is no new release publication.
 5. Freeze decision and final code/merge SHA are accepted in the decision log/status. Any later material correctness/safety/public-contract fix needs a focused regression, independent approval, new pinned candidate and repeat freeze gate; new product features do not creep into Phase 8.
 
-**Current verdict:** **READY TO PRESENT FOR FREEZE APPROVAL**, **freeze not yet in force**. This PR is the readiness artifact, not the post-merge acceptance record.
+**Follow-up verdict (2026-11-04):** the readiness PR was merged and its post-merge CI passed on `28dc5c84ea4d154a99cf68c7446303648f076d52`. The **formal** [D-028 proposal](DECISIONS.md) must still pass its own approval, merge and final main-CI/pin gate. This document alone does not declare a freeze or authorize Phase 8.
 
 ## Phase 8 authorization remains separate
 
