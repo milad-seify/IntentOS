@@ -1,6 +1,6 @@
 # C1 — Project Lifecycle Governance: Needs and Scope Assessment
 
-**Status:** assessment only; **implementation NOT approved**.  
+**Status:** assessment merged in [PR #44](https://github.com/milad-seify/IntentOS/pull/44); **implementation deferred pending evidence** and NOT approved.  
 **Date:** 2026-11-04. **Source baseline:** `milad-seify/IntentOS` main `7a47f5289243a0ac0958881126d922e490b0d6aa` ([CI 41801386563](https://github.com/milad-seify/IntentOS/actions/runs/41801386563): seven successful jobs); no PR open when the assessment began.  
 **Prior gates:** Stage A [PR #41](https://github.com/milad-seify/IntentOS/pull/41) complete, B1 [PR #42](https://github.com/milad-seify/IntentOS/pull/42) merged as internal pilot only, B2 [PR #43](https://github.com/milad-seify/IntentOS/pull/43) assessed and deferred pending repeated evidence. [Finite program](POST_PHASE_7_PROGRAM.md), [future capabilities](FUTURE_CAPABILITIES.md), [Phase 7C promotion rules](PHASE_7C_EVIDENCE.md#promotion-rules) and [accepted decisions](DECISIONS.md) remain authoritative.
 
@@ -57,6 +57,6 @@ Potential narrow manual comparison: predefine a 2–3 milestone scenario with fi
 
 ## Decision / exit
 
-**Recommendation: C1 implementation DEFERRED pending repeated evidence.** Use reviewed project documents and existing task DoD first. Keep the C1 proposal small and reversible if a later scoped decision is made. Review/merge this assessment as **docs-only**; do not implement C1, resume B2, begin D1, freeze features, collect Phase 8 sessions or publish a release automatically.
+**Recommendation: C1 implementation DEFERRED pending repeated evidence.** Use reviewed project documents and existing task DoD first. Keep the C1 proposal small and reversible if a later scoped decision is made. This documentation-only assessment was merged in PR #44; it did not authorize C1 runtime. D1 may receive a **separate assessment**, not automatic implementation, feature freeze, Phase 8 collection or publication.
 
 This artifact records **analysis and candidate test criteria**, not proof of user demand, successful C1 feature execution or completed lifecycle validation.
