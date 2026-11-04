@@ -55,6 +55,8 @@ Use focused checks first, then the broader relevant test suite when available.
 
 ## Current phase
 
+**LATEST ACCEPTED SCOPE OVERRIDE (D-031, 2026-11-04):** The owner requires **all ten feature families** from [docs/DELIVERY_PROGRAM.md](docs/DELIVERY_PROGRAM.md) be implemented before final consolidated acceptance and owner-led Phase 8/Dogfooding. Previous notes below that B2/C1/D1 are deferred or D-030 proposes a final pre-validation cutoff are **historical only and superseded for implementation planning**. [PR #53](https://github.com/milad-seify/IntentOS/pull/53) closed unmerged; [Issue #52](https://github.com/milad-seify/IntentOS/issues/52) reopened. B1 remains internal until a separately versioned stable integration; B2/C1/D1 are required but **not yet complete**. Preserve bounded change design, explicit human approvals and safe regressions per slice, then one comprehensive final system gate. Do not start operational Phase 8 sessions or owner dogfood until the feature set is complete and a newly accepted Freeze is recorded. No unapproved new capabilities beyond F01–F10.
+
 Phase 7 is **complete**. Phase 7A MCP parity, Phase 7B VS Code access, and the Phase 7C real-use evidence gate are complete. Phase 7D was intentionally deferred and closed without implementation because additional adapter demand did not meet the evidence threshold.
 
 Phase 8 — Adoption & Outcome Validation has an **approved protocol; operational execution is deferred until final validation after a separately accepted feature freeze**. Preserve every existing first-use, controlled-comparison, external-evidence, privacy and promotion criterion in `docs/PHASE_8_VALIDATION.md`. Do not begin Phase 8 sessions or implement Phase 8B tooling without a separate authorization.
