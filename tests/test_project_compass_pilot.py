@@ -50,7 +50,7 @@ class ProjectCompassPilotTests(unittest.TestCase):
         self.assertEqual(compass.field("current_phase").value, "Milestone 2")
         self.assertEqual(compass.field("next_action").value, "Verify read-only dashboard")
         self.assertEqual(compass.task_scope.status, "in_scope")
-        self.assertFalse(compass.task_scope.approval_required)
+        self.assertFalse(compass.task_scope.scope_review_required)
         self.assertEqual(compass.field("completed").evidence[0].path, "docs/STATUS.md")
         self.assertEqual(compass.field("decisions").evidence[0].path, "docs/PLAN.md")
         self.assertGreater(compass.field("next_action").evidence[0].line, 0)
@@ -58,8 +58,32 @@ class ProjectCompassPilotTests(unittest.TestCase):
     def test_explicit_out_of_scope_requires_approval(self):
         review = review_project_compass(self.docs(), proposed_task="Add Redis cache")
         self.assertEqual(review.task_scope.status, "out_of_scope")
-        self.assertTrue(review.task_scope.approval_required)
+        self.assertTrue(review.task_scope.scope_review_required)
         self.assertEqual(review.task_scope.evidence[0].path, "docs/PLAN.md")
+
+    def test_h4_section_does_not_leak_items_into_in_scope(self):
+        approved = ContextDocument(
+            "docs/SCOPE.md",
+            "## In Scope\n- Build dashboard\n"
+            "#### Historical rejected ideas\n- Delete production data\n",
+            authoritative=True,
+        )
+        review = review_project_compass((approved,), proposed_task="Delete production data")
+        self.assertEqual(review.task_scope.status, "unknown")
+        self.assertTrue(review.task_scope.scope_review_required)
+        valid = review_project_compass((approved,), proposed_task="Build dashboard")
+        self.assertEqual(valid.task_scope.status, "in_scope")
+        self.assertFalse(valid.task_scope.scope_review_required)
+
+    def test_h1_section_does_not_leak_items_into_in_scope(self):
+        approved = ContextDocument(
+            "docs/SCOPE.md",
+            "## In Scope\n- Build dashboard\n"
+            "# Other plan\n- Delete production data\n",
+            authoritative=True,
+        )
+        review = review_project_compass((approved,), proposed_task="Delete production data")
+        self.assertEqual(review.task_scope.status, "unknown")
 
     def test_non_authoritative_in_scope_does_not_approve_task(self):
         doc = ContextDocument(
@@ -68,7 +92,7 @@ class ProjectCompassPilotTests(unittest.TestCase):
         )
         review = review_project_compass((doc,), proposed_task="Deploy database")
         self.assertEqual(review.task_scope.status, "unknown")
-        self.assertTrue(review.task_scope.approval_required)
+        self.assertTrue(review.task_scope.scope_review_required)
         self.assertEqual(review.task_scope.evidence[0].path, doc.path)
         self.assertFalse(review.task_scope.evidence[0].authoritative)
 
@@ -79,7 +103,7 @@ class ProjectCompassPilotTests(unittest.TestCase):
         )
         review = review_project_compass((doc,), proposed_task="Deploy database")
         self.assertEqual(review.task_scope.status, "in_scope")
-        self.assertFalse(review.task_scope.approval_required)
+        self.assertFalse(review.task_scope.scope_review_required)
         self.assertTrue(review.task_scope.evidence[0].authoritative)
 
     def test_non_authoritative_out_of_scope_blocks_authoritative_allow(self):
@@ -89,14 +113,14 @@ class ProjectCompassPilotTests(unittest.TestCase):
         )
         review = review_project_compass(docs, proposed_task="Add Redis cache")
         self.assertEqual(review.task_scope.status, "conflicting")
-        self.assertTrue(review.task_scope.approval_required)
+        self.assertTrue(review.task_scope.scope_review_required)
 
     def test_unmatched_or_similar_task_is_unknown_not_guessed(self):
         for task in ("Deploy Redis", "Build a dashboard", ""):
             with self.subTest(task=task):
                 result = review_project_compass(self.docs(), proposed_task=task)
                 self.assertEqual(result.task_scope.status, "unknown")
-                self.assertTrue(result.task_scope.approval_required)
+                self.assertTrue(result.task_scope.scope_review_required)
 
     def test_conflicting_phase_and_scope_preserve_evidence(self):
         docs = self.docs() + (
@@ -110,7 +134,7 @@ class ProjectCompassPilotTests(unittest.TestCase):
         self.assertIsNone(result.field("current_phase").value)
         self.assertEqual(len(result.field("current_phase").evidence), 2)
         self.assertEqual(result.task_scope.status, "conflicting")
-        self.assertTrue(result.task_scope.approval_required)
+        self.assertTrue(result.task_scope.scope_review_required)
 
     def test_different_worded_goals_are_unresolved_not_false_conflict(self):
         docs = (
@@ -186,7 +210,7 @@ class ProjectCompassPilotTests(unittest.TestCase):
         # Deliberately no semantic inference for an unmatched phrase.
         uncertain = review_project_compass((agent, product, status), proposed_task="Add Redis cache")
         self.assertEqual(uncertain.task_scope.status, "unknown")
-        self.assertTrue(uncertain.task_scope.approval_required)
+        self.assertTrue(uncertain.task_scope.scope_review_required)
 
     def test_current_phase_uses_first_paragraph_not_later_bullets(self):
         doc = ContextDocument(
