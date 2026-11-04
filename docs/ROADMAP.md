@@ -190,6 +190,10 @@ Other IDE, agent, community, and provider/model adapters were candidates, not ma
 
 The absence of sufficient demand is the Phase 7 decision, not a failed or abandoned direction. Phase 7 overall is complete.
 
+## Latest owner-authorized full-feature delivery (2026-11-04)
+
+**D-031 supersedes the historical early-final-Freeze plan described below for future work.** Implement **all ten** F01–F10 user outcomes in the [Full-Scope Delivery Program](DELIVERY_PROGRAM.md). B2/C1/D1 are now **required future deliverables**, not silently deferred or claimed implemented; B1 must be integrated for actual use. Reuse Phase 0–7 capability foundations. Workstreams: project governance (F05–F08), agent/routing/resilience (F03/F04/F09), evidence/UX (F10 with F01/F02 regressions), and **one final integrated acceptance + new Feature Freeze**. Operational Phase 8 and Idea-to-Production dogfood remain owner-led **after** that endpoint; all protocol thresholds remain unchanged. Do not open repeated assessment loops. Old stage labels and historical source pins below are retained only as provenance.
+
 ## Post-Phase-7 Capability Evolution Program — A COMPLETE; B1 INTERNAL; B2/C1/D1 DEFERRED; E READINESS VERIFIED / FINAL FREEZE DEFERRED
 
 This is a finite, evidence-gated development program between completed Phase 7 and operational Phase 8. It is **not a renumbered official Phase**. The [Stage A baseline/plan](POST_PHASE_7_PROGRAM.md) and [candidate capability inventory](FUTURE_CAPABILITIES.md) distinguish planning priorities from approved implementation.
