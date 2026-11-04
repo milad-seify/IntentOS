@@ -115,7 +115,10 @@ def _sections(doc: ContextDocument) -> list[tuple[str, list[tuple[int, str]]]]:
             # headings with known names start a new recognized section.
             depth = len(raw) - len(raw.lstrip("#"))
             key = re.sub(r"^\d+[.)]\s*", "", heading.group(1).strip().casefold())
-            if depth in {2, 3} and (key == "evidence freshness" or key in _ALIASES):
+            if depth == 2 and re.match(r"^d-\d{3,}(?:\s|$)", key):
+                sections.append(("decisions", [(line_no, heading.group(1).strip())]))
+                current = None
+            elif depth in {2, 3} and (key == "evidence freshness" or key in _ALIASES):
                 current = []
                 sections.append((key, current))
             else:

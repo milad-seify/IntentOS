@@ -79,7 +79,7 @@ Advanced users, CI systems, scripts, and other developer tools should use the CL
 
 The CLI remains a first-class interface because it is portable, scriptable, testable, and independent of a specific IDE.
 
-The development `intentos compass` CLI exposes the existing Project Compass reviewer through explicitly supplied local documents. It shows source file and line for each claim, distinguishes missing, stale, and unresolved state, and requires the caller to designate authoritative scope sources. Its scope result is advisory and never grants execution permission. The published Core 1.0.1 CLI does not include this command.
+The development `intentos compass` CLI exposes the existing Project Compass reviewer through explicitly supplied local documents. It shows source file and line for each claim, including decision headings in a supplied `docs/DECISIONS.md`, distinguishes missing, stale, and unresolved state, and requires the caller to designate authoritative scope sources. Its scope result is advisory and never grants execution permission. The published Core 1.0.1 CLI does not include this command.
 
 The development `intentos state` CLI previews exact status or decision changes before any write. A user must review the proposed diff and supply its content-bound approval digest in a second invocation. The writer checks the source revision and any related source fingerprints, serializes IntentOS writers with a local lock, and refuses unexpected targets or stale approvals. The digest is an explicit approval assertion, not independent proof of human review. An interrupted write may leave a lock that requires inspection before removal. This development command is also absent from Core 1.0.1.
 

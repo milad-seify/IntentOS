@@ -162,7 +162,7 @@ intentos compass --authoritative-document docs/PLAN.md \
   --document docs/STATUS.md --task "Review API"
 ```
 
-`compass` reports each extracted claim with its file and line, and labels missing, stale, or unresolved facts. An exact in-scope match needs a file you explicitly designated authoritative; the result does not approve execution or verify the underlying claims. Use `--json` for the review data. This command is not in the published Core 1.0.1 package.
+`compass` reports each extracted claim with its file and line, including `D-xxx` decision headings, and labels missing, stale, or unresolved facts. An exact in-scope match needs a file you explicitly designated authoritative; the result does not approve execution or verify the underlying claims. Use `--json` for the review data. This command is not in the published Core 1.0.1 package.
 
 The same unreleased development branch can propose a bounded update to a simple `docs/STATUS.md`:
 

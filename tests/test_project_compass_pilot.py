@@ -186,6 +186,19 @@ class ProjectCompassPilotTests(unittest.TestCase):
         self.assertEqual(result.field("next_action").status, "missing")
         self.assertIsNone(result.field("next_action").value)
 
+    def test_decision_history_headings_are_visible_with_provenance(self):
+        decisions = ContextDocument(
+            "docs/DECISIONS.md",
+            "# Decisions\n\n## D-001 — Initial scope\n\nAccepted.\n"
+            "\n## D-002 — Owner approval\n\nApproval evidence: issue #7\n",
+            authoritative=True,
+        )
+        result = review_project_compass((decisions,))
+        facts = result.field("decisions").evidence
+        self.assertEqual([item.text for item in facts], ["D-001 — Initial scope", "D-002 — Owner approval"])
+        self.assertEqual([item.line for item in facts], [3, 7])
+        self.assertTrue(all(item.path == "docs/DECISIONS.md" for item in facts))
+
     def test_fresh_invocations_have_identical_outputs(self):
         first = review_project_compass(self.docs(), proposed_task="Add Redis cache")
         second = review_project_compass(self.docs(), proposed_task="Add Redis cache")
