@@ -84,6 +84,18 @@ class HandoffCheckpointTests(unittest.TestCase):
         self.assertEqual(missing_context.status, "blocked")
         self.assertIn("fingerprint", " ".join(missing_context.reasons))
 
+    def test_caller_supplied_budget_is_advisory_and_overrun_blocks_resume(self):
+        cp = self.checkpoint()
+        common = dict(current_source_revision="commit-123", current_context_digest=cp.context_digest,
+                      already_executed_operation_ids=(),
+                      externally_accepted_approval_ids=("owner-production-approval",))
+        over = review_resume(cp, remaining_budget_tokens=100, **common)
+        self.assertEqual(over.status, "blocked")
+        self.assertEqual(over.budget_status, "estimate_over_budget")
+        within = review_resume(cp, remaining_budget_tokens=2000, **common)
+        self.assertEqual(within.status, "ready_for_owner_review")
+        self.assertEqual(within.budget_status, "estimate_within_supplied_budget")
+
     def test_missing_plan_or_state_cannot_be_checkpointed(self):
         with self.assertRaises(ValueError):
             make_checkpoint(task_id="task", source_revision="sha", next_step_id="next")

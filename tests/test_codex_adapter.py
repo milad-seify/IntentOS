@@ -20,6 +20,7 @@ class CodexAdapterTests(unittest.TestCase):
                 self.assertIn("--ephemeral", command)
                 self.assertIn("--ignore-user-config", command)
                 self.assertIn("read-only", command)
+                self.assertEqual(command[command.index("-m") + 1], "caller-model")
                 self.assertNotIn("danger-full-access", command)
                 self.assertEqual(kwargs["input"], b"Do the task")
                 kwargs["stdout"].write((json.dumps({"type": "thread.started", "thread_id": "thread-1"}) + "\n" +
@@ -27,11 +28,12 @@ class CodexAdapterTests(unittest.TestCase):
                                          json.dumps({"type": "turn.completed", "usage": {"input_tokens": 10, "output_tokens": 3}}) + "\n").encode())
                 return subprocess.CompletedProcess(command, 0)
             with patch("intentos.codex_adapter.subprocess.run", side_effect=fake_run):
-                receipt = run_codex_handoff(self.packet(), root=Path(directory))
+                receipt = run_codex_handoff(self.packet(), root=Path(directory), model="caller-model")
             self.assertEqual(receipt["status"], "completed_unverified")
             self.assertEqual(receipt["thread_id"], "thread-1")
             self.assertEqual(receipt["usage"]["input_tokens"], 10)
             self.assertEqual(receipt["final_message"], "Inspected STATUS.md")
+            self.assertEqual(receipt["requested_model"], "caller-model")
 
     def test_unavailable_and_interrupted_are_not_reported_as_success(self):
         with tempfile.TemporaryDirectory() as directory:

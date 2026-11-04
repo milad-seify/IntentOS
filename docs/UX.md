@@ -95,6 +95,8 @@ The development `intentos handoff` flow keeps preparation and execution separate
 
 The development `intentos outcome` CLI accepts explicit external acceptance checks, outcomes, conditions and optional measured metrics. It records one observation, compares only matching raw/prepared conditions through the existing paired comparator, and keeps missing evidence inconclusive. Repeated failed tasks can produce an evidence-linked learning proposal. Saving an approved proposal needs a matching digest and owner reference; it never silently changes product rules. This is developer access, not operational Phase 8 evidence collection.
 
+A caller-verified route can be passed explicitly to Codex dispatch with `--model`; the chosen name becomes part of the human-reviewed digest. Checkpoint review can compare a supplied remaining token budget with a supplied work estimate and block an estimated overrun. These are explicit guidance inputs, not live provider or usage observations.
+
 ### AI agent
 
 Agents should be able to consume IntentOS capabilities through an interoperability layer such as MCP rather than requiring custom integration with every agent product.

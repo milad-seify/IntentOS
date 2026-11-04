@@ -4,6 +4,7 @@ import argparse
 import difflib
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -131,6 +132,7 @@ def _build_parser() -> argparse.ArgumentParser:
             action_parser.add_argument("--ledger-reviewed", action="store_true", help="Assert external operation ledger was checked.")
             action_parser.add_argument("--executed-operation", action="append", default=[], help="Operation already executed; repeatable.")
             action_parser.add_argument("--accepted-approval", action="append", default=[], help="Externally accepted approval ID; repeatable.")
+            action_parser.add_argument("--remaining-budget-tokens", type=int, help="Caller-supplied remaining budget for an estimate check.")
 
     handoff = subparsers.add_parser("handoff", help="Prepare or explicitly dispatch a portable agent handoff.")
     handoff_actions = handoff.add_subparsers(dest="handoff_action", required=True)
@@ -149,6 +151,7 @@ def _build_parser() -> argparse.ArgumentParser:
     dispatch.add_argument("--file", required=True, help="Saved handoff JSON.")
     dispatch.add_argument("--sandbox", choices=("read-only", "workspace-write"), default="read-only")
     dispatch.add_argument("--executable", default="codex", help="Codex CLI executable; included in approval digest.")
+    dispatch.add_argument("--model", help="Explicit Codex model name; included in approval digest.")
     dispatch.add_argument("--approve-digest", help="Exact digest from a reviewed dispatch preview.")
     dispatch.add_argument("--timeout", type=int, default=1800, help="Seconds, 1–3600.")
     dispatch.add_argument("--json", action="store_true")
@@ -649,6 +652,7 @@ def _run_checkpoint(args: argparse.Namespace) -> int:
             current_context_digest=context_digest,
             already_executed_operation_ids=tuple(args.executed_operation) if args.ledger_reviewed else None,
             externally_accepted_approval_ids=tuple(args.accepted_approval),
+            remaining_budget_tokens=args.remaining_budget_tokens,
         )
         payload = {
             "status": review.status, "task_id": review.task_id,
@@ -657,6 +661,8 @@ def _run_checkpoint(args: argparse.Namespace) -> int:
             "approved_plan": checkpoint.to_dict()["approved_plan"],
             "state_summary": checkpoint.state_summary,
             "source_revision": checkpoint.source_revision,
+            "estimated_remaining_tokens": checkpoint.estimated_remaining_tokens,
+            "budget_status": review.budget_status,
         }
     if args.json:
         print(json.dumps(payload, indent=2, ensure_ascii=False))
@@ -744,14 +750,18 @@ def _run_handoff(args: argparse.Namespace) -> int:
         else:
             if review.get("risk_level") == "high" and args.sandbox == "workspace-write":
                 raise ValueError("high-risk handoffs require read-only dispatch or separate manual execution approval")
+            if args.model is not None and not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,79}", args.model):
+                raise ValueError("model must be a bounded explicit name")
             approval = hashlib.sha256(json.dumps({
                 "file_sha256": hashlib.sha256(raw_file).hexdigest(), "root": str(root),
                 "sandbox": args.sandbox, "executable": args.executable, "timeout": args.timeout,
+                "model": args.model,
             }, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
             if args.approve_digest is None:
                 response = {"status": "approval_required", "approval_digest": approval,
                             "target_tool": packet.target_tool, "risk_level": review["risk_level"],
                             "sandbox": args.sandbox, "root": str(root),
+                            "requested_model": args.model,
                             "goal": actual.intent.goal, "context_files": context_files,
                             "done_criteria": review.get("done_criteria", []),
                             "approval_boundaries": review.get("approval_boundaries", []),
@@ -765,7 +775,7 @@ def _run_handoff(args: argparse.Namespace) -> int:
                         raise ValueError("workspace-write dispatch requires a clean Git working tree")
                 response = run_codex_handoff(
                     packet, root=root, executable=args.executable,
-                    sandbox=args.sandbox, timeout_seconds=args.timeout,
+                    sandbox=args.sandbox, timeout_seconds=args.timeout, model=args.model,
                 )
                 response["target_tool"] = packet.target_tool
                 response["source_revision"] = revision

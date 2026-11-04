@@ -11,7 +11,7 @@ from .handoff import AgentHandoff
 
 def run_codex_handoff(
     packet: AgentHandoff, *, root: Path, executable: str = "codex",
-    sandbox: str = "read-only", timeout_seconds: int = 1800,
+    sandbox: str = "read-only", timeout_seconds: int = 1800, model: str | None = None,
 ) -> dict[str, object]:
     """Run one approved handoff; a completed agent turn is not task verification."""
     if packet.target_tool != "codex":
@@ -22,8 +22,11 @@ def run_codex_handoff(
         raise ValueError("timeout must be between 1 and 3600 seconds")
     command = [
         executable, "exec", "--json", "--ephemeral", "--ignore-user-config",
-        "--sandbox", sandbox, "-C", str(root), "-",
+        "--sandbox", sandbox, "-C", str(root),
     ]
+    if model is not None:
+        command.extend(("-m", model))
+    command.append("-")
     try:
         with tempfile.TemporaryFile() as stdout, tempfile.TemporaryFile() as stderr:
             completed = subprocess.run(
@@ -74,6 +77,7 @@ def run_codex_handoff(
     return {
         "status": status, "exit_code": completed.returncode,
         "thread_id": thread_id, "usage": usage,
+        "requested_model": model,
         "final_message": final_message, "message_truncated": message_truncated,
         "reason": (
             "Codex completed its turn; inspect changes and run independent checks."

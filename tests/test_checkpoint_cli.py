@@ -30,6 +30,7 @@ class CheckpointCliTests(unittest.TestCase):
             "completed": [{"step_id": "build", "evidence_ref": "CI #8", "accepted_by_owner": True}],
             "operation_ids": ["publish-1"],
             "required_approval_ids": ["owner-release"],
+            "estimated_remaining_tokens": 1200,
         }), encoding="utf-8")
         self.checkpoint = self.root / "checkpoint.json"
 
@@ -93,6 +94,17 @@ class CheckpointCliTests(unittest.TestCase):
         code, review = self.review("--accepted-approval", "owner-release")
         self.assertEqual(code, 2)
         self.assertIn("ledger", " ".join(review["reasons"]))
+
+    def test_remaining_budget_is_visible_and_overrun_blocks(self):
+        self.create()
+        code, result = self.review("--ledger-reviewed", "--accepted-approval", "owner-release",
+                                   "--remaining-budget-tokens", "100")
+        self.assertEqual(code, 2)
+        self.assertEqual(result["budget_status"], "estimate_over_budget")
+        code, result = self.review("--ledger-reviewed", "--accepted-approval", "owner-release",
+                                   "--remaining-budget-tokens", "2000")
+        self.assertEqual(code, 0)
+        self.assertEqual(result["budget_status"], "estimate_within_supplied_budget")
 
     def test_rejects_false_plan_and_will_not_overwrite(self):
         self.create()

@@ -57,6 +57,7 @@ class ResumeReview:
     next_step_id: str
     reasons: tuple[str, ...]
     approved_to_execute: bool = False
+    budget_status: str = "unknown"
 
 
 @dataclass(frozen=True, slots=True)
@@ -188,12 +189,14 @@ def review_resume(
     already_executed_operation_ids: tuple[str, ...] | None = None,
     externally_accepted_approval_ids: tuple[str, ...] = (),
     current_context_digest: str | None = None,
+    remaining_budget_tokens: int | None = None,
 ) -> ResumeReview:
     """Require human review even if all caller-supplied preconditions match.
 
     This cannot verify actual filesystem state, external permissions or task success.
     """
     reasons: list[str] = []
+    budget_status = "unknown"
     try:
         _validate_checkpoint(checkpoint)
     except (ValueError, TypeError, AttributeError):
@@ -216,11 +219,22 @@ def review_resume(
         reasons.append("A claimed completed step lacks approval or evidence.")
     if not set(checkpoint.required_approval_ids).issubset(externally_accepted_approval_ids):
         reasons.append("Required external approvals have not all been supplied.")
+    if remaining_budget_tokens is not None:
+        if type(remaining_budget_tokens) is not int or remaining_budget_tokens < 0:
+            reasons.append("Supplied remaining token budget must be a nonnegative integer.")
+        elif checkpoint.estimated_remaining_tokens is None:
+            budget_status = "estimate_unavailable"
+        elif checkpoint.estimated_remaining_tokens > remaining_budget_tokens:
+            budget_status = "estimate_over_budget"
+            reasons.append("Estimated remaining work exceeds the supplied token budget; split or re-plan before resuming.")
+        else:
+            budget_status = "estimate_within_supplied_budget"
     if reasons:
-        return ResumeReview("blocked", checkpoint.task_id, checkpoint.next_step_id, tuple(reasons))
+        return ResumeReview("blocked", checkpoint.task_id, checkpoint.next_step_id, tuple(reasons), budget_status=budget_status)
     return ResumeReview(
         "ready_for_owner_review", checkpoint.task_id, checkpoint.next_step_id,
         ("All supplied revision/duplicate/approval checks passed; executor and owner must verify runtime state.",),
+        budget_status=budget_status,
     )
 
 
