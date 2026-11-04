@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -11,9 +12,10 @@ from .compass import review_project_compass
 from .continuity import git_blob_sha, propose_decision_append, propose_scope_amendment, propose_status_continuity
 from .continuity_store import apply_continuity_proposal, proposal_approval_digest
 from .governance import CheckEvidence, Milestone, MilestoneRequirement, review_project_gates
-from .models import ContextDocument, IntentRequest
+from .models import CapabilityClass, ContextDocument, CostClass, IntentRequest, ModelMetadata
 from .project import optimize_project_prompt
 from .result_contract import RESULT_SCHEMA_VERSION, error_dict, result_dict
+from .router import review_route
 from .service import optimize_prompt
 from .skills import build_skill_artifact
 from .workspace import plan_agent_workspace
@@ -104,6 +106,11 @@ def _build_parser() -> argparse.ArgumentParser:
     gates = subparsers.add_parser("gates", help="Review requirement, milestone and launch readiness evidence.")
     gates.add_argument("--file", required=True, help="Caller-supplied project gate evidence JSON file.")
     gates.add_argument("--json", action="store_true", help="Emit machine-readable readiness findings.")
+
+    route = subparsers.add_parser("route", help="Review a capability/effort recommendation and supplied model catalog.")
+    _add_intent_arguments(route)
+    route.add_argument("--models-file", help="Optional caller-supplied model metadata JSON; no provider discovery.")
+    route.add_argument("--json", action="store_true", help="Emit machine-readable route review.")
 
     return parser
 
@@ -419,6 +426,79 @@ def _run_gates(args: argparse.Namespace) -> int:
     return 0 if review.status == "ready_for_owner_review" else 2
 
 
+def _load_model_catalog(raw_path: str | None) -> tuple[tuple[ModelMetadata, ...], str | None]:
+    if raw_path is None:
+        return (), None
+    source = Path(raw_path)
+    if source.stat().st_size > 100_000:
+        raise ValueError("model catalog exceeds the bounded size limit")
+    raw = source.read_bytes()
+    data = json.loads(raw.decode("utf-8"))
+    if not isinstance(data, dict) or type(data.get("schema_version")) is not int or data["schema_version"] != 1:
+        raise ValueError("model catalog requires schema_version 1")
+    entries = data.get("models")
+    if not isinstance(entries, list) or len(entries) > 128 or any(not isinstance(item, dict) for item in entries):
+        raise ValueError("models must be a bounded list of objects")
+    models = []
+    for item in entries:
+        name, provider, surfaces = item.get("name"), item.get("provider"), item.get("surfaces")
+        if (not isinstance(name, str) or not name.strip() or len(name) > 80
+                or not isinstance(provider, str) or not provider.strip() or len(provider) > 80
+                or not isinstance(surfaces, list) or not surfaces or len(surfaces) > 16
+                or any(not isinstance(surface, str) or not surface.strip() for surface in surfaces)):
+            raise ValueError("each model needs a bounded name, provider and target surfaces")
+        available, verified = item.get("available", False), item.get("verified", False)
+        if not isinstance(available, bool) or not isinstance(verified, bool):
+            raise ValueError("available and verified must be explicit booleans")
+        models.append(ModelMetadata(
+            name.strip(), provider.strip(), tuple(surfaces),
+            CapabilityClass(item.get("capability")), CostClass(item.get("cost")),
+            available=available, verified=verified,
+        ))
+    return tuple(models), hashlib.sha256(raw).hexdigest()
+
+
+def _run_route(args: argparse.Namespace) -> int:
+    models, catalog_sha256 = _load_model_catalog(args.models_file)
+    request, documents = _request_and_documents(args)
+    result = (
+        optimize_project_prompt(request, documents, models=models)
+        if documents else optimize_prompt(request, models=models)
+    )
+    if result.needs_clarification:
+        if args.json:
+            print(json.dumps(result_dict(result), indent=2, ensure_ascii=False))
+        else:
+            for question in result.questions:
+                print(f"? {question}")
+        return 2
+    review = review_route(result.intent, result.policy, models)
+    decision = review.decision
+    payload = {
+        "status": "ready", "target_tool": decision.target_tool,
+        "task_type": result.policy.task_type.value, "risk_level": result.policy.risk_level.value,
+        "required_capability": decision.required_capability.value, "effort": decision.effort.value,
+        "selected_model": decision.selected_model, "fallback": decision.fallback,
+        "reason": decision.reason, "metadata_source": review.metadata_source,
+        "catalog_sha256": catalog_sha256,
+        "candidates": [
+            {"name": item.name, "provider": item.provider,
+             "capability": item.capability.value, "relative_cost": item.cost.value,
+             "eligible": item.eligible, "selected": item.selected, "reasons": list(item.reasons)}
+            for item in review.candidates
+        ],
+    }
+    if args.json:
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+    else:
+        print(f"Route: {decision.target_tool} / {decision.required_capability.value} / effort {decision.effort.value}")
+        print(decision.reason)
+        for item in review.candidates:
+            label = "SELECTED" if item.selected else "ELIGIBLE" if item.eligible else "EXCLUDED"
+            print(f"{label} {item.provider}/{item.name}: {', '.join(item.reasons)}")
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     _configure_output_encoding()
     args = _build_parser().parse_args(argv)
@@ -435,6 +515,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_state(args)
         if args.command == "gates":
             return _run_gates(args)
+        if args.command == "route":
+            return _run_route(args)
     except (OSError, ValueError) as error:
         if getattr(args, "json", False):
             print(json.dumps(error_dict(error), indent=2, ensure_ascii=False))

@@ -87,6 +87,8 @@ The same development flow supports one bounded `docs/SCOPE.md` amendment at a ti
 
 The development `intentos gates` command reads a caller-supplied JSON evidence file and produces a requirement-to-milestone/check report. It keeps proposed, claimed done, verified and owner-approved states distinct. Missing or failed checks block readiness; unreviewed evidence remains unresolved. Even when every supplied check passes, the result is only ready for owner review and never certifies a launch. The evidence references and approval flags are caller assertions, not independent verification by IntentOS.
 
+The development `intentos route` review shows why a caller-supplied model is eligible, excluded, or selected for a task's required capability and effort. It uses relative cost classes, includes a catalog fingerprint for reproducibility, and falls back when compatible verified metadata is missing or names conflict. `available` and `verified` are caller assertions; the review does not query providers or claim live prices.
+
 ### AI agent
 
 Agents should be able to consume IntentOS capabilities through an interoperability layer such as MCP rather than requiring custom integration with every agent product.

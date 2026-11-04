@@ -177,6 +177,8 @@ For projects with a simple `docs/SCOPE.md`, the unreleased `intentos state scope
 
 For a development milestone/launch review, place accepted requirements, milestone states and external check references in a local JSON file, then run `intentos gates --file project-gates.json --json`. The file uses `schema_version: 1` and three arrays: `requirements` (`key`, `outcome`, `checks`, `accepted_by_owner`, `approval_ref`), `milestones` (`key`, `requirement_keys`, `state`, `approval_ref`), and `evidence` (`requirement_key`, `check`, `passed`, `source_ref`, `source_revision`, `independently_reviewed`). States are `proposed`, `done`, `verified` and `approved`; unknown checks remain `null`. The command reports missing, failed and unreviewed gates and never grants launch approval. It is not in Core 1.0.1.
 
+The unreleased `intentos route "Refactor the parser" --target codex --models-file models.json --json` command reviews a recommendation from caller-supplied model metadata. The catalog has `schema_version: 1` and a `models` array with each model's `name`, `provider`, `surfaces`, `capability` (`fast`/`balanced`/`strong`), `cost` (`low`/`medium`/`high`), `available`, and `verified`. Availability and verification default to false when omitted. The report explains eligible and excluded candidates, required capability/effort, relative cost and the catalog SHA-256. No live provider availability or price is claimed; missing or conflicting verified metadata produces a fallback for human review.
+
 You can also run the CLI as a module:
 
 ```bash
