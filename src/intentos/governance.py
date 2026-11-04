@@ -20,6 +20,8 @@ class MilestoneRequirement:
     key: str
     outcome: str
     checks: tuple[str, ...]
+    accepted_by_owner: bool = False
+    approval_ref: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -36,6 +38,8 @@ class CheckEvidence:
 class Milestone:
     key: str
     requirement_keys: tuple[str, ...]
+    state: str = "proposed"  # proposed | done | verified | approved
+    approval_ref: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -105,8 +109,20 @@ def review_project_gates(
     findings: list[GateFinding] = []
     mapped = set()
     for milestone in milestones:
+        if milestone.state not in {"proposed", "done", "verified", "approved"}:
+            raise ValueError("milestone state must be proposed, done, verified or approved")
+        if milestone.state == "proposed":
+            findings.append(GateFinding(milestone.key, "missing", "Milestone is only proposed."))
+        elif milestone.state == "done":
+            findings.append(GateFinding(milestone.key, "needs_review", "Milestone is claimed done but has not been marked verified."))
+        elif milestone.state == "verified":
+            findings.append(GateFinding(milestone.key, "needs_review", "Verified milestone still needs owner approval."))
+        elif not milestone.approval_ref.strip():
+            findings.append(GateFinding(milestone.key, "needs_review", "Approved milestone has no owner approval reference."))
         if not milestone.requirement_keys:
             findings.append(GateFinding(milestone.key, "missing", "Milestone has no mapped requirements."))
+        if len(set(milestone.requirement_keys)) != len(milestone.requirement_keys):
+            findings.append(GateFinding(milestone.key, "needs_review", "Milestone repeats a requirement; review the mapping."))
         for key in milestone.requirement_keys:
             if key not in requirements_by_key:
                 findings.append(GateFinding(f"{milestone.key}:{key}", "missing", "Unknown requirement referenced by milestone."))
@@ -118,7 +134,10 @@ def review_project_gates(
     for item in evidence:
         by_check.setdefault((item.requirement_key, item.check), []).append(item)
     for req in requirements:
-        if not req.outcome.strip() or not req.checks or len(set(req.checks)) != len(req.checks):
+        if req.accepted_by_owner is not True or not req.approval_ref.strip():
+            findings.append(GateFinding(req.key, "missing", "Requirement lacks recorded owner acceptance."))
+        if (not req.outcome.strip() or not req.checks or len(set(req.checks)) != len(req.checks)
+                or any(not check.strip() for check in req.checks)):
             findings.append(GateFinding(req.key, "missing", "Requirement has no usable outcome or unique acceptance checks."))
         for check in req.checks:
             key = (req.key, check)
@@ -130,9 +149,11 @@ def review_project_gates(
             else:
                 item = supplied[0]
                 label = f"{req.key}:{check}"
-                if not item.source_ref.strip() or not item.source_revision.strip() or not item.independently_reviewed or item.passed is None:
+                if (not item.source_ref.strip() or not item.source_revision.strip()
+                        or item.independently_reviewed is not True or item.passed not in (True, False)
+                        or not isinstance(item.passed, bool)):
                     findings.append(GateFinding(label, "needs_review", "Evidence is unreviewed, unpinned or inconclusive.", item.source_ref or None))
-                elif not item.passed:
+                elif item.passed is False:
                     findings.append(GateFinding(label, "failed", "Check failed; milestone is not ready.", item.source_ref))
                 else:
                     findings.append(GateFinding(label, "passed", "Caller states this check has verified external evidence.", item.source_ref))

@@ -164,8 +164,6 @@ intentos compass --authoritative-document docs/PLAN.md \
 
 `compass` reports each extracted claim with its file and line, and labels missing, stale, or unresolved facts. An exact in-scope match needs a file you explicitly designated authoritative; the result does not approve execution or verify the underlying claims. Use `--json` for the review data. This command is not in the published Core 1.0.1 package.
 
-For projects with a simple `docs/SCOPE.md`, the unreleased `intentos state scope` command previews an owner-approved scope amendment. It requires an amendment ID, exact task, reason, and approval reference. The preview shows the diff and approval digest; apply requires rerunning with `--approve-digest DIGEST`. An out-of-scope item moves to the in-scope list only after approval, with an append-only audit entry in the same file. Ambiguous or stale scope requires manual review.
-
 The same unreleased development branch can propose a bounded update to a simple `docs/STATUS.md`:
 
 ```bash
@@ -174,6 +172,10 @@ intentos state status --root . --current-phase "Milestone 2" \
 ```
 
 Review the displayed diff and record its approval digest. Only after explicit owner approval, rerun with the same arguments plus `--approve-digest DIGEST`. `intentos state decision` similarly proposes an append-only decision. These commands write only the two named documents, reject changed source revisions, and do not verify that an evidence reference is truthful. Complex status sections require manual review. They are not in Core 1.0.1.
+
+For projects with a simple `docs/SCOPE.md`, the unreleased `intentos state scope` command previews an owner-approved scope amendment. It requires an amendment ID, exact task, reason, and approval reference. The preview shows the diff and approval digest; apply requires rerunning with `--approve-digest DIGEST`. An out-of-scope item moves to the in-scope list only after approval, with an append-only audit entry in the same file. Ambiguous or stale scope requires manual review.
+
+For a development milestone/launch review, place accepted requirements, milestone states and external check references in a local JSON file, then run `intentos gates --file project-gates.json --json`. The file uses `schema_version: 1` and three arrays: `requirements` (`key`, `outcome`, `checks`, `accepted_by_owner`, `approval_ref`), `milestones` (`key`, `requirement_keys`, `state`, `approval_ref`), and `evidence` (`requirement_key`, `check`, `passed`, `source_ref`, `source_revision`, `independently_reviewed`). States are `proposed`, `done`, `verified` and `approved`; unknown checks remain `null`. The command reports missing, failed and unreviewed gates and never grants launch approval. It is not in Core 1.0.1.
 
 You can also run the CLI as a module:
 

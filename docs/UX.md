@@ -85,6 +85,8 @@ The development `intentos state` CLI previews exact status or decision changes b
 
 The same development flow supports one bounded `docs/SCOPE.md` amendment at a time. It shows whether the task was unknown or explicitly out of scope, requires an owner approval reference, and records the change in that document's amendment history. Conflict, stale source, duplicate amendment ID, and unsupported Markdown layouts stop for review. A scope amendment is not a general permission grant; task risk and execution approval remain separate.
 
+The development `intentos gates` command reads a caller-supplied JSON evidence file and produces a requirement-to-milestone/check report. It keeps proposed, claimed done, verified and owner-approved states distinct. Missing or failed checks block readiness; unreviewed evidence remains unresolved. Even when every supplied check passes, the result is only ready for owner review and never certifies a launch. The evidence references and approval flags are caller assertions, not independent verification by IntentOS.
+
 ### AI agent
 
 Agents should be able to consume IntentOS capabilities through an interoperability layer such as MCP rather than requiring custom integration with every agent product.

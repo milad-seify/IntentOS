@@ -10,6 +10,7 @@ from typing import Sequence
 from .compass import review_project_compass
 from .continuity import git_blob_sha, propose_decision_append, propose_scope_amendment, propose_status_continuity
 from .continuity_store import apply_continuity_proposal, proposal_approval_digest
+from .governance import CheckEvidence, Milestone, MilestoneRequirement, review_project_gates
 from .models import ContextDocument, IntentRequest
 from .project import optimize_project_prompt
 from .result_contract import RESULT_SCHEMA_VERSION, error_dict, result_dict
@@ -99,6 +100,10 @@ def _build_parser() -> argparse.ArgumentParser:
             action_parser.add_argument("--task", required=True, help="Exact task to add to approved scope.")
             action_parser.add_argument("--reason", required=True, help="Single-line reason for scope change.")
             action_parser.add_argument("--approval-ref", required=True, help="External owner approval reference.")
+
+    gates = subparsers.add_parser("gates", help="Review requirement, milestone and launch readiness evidence.")
+    gates.add_argument("--file", required=True, help="Caller-supplied project gate evidence JSON file.")
+    gates.add_argument("--json", action="store_true", help="Emit machine-readable readiness findings.")
 
     return parser
 
@@ -327,6 +332,93 @@ def _run_state(args: argparse.Namespace) -> int:
     return 2 if proposal.action == "NEEDS_REVIEW" else 0
 
 
+def _run_gates(args: argparse.Namespace) -> int:
+    source = Path(args.file)
+    if source.stat().st_size > 200_000:
+        raise ValueError("gate evidence file exceeds the bounded size limit")
+    data = json.loads(source.read_text(encoding="utf-8"))
+    if not isinstance(data, dict) or type(data.get("schema_version")) is not int or data["schema_version"] != 1:
+        raise ValueError("gate evidence requires schema_version 1")
+
+    def entries(name):
+        values = data.get(name)
+        if not isinstance(values, list) or any(not isinstance(item, dict) for item in values):
+            raise ValueError(f"{name} must be a list of objects")
+        return values
+
+    def string(item, name, default=None):
+        value = item.get(name, default)
+        if not isinstance(value, str):
+            raise ValueError(f"{name} must be text")
+        return value
+
+    def strings(item, name):
+        value = item.get(name)
+        if not isinstance(value, list) or any(not isinstance(part, str) for part in value):
+            raise ValueError(f"{name} must be a list of text values")
+        return tuple(value)
+
+    def boolean(item, name, default=False):
+        value = item.get(name, default)
+        if not isinstance(value, bool):
+            raise ValueError(f"{name} must be true or false")
+        return value
+
+    requirements = tuple(
+        MilestoneRequirement(
+            string(item, "key"), string(item, "outcome"), strings(item, "checks"),
+            boolean(item, "accepted_by_owner"), string(item, "approval_ref", ""),
+        )
+        for item in entries("requirements")
+    )
+    milestones = tuple(
+        Milestone(
+            string(item, "key"), strings(item, "requirement_keys"),
+            string(item, "state", "proposed"), string(item, "approval_ref", ""),
+        )
+        for item in entries("milestones")
+    )
+    evidence = tuple(
+        CheckEvidence(
+            string(item, "requirement_key"), string(item, "check"),
+            item.get("passed"), string(item, "source_ref", ""),
+            string(item, "source_revision", ""),
+            boolean(item, "independently_reviewed"),
+        )
+        for item in entries("evidence")
+    )
+    for item in evidence:
+        if item.passed is not None and not isinstance(item.passed, bool):
+            raise ValueError("passed must be true, false or null")
+    review = review_project_gates(requirements, milestones, evidence)
+    payload = {
+        "status": review.status,
+        "launch_approved": review.launch_approved,
+        "requirements": [
+            {"key": item.key, "outcome": item.outcome, "checks": list(item.checks),
+             "accepted_by_owner": item.accepted_by_owner, "approval_ref": item.approval_ref}
+            for item in requirements
+        ],
+        "milestones": [
+            {"key": item.key, "requirement_keys": list(item.requirement_keys),
+             "state": item.state, "approval_ref": item.approval_ref}
+            for item in milestones
+        ],
+        "findings": [
+            {"key": finding.key, "status": finding.status, "reason": finding.reason,
+             "evidence_ref": finding.evidence_ref}
+            for finding in review.findings
+        ],
+    }
+    if args.json:
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+    else:
+        print(f"Project gates: {review.status} — caller-supplied evidence; launch approval is separate")
+        for finding in review.findings:
+            print(f"{finding.status.upper()} {finding.key}: {finding.reason}")
+    return 0 if review.status == "ready_for_owner_review" else 2
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     _configure_output_encoding()
     args = _build_parser().parse_args(argv)
@@ -341,6 +433,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_compass(args)
         if args.command == "state":
             return _run_state(args)
+        if args.command == "gates":
+            return _run_gates(args)
     except (OSError, ValueError) as error:
         if getattr(args, "json", False):
             print(json.dumps(error_dict(error), indent=2, ensure_ascii=False))
