@@ -8,10 +8,10 @@ Core 1.0.1 is the current public PyPI release, distributing the merged review-on
 
 ## Post-Phase-7 development program
 
-- **Current stage:** Stage A **completed and merged** in [PR #41](https://github.com/milad-seify/IntentOS/pull/41); Stage B1 **internal pilot merged in [PR #42](https://github.com/milad-seify/IntentOS/pull/42)**, without stable-product promotion; B2 assessed in [PR #43](https://github.com/milad-seify/IntentOS/pull/43) and deferred pending evidence; C1 assessment merged in [PR #44](https://github.com/milad-seify/IntentOS/pull/44), with implementation deferred; D1 adaptive delegation/resilience assessment only.
-- **Source of truth:** verified main + accepted decisions + observed evidence. D1 assessment baseline: `371e4b8d17b64a852d85c68216c42a04550f54cc` ([green main CI](https://github.com/milad-seify/IntentOS/actions/runs/41804283608), seven jobs). Earlier assessment baselines remain historical in their documents.
-- **Active scope:** B1 remains an internal pilot; B2 and C1 runtime implementations are deferred pending evidence; only a [D1 adaptive delegation/resilience needs assessment](D1_ADAPTIVE_RESILIENCE_ASSESSMENT.md) is active. Follow the [finite program](POST_PHASE_7_PROGRAM.md) and [candidate registry](FUTURE_CAPABILITIES.md).
-- **Authorization boundary:** B1 stable promotion and B2/C1/D1 implementation each require a separate evidence gate and explicit approval. No new public API/CLI/MCP/editor surface, provider telemetry, token/quota reservation, automated runtime recovery, automatic state write, milestone/launch enforcement or agent orchestration.
+- **Current stage:** Stage A **completed and merged** in [PR #41](https://github.com/milad-seify/IntentOS/pull/41); Stage B1 **internal pilot merged in [PR #42](https://github.com/milad-seify/IntentOS/pull/42)**, without stable-product promotion; B2 assessed in [PR #43](https://github.com/milad-seify/IntentOS/pull/43) and deferred pending evidence; C1 assessment merged in [PR #44](https://github.com/milad-seify/IntentOS/pull/44), with implementation deferred; D1 assessment merged in [PR #45](https://github.com/milad-seify/IntentOS/pull/45), with implementation deferred; Stage E stabilization and feature-freeze readiness review active (freeze not yet accepted).
+- **Source of truth:** verified main + accepted decisions + observed evidence. Stage E source-review baseline: `976db7ef888d26aca8804490147e384273cfa9b7` ([green main CI](https://github.com/milad-seify/IntentOS/actions/runs/41805348708), seven jobs). Older planning/assessment baselines remain historical in their documents.
+- **Active scope:** [Stage E compatibility, safety, test and freeze-readiness review](STAGE_E_FREEZE_READINESS.md) only. B1 is an internal non-public pilot; B2/C1/D1 implementation is deferred. Follow the [finite program](POST_PHASE_7_PROGRAM.md) and [candidate registry](FUTURE_CAPABILITIES.md).
+- **Authorization boundary:** Stage E reviews existing source; freeze declaration is pending accepted PR, post-merge main CI and a pinned final SHA. B1 stable promotion and B2/C1/D1 implementation require separate evidence/approvals. No new public API/CLI/MCP/editor surface, provider telemetry, automatic recovery, workspace mutation or agent orchestration. Phase 8 remains separately gated.
 - **Blocked/unknown:** independent, repeated new-product evidence for the proposed continuity features is not yet established; Phase 7C explicitly did not promote a new capability. A bounded pilot or separately approved reversible prototype must justify promotion.
 - **Deferred:** Phase 8 8A/8B/8C sessions and Idea-to-Production dogfooding until feature freeze; adaptive routing, token budgets/recovery, feedback-based routing and cross-agent execution handoff unless justified and independently approved.
 
@@ -60,7 +60,7 @@ No slice is complete: 8A sessions have not begun, 8B is at the manual-template s
 
 ## Current verification baseline
 
-120 Python unit tests, including review-only classification/policy, release identity, artifact, workflow permission, Marketplace package, launcher, and main-history regressions, plus CLI smoke checks and dedicated integration checks:
+Historical pre-B1 baseline: 120 Python unit tests, plus subsequent internal B1 focused regression cases; use the exact-head CI run for the current pass/fail gate rather than treating that old count as a fresh count. Coverage includes review-only classification/policy, release identity, artifact, workflow permission, Marketplace package, launcher and main-history regressions, plus CLI smoke and dedicated integration checks:
 
 - in-memory MCP v2 protocol smoke
 - stdio subprocess MCP host-parity dogfood across four representative cases
@@ -136,7 +136,7 @@ The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-Review the [D1 needs/scope assessment](D1_ADAPTIVE_RESILIENCE_ASSESSMENT.md): compare existing conservative routing, caller-supplied metadata, evaluation/run-record evidence and manual external handoff before choosing any adaptive experiment. If comparable correctness-first outcome evidence or repeated blocking friction is absent, defer D1 and consider Stage E under **separate approval**. B2/C1 implementations remain deferred. Do not start D1 runtime, feature freeze or operational Phase 8 automatically. Accepted slices culminate in feature freeze, then separately authorized Phase 8 and Idea-to-Production dogfooding. Release procedures remain in [RELEASING.md](RELEASING.md).
+Review [Stage E freeze-readiness evidence](STAGE_E_FREEZE_READINESS.md), confirm the documentation-only candidate PR's exact-head CI, record maintainer acceptance, and verify post-merge main CI **before** declaring feature freeze or pinning its final SHA. Do not publish a new package with the existing `1.0.1` version, mistake internal B1 for a public feature, start Phase 8, or begin an Idea-to-Production app without distinct authorization. Accepted slices culminate in feature freeze, then separately authorized Phase 8 and Idea-to-Production dogfooding. Release procedures remain in [RELEASING.md](RELEASING.md).
 
 ## Constraints carried forward
 
