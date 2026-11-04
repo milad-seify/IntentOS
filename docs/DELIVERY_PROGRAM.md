@@ -1,6 +1,6 @@
 # Full-Scope Delivery Program — one finite implementation path
 
-**Status:** OWNER-DIRECTED FULL FEATURE SCOPE; all ten feature families have a stacked development candidate, **not yet owner-accepted or frozen**.
+**Status:** OWNER-DIRECTED F01–F10 DELIVERY; the complete integrated source candidate is in [PR #65](https://github.com/milad-seify/IntentOS/pull/65), with conditional **final source Feature Freeze** resolved only by that PR's actual merge, exact-SHA green main CI and closeout evidence under [D-032](DECISIONS.md). No public release or Phase 8 activity is implied.
 **Decision date:** 2026-11-04. **Starting verified `main`:** `0857d9063811266d4e63d43fccfe259f240c46c5`; [main CI 41822005898](https://github.com/milad-seify/IntentOS/actions/runs/41822005898) succeeded 7/7. **No new Feature Freeze is effective.**
 
 ## Goal and decision change
