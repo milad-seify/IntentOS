@@ -61,6 +61,36 @@ class ProjectCompassPilotTests(unittest.TestCase):
         self.assertTrue(review.task_scope.approval_required)
         self.assertEqual(review.task_scope.evidence[0].path, "docs/PLAN.md")
 
+    def test_non_authoritative_in_scope_does_not_approve_task(self):
+        doc = ContextDocument(
+            "notes/agent_suggestion.md", "## In Scope\n- Deploy database\n",
+            authoritative=False,
+        )
+        review = review_project_compass((doc,), proposed_task="Deploy database")
+        self.assertEqual(review.task_scope.status, "unknown")
+        self.assertTrue(review.task_scope.approval_required)
+        self.assertEqual(review.task_scope.evidence[0].path, doc.path)
+        self.assertFalse(review.task_scope.evidence[0].authoritative)
+
+    def test_caller_designated_authoritative_scope_is_advisory_only(self):
+        doc = ContextDocument(
+            "docs/APPROVED_SCOPE.md", "## In Scope\n- Deploy database\n",
+            authoritative=True,
+        )
+        review = review_project_compass((doc,), proposed_task="Deploy database")
+        self.assertEqual(review.task_scope.status, "in_scope")
+        self.assertFalse(review.task_scope.approval_required)
+        self.assertTrue(review.task_scope.evidence[0].authoritative)
+
+    def test_non_authoritative_out_of_scope_blocks_authoritative_allow(self):
+        docs = (
+            ContextDocument("docs/SCOPE.md", "## In Scope\n- Add Redis cache\n", authoritative=True),
+            ContextDocument("notes/concern.md", "## Out of Scope\n- Add Redis cache\n"),
+        )
+        review = review_project_compass(docs, proposed_task="Add Redis cache")
+        self.assertEqual(review.task_scope.status, "conflicting")
+        self.assertTrue(review.task_scope.approval_required)
+
     def test_unmatched_or_similar_task_is_unknown_not_guessed(self):
         for task in ("Deploy Redis", "Build a dashboard", ""):
             with self.subTest(task=task):
