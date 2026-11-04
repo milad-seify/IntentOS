@@ -190,6 +190,10 @@ Other IDE, agent, community, and provider/model adapters were candidates, not ma
 
 The absence of sufficient demand is the Phase 7 decision, not a failed or abandoned direction. Phase 7 overall is complete.
 
+## Latest owner-authorized full-feature delivery (2026-11-04)
+
+**D-031 supersedes the historical early-final-Freeze plan described below for future work.** All ten F01–F10 outcomes are included in [integrated PR #65](https://github.com/milad-seify/IntentOS/pull/65), including B1 access and B2/C1/D1 implementations. Verify its actual Merge and exact-SHA CI/closeout evidence for final pre-validation source acceptance as governed by [D-032](DECISIONS.md). The earlier stacked-PR references below are historical provenance, not a mandate to merge each PR. The finite workstreams used Phase 0–7 foundations: project governance (F05–F08), agent/routing/resilience (F03/F04/F09), evidence/UX (F10 with F01/F02 regressions), and one consolidated developer gate. A **new Feature Freeze is not effective** until separately accepted. Operational Phase 8 and Idea-to-Production dogfood remain owner-led after that decision; all protocol thresholds remain unchanged. Old stage labels and source pins below are historical provenance.
+
 ## Post-Phase-7 Capability Evolution Program — A COMPLETE; B1 INTERNAL; B2/C1/D1 DEFERRED; E READINESS VERIFIED / FINAL FREEZE DEFERRED
 
 This is a finite, evidence-gated development program between completed Phase 7 and operational Phase 8. It is **not a renumbered official Phase**. The [Stage A baseline/plan](POST_PHASE_7_PROGRAM.md) and [candidate capability inventory](FUTURE_CAPABILITIES.md) distinguish planning priorities from approved implementation.
@@ -214,7 +218,7 @@ Observe public installations outside the IntentOS checkout through preparation a
 
 ### 8B — Outcome evidence workflow — GATED; NOT COMPLETE
 
-Start with the protocol's bounded manual worksheet for shared conditions and raw/prepared outcomes. Reuse existing evaluation/run-record primitives, preserve unknown metrics and privacy, and record evidence-entry friction. A comparison CLI remains conditional; it is not implemented or approved by this protocol.
+Start with the protocol's bounded manual worksheet for shared conditions and raw/prepared outcomes. Reuse existing evaluation/run-record primitives, preserve unknown metrics and privacy, and record evidence-entry friction. This protocol did not authorize a comparison CLI; later D-031 authorized a development outcome CLI as part of F10. Its synthetic developer tests do not satisfy the Phase 8 evidence target.
 
 ### 8C — External evidence gate — GATED; NOT COMPLETE
 

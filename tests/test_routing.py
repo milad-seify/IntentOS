@@ -8,6 +8,7 @@ from intentos import (
     optimize_prompt,
 )
 from intentos.models import EffortLevel
+from intentos.router import review_route
 
 
 class RoutingTests(unittest.TestCase):
@@ -76,6 +77,54 @@ class RoutingTests(unittest.TestCase):
         )
 
         self.assertEqual(result.routing.selected_model, "verified")
+
+    def test_unverified_only_catalog_falls_back_without_claiming_capability(self) -> None:
+        models = (
+            ModelMetadata("unverified", "example", ("codex",), CapabilityClass.STRONG, CostClass.LOW, verified=False),
+        )
+        result = optimize_prompt(
+            IntentRequest("Change production authentication security", target_tool="codex"),
+            models=models,
+        )
+        self.assertTrue(result.routing.fallback)
+        self.assertIsNone(result.routing.selected_model)
+        self.assertIn("after checking", result.routing.reason)
+
+    def test_duplicate_model_names_are_ambiguous(self) -> None:
+        models = (
+            ModelMetadata("Same", "provider-a", ("codex",), CapabilityClass.BALANCED, CostClass.LOW),
+            ModelMetadata("same", "provider-b", ("codex",), CapabilityClass.STRONG, CostClass.HIGH),
+        )
+        result = optimize_prompt(IntentRequest("Refactor the parser", target_tool="codex"), models=models)
+        self.assertTrue(result.routing.fallback)
+        self.assertIsNone(result.routing.selected_model)
+        self.assertIn("duplicate", result.routing.reason)
+        review = review_route(result.intent, result.policy, models)
+        self.assertTrue(all("duplicate model name" in item.reasons for item in review.candidates))
+
+    def test_candidate_review_explains_selection_and_rejections(self) -> None:
+        models = (
+            ModelMetadata("fast", "provider-a", ("codex",), CapabilityClass.FAST, CostClass.LOW),
+            ModelMetadata("offline", "provider-b", ("codex",), CapabilityClass.BALANCED, CostClass.LOW, available=False),
+            ModelMetadata("wrong-tool", "provider-c", ("chatgpt",), CapabilityClass.BALANCED, CostClass.LOW),
+            ModelMetadata("unknown", "provider-d", ("codex",), CapabilityClass.BALANCED, CostClass.LOW, verified=False),
+            ModelMetadata("expensive", "provider-e", ("codex",), CapabilityClass.BALANCED, CostClass.HIGH),
+            ModelMetadata("chosen", "provider-f", ("codex",), CapabilityClass.BALANCED, CostClass.MEDIUM),
+        )
+        result = optimize_prompt(IntentRequest("Refactor the parser", target_tool="codex"), models=models)
+        review = review_route(result.intent, result.policy, models)
+        self.assertEqual(review.decision, result.routing)
+        self.assertEqual(result.routing.selected_model, "chosen")
+        self.assertIn("provider-f", result.routing.reason)
+        self.assertIn("medium relative cost", result.routing.reason)
+        self.assertIn("live availability and price were not checked", result.routing.reason)
+        by_name = {item.name: item for item in review.candidates}
+        self.assertIn("capability is below", by_name["fast"].reasons[0])
+        self.assertIn("unavailable", by_name["offline"].reasons[0])
+        self.assertIn("unsupported", by_name["wrong-tool"].reasons[0])
+        self.assertIn("not caller-verified", by_name["unknown"].reasons[0])
+        self.assertTrue(by_name["chosen"].selected)
+        self.assertTrue(by_name["expensive"].eligible)
 
 
 if __name__ == "__main__":
