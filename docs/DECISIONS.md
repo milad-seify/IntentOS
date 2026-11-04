@@ -168,3 +168,13 @@ IntentOS remains a **vendor-neutral, advisory control-and-trust layer**. Externa
 After Stage A acceptance, the maintainer gave separate approval to proceed with B1. Existing Phase 7C evidence did **not** satisfy repeated-feature promotion criteria, so this is an explicit, bounded pre-gate **prototype exception**, not a declaration of demonstrated user benefit. The experiment is limited to caller-supplied, human-readable project documents, deterministic source-grounded scope/status review, uncertainty handling, and focused tests. It does not change published v1 surfaces or give execution/permission authority.
 
 The implementation remains internal and review-only, with [acceptance criteria and limitations](B1_PROJECT_COMPASS_PILOT.md). Record CI evidence and independently review feasibility; subsequent API/UX promotion, B2, C1, D1, and Phase 8 all need separate decisions. If the evidence fails, do not represent the pilot as product-ready.
+
+## D-027 — Stage E source-freeze readiness, pending final acceptance
+
+**Status:** **PROPOSED / NOT YET ACCEPTED** (2026-11-04). This record proposes the freeze gate; it is not itself a feature-freeze declaration.
+
+The [Stage E readiness review](STAGE_E_FREEZE_READINESS.md) checked `main` `976db7ef888d26aca8804490147e384273cfa9b7` and [seven green CI jobs](https://github.com/milad-seify/IntentOS/actions/runs/41805348708). All 19 shared Python modules matched the published Core `v1.0.1` tag; four principal VS Code files matched `vscode-v0.1.1`. New `intentos.compass` B1 is internal only; B2/C1/D1 implementation remains deferred. Existing public contracts are preserved. The review scoped trust and privacy boundaries but did **not** perform new independent security certification, public first-use observation or full VS Code Extension Host run.
+
+**Proposed consequence:** after an explicitly accepted documentation-only freeze PR, its exact-head CI, a verified merge and green post-merge main CI, pin the final accepted SHA and record **FEATURE FROZEN** in a separate closeout decision/status update. The public distribution remains Core `1.0.1` and VS Code `0.1.1`, which do not expose B1; any future B1 publication needs separate versioned release/promotion. A local wheel rebuilt from post-release source carries modified content under `1.0.1` metadata and **must not** be republished as the existing public release.
+
+Do not start Phase 8 or Idea-to-Production dogfooding without their separate authorizations. Material post-freeze correctness/security changes require an approved, re-verified freeze baseline, not a silent change.
