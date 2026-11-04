@@ -155,6 +155,15 @@ intentos workspace \
 
 `workspace` and `skill` are **proposal-first**: they emit reviewable artifacts; they do not silently mutate or install anything in your repository.
 
+On the unreleased development branch, review project state and scope from files you choose:
+
+```bash
+intentos compass --authoritative-document docs/PLAN.md \
+  --document docs/STATUS.md --task "Review API"
+```
+
+`compass` reports each extracted claim with its file and line, and labels missing, stale, or unresolved facts. An exact in-scope match needs a file you explicitly designated authoritative; the result does not approve execution or verify the underlying claims. Use `--json` for the review data. This command is not in the published Core 1.0.1 package.
+
 You can also run the CLI as a module:
 
 ```bash

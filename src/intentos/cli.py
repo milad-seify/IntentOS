@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
+from .compass import review_project_compass
 from .models import ContextDocument, IntentRequest
 from .project import optimize_project_prompt
 from .result_contract import RESULT_SCHEMA_VERSION, error_dict, result_dict
@@ -63,6 +64,15 @@ def _build_parser() -> argparse.ArgumentParser:
     workspace.add_argument("--phase", required=True, help="Current project phase/status text.")
     workspace.add_argument("--document", action="append", default=[], help="Existing context document; repeatable.")
     workspace.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
+
+    compass = subparsers.add_parser("compass", help="Review supplied project goals, state, and scope.")
+    compass.add_argument("--document", action="append", default=[], help="Project document; repeatable.")
+    compass.add_argument(
+        "--authoritative-document", action="append", default=[],
+        help="Project document explicitly designated as authoritative; repeatable.",
+    )
+    compass.add_argument("--task", default="", help="Optional task to compare with explicit scope items.")
+    compass.add_argument("--json", action="store_true", help="Emit machine-readable review evidence.")
 
     return parser
 
@@ -164,6 +174,60 @@ def _run_workspace(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_compass(args: argparse.Namespace) -> int:
+    paths = [(path, False) for path in args.document] + [
+        (path, True) for path in args.authoritative_document
+    ]
+    if not paths:
+        raise ValueError("Supply at least one --document or --authoritative-document.")
+    documents = tuple(
+        ContextDocument(str(Path(path)), Path(path).read_text(encoding="utf-8"), authoritative)
+        for path, authoritative in paths
+    )
+    review = review_project_compass(documents, proposed_task=args.task)
+
+    def fact_payload(fact):
+        return {
+            "text": fact.text,
+            "path": fact.path,
+            "line": fact.line,
+            "stale": fact.stale,
+            "authoritative": fact.authoritative,
+        }
+
+    if args.json:
+        payload = {
+            "schema_version": RESULT_SCHEMA_VERSION,
+            "status": "review",
+            "fields": {
+                field.name: {
+                    "status": field.status,
+                    "value": field.value,
+                    "evidence": [fact_payload(fact) for fact in field.evidence],
+                }
+                for field in review.fields
+            },
+            "task_scope": {
+                "status": review.task_scope.status,
+                "explanation": review.task_scope.explanation,
+                "scope_review_required": review.task_scope.scope_review_required,
+                "evidence": [fact_payload(fact) for fact in review.task_scope.evidence],
+            },
+        }
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+    else:
+        print("Project Compass — supplied source claims; review before acting")
+        for field in review.fields:
+            print(f"{field.name.replace('_', ' ').title()}: {field.status}")
+            for fact in field.evidence:
+                label = " (caller-designated authoritative)" if fact.authoritative else ""
+                print(f"  {fact.text} — {fact.path}:{fact.line}{label}")
+        print(f"Task scope: {review.task_scope.status} — {review.task_scope.explanation}")
+        for fact in review.task_scope.evidence:
+            print(f"  {fact.text} — {fact.path}:{fact.line}")
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     _configure_output_encoding()
     args = _build_parser().parse_args(argv)
@@ -174,6 +238,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_skill(args)
         if args.command == "workspace":
             return _run_workspace(args)
+        if args.command == "compass":
+            return _run_compass(args)
     except (OSError, ValueError) as error:
         if getattr(args, "json", False):
             print(json.dumps(error_dict(error), indent=2, ensure_ascii=False))

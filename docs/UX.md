@@ -79,6 +79,8 @@ Advanced users, CI systems, scripts, and other developer tools should use the CL
 
 The CLI remains a first-class interface because it is portable, scriptable, testable, and independent of a specific IDE.
 
+The development `intentos compass` CLI exposes the existing Project Compass reviewer through explicitly supplied local documents. It shows source file and line for each claim, distinguishes missing, stale, and unresolved state, and requires the caller to designate authoritative scope sources. Its scope result is advisory and never grants execution permission. The published Core 1.0.1 CLI does not include this command.
+
 ### AI agent
 
 Agents should be able to consume IntentOS capabilities through an interoperability layer such as MCP rather than requiring custom integration with every agent product.
