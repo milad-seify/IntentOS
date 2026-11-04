@@ -164,6 +164,15 @@ intentos compass --authoritative-document docs/PLAN.md \
 
 `compass` reports each extracted claim with its file and line, and labels missing, stale, or unresolved facts. An exact in-scope match needs a file you explicitly designated authoritative; the result does not approve execution or verify the underlying claims. Use `--json` for the review data. This command is not in the published Core 1.0.1 package.
 
+The same unreleased development branch can propose a bounded update to a simple `docs/STATUS.md`:
+
+```bash
+intentos state status --root . --current-phase "Milestone 2" \
+  --evidence "owner-reviewed PR #12"
+```
+
+Review the displayed diff and record its approval digest. Only after explicit owner approval, rerun with the same arguments plus `--approve-digest DIGEST`. `intentos state decision` similarly proposes an append-only decision. These commands write only the two named documents, reject changed source revisions, and do not verify that an evidence reference is truthful. Complex status sections require manual review. They are not in Core 1.0.1.
+
 You can also run the CLI as a module:
 
 ```bash

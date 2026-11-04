@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import argparse
+import difflib
 import json
 import sys
 from pathlib import Path
 from typing import Sequence
 
 from .compass import review_project_compass
+from .continuity import git_blob_sha, propose_decision_append, propose_status_continuity
+from .continuity_store import apply_continuity_proposal, proposal_approval_digest
 from .models import ContextDocument, IntentRequest
 from .project import optimize_project_prompt
 from .result_contract import RESULT_SCHEMA_VERSION, error_dict, result_dict
@@ -73,6 +76,24 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     compass.add_argument("--task", default="", help="Optional task to compare with explicit scope items.")
     compass.add_argument("--json", action="store_true", help="Emit machine-readable review evidence.")
+
+    state = subparsers.add_parser("state", help="Review or apply an approved project-state update.")
+    state_actions = state.add_subparsers(dest="state_action", required=True)
+    for action in ("status", "decision"):
+        action_parser = state_actions.add_parser(action)
+        action_parser.add_argument("--root", default=".", help="Project root containing docs/STATUS.md and docs/DECISIONS.md.")
+        action_parser.add_argument("--approve-digest", help="Apply only the exact proposal digest reviewed by the owner.")
+        action_parser.add_argument("--json", action="store_true", help="Emit machine-readable proposal or apply result.")
+        if action == "status":
+            action_parser.add_argument("--current-phase", help="New single-line current phase.")
+            action_parser.add_argument("--next-action", help="New single-line next action.")
+            action_parser.add_argument("--evidence", action="append", default=[], help="External review evidence reference; repeatable.")
+            action_parser.add_argument("--related-document", action="append", default=[], help="Additional context for conflict review; repeatable.")
+        else:
+            action_parser.add_argument("--decision-id", required=True, help="New decision ID, e.g. D-032.")
+            action_parser.add_argument("--title", required=True, help="Single-line decision title.")
+            action_parser.add_argument("--body", required=True, help="Single-line approved decision text.")
+            action_parser.add_argument("--approval-ref", required=True, help="External human approval reference.")
 
     return parser
 
@@ -228,6 +249,72 @@ def _run_compass(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_state(args: argparse.Namespace) -> int:
+    project_root = Path(args.root).resolve(strict=True)
+    relative = "docs/STATUS.md" if args.state_action == "status" else "docs/DECISIONS.md"
+    target = project_root / relative
+    content = target.read_bytes().decode("utf-8")
+    document = ContextDocument(relative, content, authoritative=True)
+    expected = git_blob_sha(content)
+    if args.state_action == "status":
+        related_documents = []
+        for raw_path in args.related_document:
+            selected = Path(raw_path)
+            if not selected.is_absolute():
+                selected = project_root / selected
+            selected = selected.resolve(strict=True)
+            if not selected.is_relative_to(project_root) or not selected.is_file():
+                raise ValueError("related source must be a project file")
+            related_documents.append(ContextDocument(
+                selected.relative_to(project_root).as_posix(),
+                selected.read_bytes().decode("utf-8"),
+                authoritative=selected.name in _AUTHORITATIVE_NAMES,
+            ))
+        proposal = propose_status_continuity(
+            document, expected_blob_sha=expected, evidence_refs=tuple(args.evidence),
+            new_current_phase=args.current_phase, new_next_action=args.next_action,
+            related_documents=tuple(related_documents),
+        )
+    else:
+        proposal = propose_decision_append(
+            document, expected_blob_sha=expected, decision_id=args.decision_id,
+            title=args.title, decision_body=args.body, approval_ref=args.approval_ref,
+        )
+    if args.approve_digest:
+        applied = apply_continuity_proposal(
+            Path(args.root), proposal, approved_digest=args.approve_digest,
+        )
+        payload = {"status": applied.status, "path": applied.path, "blob_sha": applied.blob_sha}
+        if args.json:
+            print(json.dumps(payload, indent=2, ensure_ascii=False))
+        else:
+            print(f"{applied.status.upper()} {applied.path} — {applied.blob_sha}")
+        return 0
+
+    digest = proposal_approval_digest(proposal) if proposal.action == "UPDATE" else None
+    payload = {
+        "status": proposal.action.lower(), "path": proposal.path,
+        "expected_blob_sha": proposal.expected_blob_sha,
+        "proposed_content": proposal.proposed_content,
+        "reasons": list(proposal.reasons), "evidence_refs": list(proposal.evidence_refs),
+        "related_source_fingerprints": [list(item) for item in proposal.related_source_fingerprints],
+        "requires_human_approval": proposal.requires_human_approval,
+        "approval_digest": digest,
+    }
+    if args.json:
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+    else:
+        print(f"{proposal.action} {proposal.path} — {proposal.reasons[0]}")
+        if digest is not None:
+            print("Review this exact change before explicitly approving it:")
+            print("".join(difflib.unified_diff(
+                content.splitlines(keepends=True), proposal.proposed_content.splitlines(keepends=True),
+                fromfile=f"{relative} (current)", tofile=f"{relative} (proposed)",
+            )), end="")
+            print(f"Approval digest: {digest}")
+    return 2 if proposal.action == "NEEDS_REVIEW" else 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     _configure_output_encoding()
     args = _build_parser().parse_args(argv)
@@ -240,6 +327,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_workspace(args)
         if args.command == "compass":
             return _run_compass(args)
+        if args.command == "state":
+            return _run_state(args)
     except (OSError, ValueError) as error:
         if getattr(args, "json", False):
             print(json.dumps(error_dict(error), indent=2, ensure_ascii=False))

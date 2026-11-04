@@ -32,6 +32,7 @@ class ContinuityProposal:
     reasons: tuple[str, ...]
     evidence_refs: tuple[str, ...] = ()
     requires_human_approval: bool = True
+    related_source_fingerprints: tuple[tuple[str, str], ...] = ()
 
 
 def git_blob_sha(content: str) -> str:
@@ -47,8 +48,12 @@ def _proposal(
     reason: str,
     proposed: str | None = None,
     refs: tuple[str, ...] = (),
+    related_source_fingerprints: tuple[tuple[str, str], ...] = (),
 ) -> ContinuityProposal:
-    return ContinuityProposal(action, document.path, expected_blob_sha, proposed, (reason,), refs)
+    return ContinuityProposal(
+        action, document.path, expected_blob_sha, proposed, (reason,), refs,
+        related_source_fingerprints=related_source_fingerprints,
+    )
 
 
 def _validate_source(document: ContextDocument, expected_blob_sha: str) -> str | None:
@@ -136,6 +141,9 @@ def propose_status_continuity(
     paths = [x.path.replace("\\", "/").casefold() for x in (document, *related_documents)]
     if len(set(paths)) != len(paths):
         return _proposal("NEEDS_REVIEW", document, expected_blob_sha, "Duplicate context paths require review.")
+    related_fingerprints = tuple(
+        (related.path, git_blob_sha(related.content)) for related in related_documents
+    )
     report = review_project_compass((document, *related_documents))
     if new_current_phase is not None and report.field("current_phase").status in ("unresolved", "stale"):
         return _proposal("NEEDS_REVIEW", document, expected_blob_sha, "Current phase sources conflict or are explicitly stale.")
@@ -149,7 +157,10 @@ def propose_status_continuity(
                 return _proposal("NEEDS_REVIEW", document, expected_blob_sha, reason)
             proposed = changed
     if proposed == document.content:
-        return _proposal("KEEP", document, expected_blob_sha, "Supplied state is already current.", refs=evidence_refs)
+        return _proposal(
+            "KEEP", document, expected_blob_sha, "Supplied state is already current.",
+            refs=evidence_refs, related_source_fingerprints=related_fingerprints,
+        )
     return _proposal(
         "UPDATE",
         document,
@@ -157,6 +168,7 @@ def propose_status_continuity(
         "Review exact revision and external evidence before applying proposed state update.",
         proposed,
         evidence_refs,
+        related_fingerprints,
     )
 
 
