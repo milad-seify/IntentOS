@@ -2,9 +2,9 @@
 
 ## Current phase
 
-IntentOS Core 1.0.1 and VS Code extension 0.1.1 are released. **Phase 7 is complete. Stage E source-freeze readiness passed, but formal final Feature Freeze is NOT EFFECTIVE**: the stale closeout PR #48 was closed unmerged, per accepted [D-029](DECISIONS.md). Operational Phase 8A/8B/8C and the final Idea-to-Production dogfood are **DEFERRED / NOT STARTED** while scope is settled and real-user testing is unavailable. All Phase 8 numerical and privacy criteria remain unchanged.
+**ACTIVE FULL-SCOPE DEVELOPMENT — F01–F10 REQUIRED, NOT COMPLETE.** The owner has superseded the earlier early-Freeze plan and required all ten features be implemented before consolidated final testing and owner-led Phase 8/Dogfooding. [D-031](DECISIONS.md) and [one finite delivery program](DELIVERY_PROGRAM.md) are the authoritative execution scope; this is not a declaration that the new capabilities are ready.
 
-Core 1.0.1 is the current public PyPI release, distributing the merged review-only classification/policy correction from PR #38. [Release notes](RELEASE_NOTES_1.0.1.md), [tag and GitHub Release](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.1), and the [successful Trusted Publishing run](https://github.com/milad-seify/IntentOS/actions/runs/41685995740) are verified. A clean external Windows/Python 3.13 installation confirmed the CLI and read-only review behavior. Core 1.0.0 remains preserved as the previous release.
+Existing public releases remain Core `1.0.1` and VS Code `0.1.1`. Completed Phase 0–7 contracts remain in force. B1 currently only an internal pilot, B2/C1/D1 currently **missing or partial and required to implement**; [Issue #52](https://github.com/milad-seify/IntentOS/issues/52) reopened. The first B2 internal implementation branch proposes revision-pinned Markdown status and decision changes with **no applied writes**. Final acceptance must verify *all* F01–F10 and then establish an actual new Feature Freeze; operational Phase 8A/8B/8C and separate owner-led Idea-to-Production dogfooding stay **DEFERRED / NOT STARTED**, all original criteria unchanged.
 
 ## Post-Phase-7 development program
 
@@ -136,9 +136,9 @@ The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-1. **Current operation:** review and accept the narrowly scoped docs reconciliation recorded under [D-029](DECISIONS.md); check exact-head CI, merge only after approval, then verify post-merge `main` CI. No code or new runtime capability is included.
-2. **Product decision after that:** identify one concrete unmet outcome with evidence, scope/non-goals, regression/exit checks, and separate maintainer approval; otherwise preserve the current product and defer new features. Do not count the one B2-OBS-001 task as repeated demand.
-3. **Final gates when feasible:** after any accepted scope work (or explicit decision for no change), reassess and pin formal Feature Freeze on the then-current source with review/CI. Operational Phase 8 and Idea-to-Production dogfood still need separate authorization and real participants. No publishing `1.0.1` with changed source contents or representing B1 as publicly released.
+1. Follow the **finite** [Full-Scope Delivery Program](DELIVERY_PROGRAM.md), F01–F10. Start with project governance (B1 stable UX, B2 state/decisions, scope guard, milestones), then explainable routing/approved agent handoff/checkpoint-resume, then learning and access. Every required feature must have implementation + verification evidence; do not mark a missing feature deferred to end development.
+2. For each coherent code slice, run focused regressions and CI. Treat CI as developer safety, **not** the final owner acceptance or Phase 8 user study. Avoid docs-only loops and unrelated refactors.
+3. At the actual feature-complete revision, perform **one consolidated full integration/compatibility/privacy/release gate** and independently accepted Feature Freeze; stop before separately authorized operational Phase 8 and owner-led Dogfooding.
 
 ## Constraints carried forward
 
