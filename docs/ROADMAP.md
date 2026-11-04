@@ -190,14 +190,14 @@ Other IDE, agent, community, and provider/model adapters were candidates, not ma
 
 The absence of sufficient demand is the Phase 7 decision, not a failed or abandoned direction. Phase 7 overall is complete.
 
-## Post-Phase-7 Capability Evolution Program — STAGE A COMPLETE; B1 INTERNAL PILOT MERGED; B2 DEFERRED; C1 ASSESSMENT
+## Post-Phase-7 Capability Evolution Program — A COMPLETE; B1 INTERNAL PILOT MERGED; B2/C1 DEFERRED; D1 ASSESSMENT
 
 This is a finite, evidence-gated development program between completed Phase 7 and operational Phase 8. It is **not a renumbered official Phase**. The [Stage A baseline/plan](POST_PHASE_7_PROGRAM.md) and [candidate capability inventory](FUTURE_CAPABILITIES.md) distinguish planning priorities from approved implementation.
 
 - **Stage A — Planning, Baseline & Governance Alignment (complete; PR #41):** verify repository and existing implementation, preserve a small reproducible baseline, record capability gaps and the revised Phase 8 sequence. Exit: reviewed/accepted finite roadmap, evidence gates and separately approvable first slice.
 - **Stage B — Project Continuity Foundation (B1 internal pilot merged; B2 assessment only):** read-only Project Compass/Scope Guardian feasibility first (see [pilot contract](B1_PROJECT_COMPASS_PILOT.md)); controlled state/decision proposals only in later separately approved slices. Exit: source-grounded project status, scope and decisions survive fresh sessions without unsupported completion claims.
-- **Stage C — Project Lifecycle Governance (C1 assessment only):** assess whether manual requirement-to-milestone alignment, current task DoD, and launch evidence already suffice; see [C1 assessment](C1_LIFECYCLE_ASSESSMENT.md). No code authorized. Exit: bounded, evidence-backed C1 scope approval or documented deferral.
-- **Stage D — Adaptive Delegation & Resilience (conditional):** only evidence-promoted routing, budget and recoverable-handoff proposals; at most one separately approved adaptive experiment in this program. Exit: accepted measurable results or documented deferral, without new execution/runtime platform.
+- **Stage C — Project Lifecycle Governance (C1 assessment merged; implementation deferred):** [C1 evidence assessment](C1_LIFECYCLE_ASSESSMENT.md) found no sufficient repeated need for runtime governance; use reviewed milestone/DoD/launch evidence manually unless a new scoped gate is met.
+- **Stage D — Adaptive Delegation & Resilience (D1 assessment only):** [D1 evidence assessment](D1_ADAPTIVE_RESILIENCE_ASSESSMENT.md) evaluates existing routing, external outcome metrics and manual handoff before any new adaptive behavior. At most one separately approved evidence-supported experiment; absent evidence, defer and consider Stage E separately. No execution/runtime platform.
 - **Stage E — Stabilization & Feature Freeze:** focused regressions, security, compatibility, documentation, accepted limitations and a pinned final validation build. Exit: feature freeze explicitly recorded; no routine feature additions during final validation.
 
 Bounded initial implementation candidates: B1 read-only Project Compass; B2 state/decision update **proposals** only if justified; C1 lifecycle/quality-gate review only if justified; D1 a single evidence-supported adaptive slice at most. There is no mandate to implement every candidate. Each slice needs new scope authorization, tests, review, and independent closeout. The sequence may end early with documented deferrals; there is no indefinite feature loop.
