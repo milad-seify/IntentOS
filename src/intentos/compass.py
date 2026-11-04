@@ -13,7 +13,7 @@ from .models import ContextDocument
 
 _MAX_DOCUMENTS = 32
 _MAX_CHARS = 36000
-_HEADING = re.compile(r"^#{2,3}\s+(.+?)\s*$")
+_HEADING = re.compile(r"^#{1,6}\s+(.+?)\s*$")
 _SINGLE = {"goal", "current_phase", "next_action"}
 _ALIASES = {
     "project goal": "goal",
@@ -72,7 +72,7 @@ class ScopeAssessment:
     status: str  # in_scope | out_of_scope | conflicting | unknown
     explanation: str
     evidence: tuple[SourceFact, ...]
-    approval_required: bool
+    scope_review_required: bool
 
 
 @dataclass(frozen=True, slots=True)
@@ -93,8 +93,11 @@ def _sections(doc: ContextDocument) -> list[tuple[str, list[tuple[int, str]]]]:
     for line_no, raw in enumerate(doc.content.splitlines(), 1):
         heading = _HEADING.match(raw)
         if heading:
+            # Every Markdown heading is a section boundary. Only H2/H3
+            # headings with known names start a new recognized section.
+            depth = len(raw) - len(raw.lstrip("#"))
             key = re.sub(r"^\d+[.)]\s*", "", heading.group(1).strip().casefold())
-            if key == "evidence freshness" or key in _ALIASES:
+            if depth in {2, 3} and (key == "evidence freshness" or key in _ALIASES):
                 current = []
                 sections.append((key, current))
             else:
