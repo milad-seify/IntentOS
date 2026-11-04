@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Sequence
 
 from .compass import review_project_compass
-from .continuity import git_blob_sha, propose_decision_append, propose_status_continuity
+from .continuity import git_blob_sha, propose_decision_append, propose_scope_amendment, propose_status_continuity
 from .continuity_store import apply_continuity_proposal, proposal_approval_digest
 from .models import ContextDocument, IntentRequest
 from .project import optimize_project_prompt
@@ -79,7 +79,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     state = subparsers.add_parser("state", help="Review or apply an approved project-state update.")
     state_actions = state.add_subparsers(dest="state_action", required=True)
-    for action in ("status", "decision"):
+    for action in ("status", "decision", "scope"):
         action_parser = state_actions.add_parser(action)
         action_parser.add_argument("--root", default=".", help="Project root containing docs/STATUS.md and docs/DECISIONS.md.")
         action_parser.add_argument("--approve-digest", help="Apply only the exact proposal digest reviewed by the owner.")
@@ -89,11 +89,16 @@ def _build_parser() -> argparse.ArgumentParser:
             action_parser.add_argument("--next-action", help="New single-line next action.")
             action_parser.add_argument("--evidence", action="append", default=[], help="External review evidence reference; repeatable.")
             action_parser.add_argument("--related-document", action="append", default=[], help="Additional context for conflict review; repeatable.")
-        else:
+        elif action == "decision":
             action_parser.add_argument("--decision-id", required=True, help="New decision ID, e.g. D-032.")
             action_parser.add_argument("--title", required=True, help="Single-line decision title.")
             action_parser.add_argument("--body", required=True, help="Single-line approved decision text.")
             action_parser.add_argument("--approval-ref", required=True, help="External human approval reference.")
+        else:
+            action_parser.add_argument("--amendment-id", required=True, help="New scope amendment ID, e.g. S-001.")
+            action_parser.add_argument("--task", required=True, help="Exact task to add to approved scope.")
+            action_parser.add_argument("--reason", required=True, help="Single-line reason for scope change.")
+            action_parser.add_argument("--approval-ref", required=True, help="External owner approval reference.")
 
     return parser
 
@@ -251,7 +256,9 @@ def _run_compass(args: argparse.Namespace) -> int:
 
 def _run_state(args: argparse.Namespace) -> int:
     project_root = Path(args.root).resolve(strict=True)
-    relative = "docs/STATUS.md" if args.state_action == "status" else "docs/DECISIONS.md"
+    relative = {
+        "status": "docs/STATUS.md", "decision": "docs/DECISIONS.md", "scope": "docs/SCOPE.md",
+    }[args.state_action]
     target = project_root / relative
     content = target.read_bytes().decode("utf-8")
     document = ContextDocument(relative, content, authoritative=True)
@@ -275,10 +282,15 @@ def _run_state(args: argparse.Namespace) -> int:
             new_current_phase=args.current_phase, new_next_action=args.next_action,
             related_documents=tuple(related_documents),
         )
-    else:
+    elif args.state_action == "decision":
         proposal = propose_decision_append(
             document, expected_blob_sha=expected, decision_id=args.decision_id,
             title=args.title, decision_body=args.body, approval_ref=args.approval_ref,
+        )
+    else:
+        proposal = propose_scope_amendment(
+            document, expected_blob_sha=expected, amendment_id=args.amendment_id,
+            task=args.task, reason=args.reason, approval_ref=args.approval_ref,
         )
     if args.approve_digest:
         applied = apply_continuity_proposal(

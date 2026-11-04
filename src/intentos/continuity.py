@@ -15,8 +15,12 @@ from .models import ContextDocument
 
 _SHA1 = re.compile(r"^[0-9a-f]{40}$")
 _DECISION = re.compile(r"^D-\d{3,}$")
+_SCOPE_AMENDMENT = re.compile(r"^S-\d{3,6}$")
 _HEADING = re.compile(r"^## (.+?)\s*$", re.IGNORECASE)
+_ANY_HEADING = re.compile(r"^(#{1,6})[ \t]+(.+?)\s*$")
+_FENCE = re.compile(r"^[ \t]{0,3}(`{3,}|~{3,})")
 _SAFE_TEXT_MAX = 240
+_LINE_BREAKS = "\n\r\v\f\x1c\x1d\x1e\x85\u2028\u2029"
 _MAX_DOCUMENTS = 32
 _MAX_CONTEXT_CHARS = 36000
 
@@ -73,8 +77,7 @@ def _safe_value(value: str | None) -> bool:
         value is None or (
             bool(value.strip())
             and len(value) <= _SAFE_TEXT_MAX
-            and "\n" not in value
-            and "\r" not in value
+            and not any(char in _LINE_BREAKS for char in value)
             and not value.lstrip().startswith(("#", "-", "*", ">"))
             and "\x00" not in value
         )
@@ -83,7 +86,7 @@ def _safe_value(value: str | None) -> bool:
 
 def _safe_reference(value: str) -> bool:
     return bool(value.strip()) and len(value) <= 500 and not any(
-        ord(char) < 32 or ord(char) == 127 for char in value
+        ord(char) < 32 or ord(char) == 127 or char in _LINE_BREAKS for char in value
     )
 
 
@@ -202,4 +205,109 @@ def propose_decision_append(
         "UPDATE", document, expected_blob_sha,
         "Append-only decision proposal; verify approval and exact source revision before applying.",
         proposed, (approval_ref,),
+    )
+
+
+def _scope_sections(lines: list[str]) -> dict[str, list[tuple[int, int]]]:
+    """Locate editable H2 sections outside fenced Markdown examples."""
+    headings: list[tuple[int, str | None]] = []
+    fence_char: str | None = None
+    fence_size = 0
+    for index, line in enumerate(lines):
+        raw = line.rstrip("\r\n")
+        delimiter = _FENCE.match(raw)
+        if fence_char is not None:
+            if (delimiter and delimiter.group(1)[0] == fence_char
+                    and len(delimiter.group(1)) >= fence_size
+                    and not raw[delimiter.end():].strip()):
+                fence_char = None
+            continue
+        if delimiter:
+            fence_char = delimiter.group(1)[0]
+            fence_size = len(delimiter.group(1))
+            continue
+        match = _ANY_HEADING.fullmatch(raw)
+        if match:
+            name = match.group(2).casefold().strip() if len(match.group(1)) == 2 else None
+            headings.append((index, name))
+    sections: dict[str, list[tuple[int, int]]] = {}
+    for number, (start, name) in enumerate(headings):
+        if name is not None:
+            end = headings[number + 1][0] if number + 1 < len(headings) else len(lines)
+            sections.setdefault(name, []).append((start, end))
+    return sections
+
+
+def _insert_scope_line(lines: list[str], section: tuple[int, int], text: str, newline: str) -> None:
+    start, end = section
+    while end > start + 1 and not lines[end - 1].strip():
+        end -= 1
+    if end and not lines[end - 1].endswith(("\n", "\r")):
+        lines[end - 1] += newline
+    lines.insert(end, text + newline)
+
+
+def propose_scope_amendment(
+    document: ContextDocument,
+    *,
+    expected_blob_sha: str,
+    amendment_id: str,
+    task: str,
+    reason: str,
+    approval_ref: str,
+) -> ContinuityProposal:
+    """Propose an exact scope amendment with an append-only audit entry."""
+    error = _validate_source(document, expected_blob_sha)
+    if error:
+        return _proposal("NEEDS_REVIEW", document, expected_blob_sha, error)
+    if document.path.replace("\\", "/") != "docs/SCOPE.md" or not document.authoritative:
+        return _proposal("NEEDS_REVIEW", document, expected_blob_sha, "An explicitly authoritative docs/SCOPE.md is required.")
+    if (not _SCOPE_AMENDMENT.fullmatch(amendment_id) or not _safe_value(task)
+            or not _safe_value(reason) or not _safe_reference(approval_ref)
+            or any("|" in item for item in (task, reason, approval_ref))):
+        return _proposal("NEEDS_REVIEW", document, expected_blob_sha, "A bounded amendment ID, task, reason and approval reference are required.")
+    if re.search(rf"(?<!\w){re.escape(amendment_id)}(?!\w)", document.content):
+        return _proposal("NEEDS_REVIEW", document, expected_blob_sha, "Amendment ID already exists; review audit history.")
+    if re.search(r"(?im)^## Evidence freshness\s*\r?\n\s*(?:stale|outdated)\s*$", document.content):
+        return _proposal("NEEDS_REVIEW", document, expected_blob_sha, "Scope source is explicitly stale.")
+
+    lines = document.content.splitlines(keepends=True)
+    sections = _scope_sections(lines)
+    inside = sections.get("in scope", [])
+    history = sections.get("scope amendment history", [])
+    if len(inside) != 1 or len(history) > 1 or len(sections.get("out of scope", [])) > 1:
+        return _proposal("NEEDS_REVIEW", document, expected_blob_sha, "Scope headings are missing or ambiguous.")
+    review = review_project_compass((document,), proposed_task=task)
+    if review.task_scope.status == "conflicting":
+        return _proposal("NEEDS_REVIEW", document, expected_blob_sha, "In-scope and out-of-scope evidence conflict.")
+    if review.task_scope.status == "in_scope":
+        return _proposal("KEEP", document, expected_blob_sha, "Task is already explicitly in scope.", refs=(approval_ref,))
+    prior_status = review.task_scope.status
+    if prior_status == "out_of_scope":
+        if len(sections.get("out of scope", [])) != 1:
+            return _proposal("NEEDS_REVIEW", document, expected_blob_sha, "Out-of-scope heading is not an editable H2 section.")
+        matches = review.task_scope.evidence
+        if len(matches) != 1:
+            return _proposal("NEEDS_REVIEW", document, expected_blob_sha, "Multiple out-of-scope matches require manual review.")
+        index = matches[0].line - 1
+        if not lines[index].lstrip().startswith(("- ", "* ")):
+            return _proposal("NEEDS_REVIEW", document, expected_blob_sha, "Out-of-scope item is not an editable bullet.")
+        del lines[index]
+        sections = _scope_sections(lines)
+    newline = "\r\n" if "\r\n" in document.content else "\n"
+    _insert_scope_line(lines, sections["in scope"][0], f"- {task.strip()}", newline)
+    sections = _scope_sections(lines)
+    audit = (
+        f"- {amendment_id}: {task.strip()} | prior: {prior_status} | "
+        f"reason: {reason.strip()} | approval: {approval_ref.strip()} | source: {expected_blob_sha}"
+    )
+    if history:
+        _insert_scope_line(lines, sections["scope amendment history"][0], audit, newline)
+    else:
+        content = "".join(lines).rstrip("\r\n") + newline + newline
+        lines = [content, "## Scope amendment history" + newline, audit + newline]
+    return _proposal(
+        "UPDATE", document, expected_blob_sha,
+        f"Review scope change from {prior_status} and its append-only audit entry before applying.",
+        "".join(lines), (approval_ref,),
     )

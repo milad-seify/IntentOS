@@ -83,6 +83,8 @@ The development `intentos compass` CLI exposes the existing Project Compass revi
 
 The development `intentos state` CLI previews exact status or decision changes before any write. A user must review the proposed diff and supply its content-bound approval digest in a second invocation. The writer checks the source revision and any related source fingerprints, serializes IntentOS writers with a local lock, and refuses unexpected targets or stale approvals. The digest is an explicit approval assertion, not independent proof of human review. An interrupted write may leave a lock that requires inspection before removal. This development command is also absent from Core 1.0.1.
 
+The same development flow supports one bounded `docs/SCOPE.md` amendment at a time. It shows whether the task was unknown or explicitly out of scope, requires an owner approval reference, and records the change in that document's amendment history. Conflict, stale source, duplicate amendment ID, and unsupported Markdown layouts stop for review. A scope amendment is not a general permission grant; task risk and execution approval remain separate.
+
 ### AI agent
 
 Agents should be able to consume IntentOS capabilities through an interoperability layer such as MCP rather than requiring custom integration with every agent product.

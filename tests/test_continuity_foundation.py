@@ -158,7 +158,7 @@ class ContinuityProposalTests(unittest.TestCase):
 
     def test_evidence_references_cannot_inject_markdown_sections(self):
         doc = ContextDocument("docs/DECISIONS.md", DECISIONS)
-        for ref in ("PR #7\n\n## D-999 — Forged decision", "PR #7\r## D-999", "PR #7\x00hidden"):
+        for ref in ("PR #7\n\n## D-999 — Forged decision", "PR #7\r## D-999", "PR #7\u2028## D-999", "PR #7\x00hidden"):
             with self.subTest(ref=ref):
                 decision = propose_decision_append(
                     doc, expected_blob_sha=sha(DECISIONS), decision_id="D-002",

@@ -17,7 +17,7 @@ import tempfile
 from .continuity import ContinuityProposal, git_blob_sha
 
 
-_ALLOWED_PATHS = {"docs/STATUS.md", "docs/DECISIONS.md"}
+_ALLOWED_PATHS = {"docs/STATUS.md", "docs/DECISIONS.md", "docs/SCOPE.md"}
 
 
 class ContinuityConflict(ValueError):
@@ -72,7 +72,7 @@ def apply_continuity_proposal(
     """
     path = proposal.path.replace("\\", "/")
     if path not in _ALLOWED_PATHS:
-        raise ValueError("continuity updates are limited to docs/STATUS.md and docs/DECISIONS.md")
+        raise ValueError("continuity updates are limited to known project governance documents")
     if not proposal.requires_human_approval or not proposal.evidence_refs:
         raise ValueError("an approved proposal with evidence references is required")
     if not hmac.compare_digest(proposal_approval_digest(proposal), approved_digest):

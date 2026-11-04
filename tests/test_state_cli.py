@@ -109,6 +109,26 @@ class StateCliTests(unittest.TestCase):
         self.assertEqual(result["status"], "applied")
         self.assertIn("## D-002 — Review boundary", decisions.read_text(encoding="utf-8"))
 
+    def test_scope_amendment_is_reviewed_and_audited_before_write(self):
+        scope = self.root / "docs" / "SCOPE.md"
+        original = "## In Scope\n- Review API\n\n## Out of Scope\n- Add Redis cache\n"
+        scope.write_text(original, encoding="utf-8", newline="")
+        arguments = [
+            "scope", "--root", str(self.root), "--amendment-id", "S-001",
+            "--task", "Add Redis cache", "--reason", "Owner expanded scope",
+            "--approval-ref", "owner issue #7",
+        ]
+        code, preview = self.command(*arguments)
+        self.assertEqual(code, 0)
+        self.assertEqual(preview["status"], "update")
+        self.assertEqual(scope.read_text(encoding="utf-8"), original)
+        code, applied = self.command(*arguments, "--approve-digest", preview["approval_digest"])
+        self.assertEqual(code, 0)
+        self.assertEqual(applied["status"], "applied")
+        changed = scope.read_text(encoding="utf-8")
+        self.assertEqual(changed.count("- Add Redis cache"), 1)
+        self.assertIn("S-001: Add Redis cache | prior: out_of_scope", changed)
+
 
 if __name__ == "__main__":
     unittest.main()
