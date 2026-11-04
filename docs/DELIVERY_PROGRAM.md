@@ -1,6 +1,6 @@
 # Full-Scope Delivery Program — one finite implementation path
 
-**Status:** OWNER-DIRECTED FULL FEATURE SCOPE; implementation in progress, **not yet complete**.  
+**Status:** OWNER-DIRECTED FULL FEATURE SCOPE; all ten feature families have a stacked development candidate, **not yet owner-accepted or frozen**.
 **Decision date:** 2026-11-04. **Starting verified `main`:** `0857d9063811266d4e63d43fccfe259f240c46c5`; [main CI 41822005898](https://github.com/milad-seify/IntentOS/actions/runs/41822005898) succeeded 7/7. **No new Feature Freeze is effective.**
 
 ## Goal and decision change
@@ -47,4 +47,4 @@ No fresh issue/assessment is a prerequisite for the next task once the owner has
 
 `AGENTS.md`, `docs/STATUS.md`, `docs/DECISIONS.md`, this program and actual GitHub SHA/PR/CI are authoritative. Each code PR marks feature IDs *partial / implemented with evidence* and preserves existing contracts until a separately approved versioning plan. No automatic merge/release or false feature-freeze claim. **One plan, one implementation flow, one final integration gate; no repeated “are we ready to plan?” cycles.**
 
-The first implementation branch covers the initial F06 read-only revision-grounded continuity proposal and regression tests. It is **only part of** the full commitment: F03–F10 stay open until their actual acceptance checks pass.
+The first implementation branch covered the initial F06 read-only revision-grounded continuity proposal and regression tests. Later stacked branches added the remaining development access and regressions. The [candidate acceptance record](FULL_SCOPE_CANDIDATE.md) tracks the consolidated developer gate; owner acceptance, merge, versioning and a new Feature Freeze remain separate decisions.
