@@ -190,7 +190,7 @@ Other IDE, agent, community, and provider/model adapters were candidates, not ma
 
 The absence of sufficient demand is the Phase 7 decision, not a failed or abandoned direction. Phase 7 overall is complete.
 
-## Post-Phase-7 Capability Evolution Program — A COMPLETE; B1 INTERNAL; B2/C1/D1 DEFERRED; E FORMAL FREEZE DECISION PENDING
+## Post-Phase-7 Capability Evolution Program — A COMPLETE; B1 INTERNAL; B2/C1/D1 DEFERRED; E READINESS VERIFIED / FINAL FREEZE DEFERRED
 
 This is a finite, evidence-gated development program between completed Phase 7 and operational Phase 8. It is **not a renumbered official Phase**. The [Stage A baseline/plan](POST_PHASE_7_PROGRAM.md) and [candidate capability inventory](FUTURE_CAPABILITIES.md) distinguish planning priorities from approved implementation.
 
@@ -198,7 +198,7 @@ This is a finite, evidence-gated development program between completed Phase 7 a
 - **Stage B — Project Continuity Foundation (B1 internal pilot merged; B2 assessment only):** read-only Project Compass/Scope Guardian feasibility first (see [pilot contract](B1_PROJECT_COMPASS_PILOT.md)); controlled state/decision proposals only in later separately approved slices. Exit: source-grounded project status, scope and decisions survive fresh sessions without unsupported completion claims.
 - **Stage C — Project Lifecycle Governance (C1 assessment merged; implementation deferred):** [C1 evidence assessment](C1_LIFECYCLE_ASSESSMENT.md) found no sufficient repeated need for runtime governance; use reviewed milestone/DoD/launch evidence manually unless a new scoped gate is met.
 - **Stage D — Adaptive Delegation & Resilience (D1 assessment merged; implementation deferred):** [D1 evidence assessment](D1_ADAPTIVE_RESILIENCE_ASSESSMENT.md) found no justified adaptive experiment. Preserve existing deterministic routing, external metrics and manual handoff. No execution/runtime platform.
-- **Stage E — Stabilization & Feature Freeze (readiness verified; final freeze proposed):** [readiness PR #46](https://github.com/milad-seify/IntentOS/pull/46) merged, [post-merge CI](https://github.com/milad-seify/IntentOS/actions/runs/41807465709) green, candidate code SHA `28dc5c84ea4d154a99cf68c7446303648f076d52`. Proposed [D-028 freeze decision](DECISIONS.md) still needs approved final PR, exact-head and post-merge CI, and the final merge SHA recorded. No Phase 8 start by implication.
+- **Stage E — Stabilization & Feature Freeze (readiness verified; final Freeze NOT EFFECTIVE):** [readiness PR #46](https://github.com/milad-seify/IntentOS/pull/46) and [PR #47](https://github.com/milad-seify/IntentOS/pull/47) merged with green CI. The old final-freeze [PR #48](https://github.com/milad-seify/IntentOS/pull/48) was **closed without merge** after the accepted Phase 8 schedule and scope review in [PR #49](https://github.com/milad-seify/IntentOS/pull/49), followed by one B2 observation in [PR #50](https://github.com/milad-seify/IntentOS/pull/50). Preserve historical readiness/code pins; [D-029](DECISIONS.md) requires a fresh source/CI freeze gate after intended scope is settled. No Phase 8 start by implication.
 
 Bounded initial implementation candidates: B1 read-only Project Compass; B2 state/decision update **proposals** only if justified; C1 lifecycle/quality-gate review only if justified; D1 a single evidence-supported adaptive slice at most. There is no mandate to implement every candidate. Each slice needs new scope authorization, tests, review, and independent closeout. The sequence may end early with documented deferrals; there is no indefinite feature loop.
 
@@ -206,7 +206,7 @@ Bounded initial implementation candidates: B1 read-only Project Compass; B2 stat
 
 Goal: determine whether first-time users can adopt IntentOS independently and under which real-task conditions preparation improves downstream outcomes. Phase 8 operationalizes existing Phase 5 evaluation primitives; it does not duplicate evaluation algorithms or require a new product feature.
 
-The [validation protocol](PHASE_8_VALIDATION.md) and its numerical targets remain accepted, but operational 8A/8B/8C are scheduled **after Stage E feature freeze**, not immediately after Phase 7. No slice is complete and no new runtime capability is authorized by the protocol. Complementary final validation will dogfood one real project from idea to production, without treating one project as a substitute for the multi-user/multi-project evidence targets.
+The [validation protocol](PHASE_8_VALIDATION.md) and its numerical targets remain accepted, but operational 8A/8B/8C are **DEFERRED / NOT STARTED** until scope is settled, final Stage E Feature Freeze is separately accepted on the current baseline, real users are available, and operational sessions are explicitly reauthorized. The previous final-freeze PR #48 was closed unmerged, not accepted as an effective Freeze. No slice is complete and no new runtime capability is authorized by the protocol. Complementary final validation will dogfood one real project from idea to production, without treating one project as a substitute for the multi-user/multi-project evidence targets.
 
 ### 8A — First-use validation — GATED; NOT COMPLETE
 
