@@ -8,10 +8,10 @@ Core 1.0.1 is the current public PyPI release, distributing the merged review-on
 
 ## Post-Phase-7 development program
 
-- **Current stage:** Stage A **completed and merged** in [PR #41](https://github.com/milad-seify/IntentOS/pull/41); Stage B1 **internal pilot merged in [PR #42](https://github.com/milad-seify/IntentOS/pull/42)**, without stable-product promotion; B2 assessment only.
-- **Source of truth:** verified main + accepted decisions + observed evidence. B2 assessment baseline: `07d227d5f6b4aad1e0985a5b44cb9f79b2a4f8a4` ([green main CI](https://github.com/milad-seify/IntentOS/actions/runs/41798251129), seven jobs). Original Stage A baseline is preserved in the program.
-- **Active scope:** B1 remains an internal technical prototype with documented limits. Only [B2 needs/scope assessment](B2_CONTINUITY_ASSESSMENT.md), not B2 implementation, is authorized; follow the [finite program](POST_PHASE_7_PROGRAM.md) and [candidate registry](FUTURE_CAPABILITIES.md).
-- **Authorization boundary:** B1 was merged as an internal pilot after review; stable promotion still needs real-use evidence. B2 implementation requires a separate gate and approval. No public API/CLI/MCP/editor surface, automatic state write or agent orchestration.
+- **Current stage:** Stage A **completed and merged** in [PR #41](https://github.com/milad-seify/IntentOS/pull/41); Stage B1 **internal pilot merged in [PR #42](https://github.com/milad-seify/IntentOS/pull/42)**, without stable-product promotion; B2 assessed in [PR #43](https://github.com/milad-seify/IntentOS/pull/43) and deferred pending evidence; C1 lifecycle needs/scope assessment only.
+- **Source of truth:** verified main + accepted decisions + observed evidence. C1 assessment baseline: `7a47f5289243a0ac0958881126d922e490b0d6aa` ([green main CI](https://github.com/milad-seify/IntentOS/actions/runs/41801386563), seven jobs). Earlier assessment baselines remain historical in their documents.
+- **Active scope:** B1 remains an internal technical prototype, B2 is deferred pending repeated evidence, and only a [C1 lifecycle needs/scope assessment](C1_LIFECYCLE_ASSESSMENT.md) is active; follow the [finite program](POST_PHASE_7_PROGRAM.md) and [candidate registry](FUTURE_CAPABILITIES.md).
+- **Authorization boundary:** B1 stable promotion remains evidence-gated. B2 and C1 implementation each require separate evidence and explicit approval. No public API/CLI/MCP/editor surface, automatic state write, milestone/launch enforcement or agent orchestration.
 - **Blocked/unknown:** independent, repeated new-product evidence for the proposed continuity features is not yet established; Phase 7C explicitly did not promote a new capability. A bounded pilot or separately approved reversible prototype must justify promotion.
 - **Deferred:** Phase 8 8A/8B/8C sessions and Idea-to-Production dogfooding until feature freeze; adaptive routing, token budgets/recovery, feedback-based routing and cross-agent execution handoff unless justified and independently approved.
 
@@ -136,7 +136,7 @@ The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-Review the [B2 needs/scope assessment](B2_CONTINUITY_ASSESSMENT.md) and record distinct real project continuity failures. Use the existing manual/reviewed-document workflow before justifying B2 implementation. If evidence is insufficient, defer B2. Do not start B2/C1/D1 implementation or operational Phase 8 automatically. Accepted slices culminate in feature freeze, then separately authorized Phase 8 and Idea-to-Production dogfooding. Release procedures remain in [RELEASING.md](RELEASING.md).
+Review the [C1 lifecycle assessment](C1_LIFECYCLE_ASSESSMENT.md): compare manual requirements/milestone/launch gates and existing task-level DoD with any proposed capability. Document repeated friction before requesting C1 implementation; if not demonstrated, defer C1 without code. B2 remains deferred pending evidence. Do not start B2/C1/D1 implementation or operational Phase 8 automatically. Accepted slices culminate in feature freeze, then separately authorized Phase 8 and Idea-to-Production dogfooding. Release procedures remain in [RELEASING.md](RELEASING.md).
 
 ## Constraints carried forward
 
