@@ -171,10 +171,24 @@ The implementation remains internal and review-only, with [acceptance criteria a
 
 ## D-027 — Stage E source-freeze readiness, pending final acceptance
 
-**Status:** **PROPOSED / NOT YET ACCEPTED** (2026-11-04). This record proposes the freeze gate; it is not itself a feature-freeze declaration.
+**Status:** **READINESS ACCEPTED; FORMAL FEATURE FREEZE PENDING** (2026-11-04). The readiness PR #46 merged as `28dc5c84ea4d154a99cf68c7446303648f076d52` and [post-merge CI 41807465709](https://github.com/milad-seify/IntentOS/actions/runs/41807465709) passed all seven jobs. This acceptance is not a Phase 8 authorization.
 
 The [Stage E readiness review](STAGE_E_FREEZE_READINESS.md) checked `main` `976db7ef888d26aca8804490147e384273cfa9b7` and [seven green CI jobs](https://github.com/milad-seify/IntentOS/actions/runs/41805348708). All 19 shared Python modules matched the published Core `v1.0.1` tag; four principal VS Code files matched `vscode-v0.1.1`. New `intentos.compass` B1 is internal only; B2/C1/D1 implementation remains deferred. Existing public contracts are preserved. The review scoped trust and privacy boundaries but did **not** perform new independent security certification, public first-use observation or full VS Code Extension Host run.
 
 **Proposed consequence:** after an explicitly accepted documentation-only freeze PR, its exact-head CI, a verified merge and green post-merge main CI, pin the final accepted SHA and record **FEATURE FROZEN** in a separate closeout decision/status update. The public distribution remains Core `1.0.1` and VS Code `0.1.1`, which do not expose B1; any future B1 publication needs separate versioned release/promotion. A local wheel rebuilt from post-release source carries modified content under `1.0.1` metadata and **must not** be republished as the existing public release.
 
 Do not start Phase 8 or Idea-to-Production dogfooding without their separate authorizations. Material post-freeze correctness/security changes require an approved, re-verified freeze baseline, not a silent change.
+
+## D-028 — Formal Feature Freeze: final acceptance proposal
+
+**Status:** **PROPOSED / NOT YET IN EFFECT** (2026-11-04). This is a reviewable decision candidate, not an implemented feature, release, or completed freeze.
+
+**Pinned source-code baseline:** `28dc5c84ea4d154a99cf68c7446303648f076d52` — [merged PR #46](https://github.com/milad-seify/IntentOS/pull/46), [green post-merge CI 41807465709](https://github.com/milad-seify/IntentOS/actions/runs/41807465709) (7/7 jobs). [Stage E review](STAGE_E_FREEZE_READINESS.md) verified public-contract/packaging boundaries and recorded remaining risks. There are no new authorized runtime features in this closeout.
+
+**Proposed frozen scope:** the existing public v1 contract, current CLI/MCP/VS Code Prepare → Review → Copy boundaries, and internal-only B1 Project Compass. B1 is source-only, experimental, non-public and not independently adoption-validated. B2, C1 and D1 implementations are deferred pending evidence; do not treat them as required unfinished features. No autonomous execution, project memory database, model quota guarantee, checkpoint/resume, provider SDK or new public schema is included.
+
+**Release distinction:** publicly distributed Core remains PyPI `intentos-engineering==1.0.1`, VS Code `milad-seyfi.intentos-vscode@0.1.1`. B1 is absent from the public `1.0.1` release even though post-release checkout metadata still says `1.0.1`; a rebuilt wheel would be **different content with the same version**, so do not publish or characterize it as the original artifact. Any B1 promotion or new version needs an independent decision.
+
+**Acceptance gate:** independently review this documentation-only final decision, approve the PR, pass its exact-head CI, merge it, verify the resulting `main` SHA and successful post-merge CI, then record that **exact final merge SHA** in a separately verified accepted closeout/status entry. This D-028 remains **proposed** until the gate is satisfied; documentation approval alone cannot substitute for CI. Changes to runtime or a material correctness/security defect require a reviewed regression and a new source pin.
+
+**Phase 8:** operational 8A/8B/8C sessions and the separate Idea-to-Production dogfood remain **not started** and require **separate explicit approval after effective feature freeze**. Preserve [Phase 8 methodology](PHASE_8_VALIDATION.md), privacy, non-maintainer coverage, and correctness-first paired evidence; never count Phase 7C history as fresh Phase 8 observations.
