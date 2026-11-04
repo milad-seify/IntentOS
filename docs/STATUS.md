@@ -2,7 +2,7 @@
 
 ## Current phase
 
-**F01–F10 FEATURE CANDIDATE — FINAL DEVELOPER GATE IN PROGRESS, NOT ACCEPTED.** [D-031](DECISIONS.md) and the [finite delivery program](DELIVERY_PROGRAM.md) require all ten capabilities before a new Feature Freeze. The stacked development branches contain working access for each feature; the [candidate acceptance record](FULL_SCOPE_CANDIDATE.md), consolidated verification, owner review, and merge decision remain separate gates.
+**F01–F10 FEATURE CANDIDATE — DEVELOPER GATE PASSED, OWNER ACCEPTANCE PENDING.** [D-031](DECISIONS.md) and the [finite delivery program](DELIVERY_PROGRAM.md) require all ten capabilities before a new Feature Freeze. The stacked development branches contain working access for each feature; the [candidate acceptance record](FULL_SCOPE_CANDIDATE.md) records the consolidated checks. Owner review, merge and a new Freeze decision remain separate gates.
 
 Existing public releases remain Core `1.0.1` and VS Code `0.1.1`. Completed Phase 0–7 contracts remain in force. Stacked PRs #54–#64 implement governance, routing, checkpoint/recovery, handoff, outcomes and integrated CLI access, but are not merged or a public release. [Issue #52](https://github.com/milad-seify/IntentOS/issues/52) tracks this delivery. Final acceptance must verify *all* F01–F10 and obtain owner sign-off before a new Feature Freeze; operational Phase 8A/8B/8C and owner-led Idea-to-Production dogfooding remain **DEFERRED / NOT STARTED**, with their criteria unchanged.
 
@@ -134,7 +134,7 @@ The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-1. Complete the [candidate record](FULL_SCOPE_CANDIDATE.md) on one exact stacked head: full tests, cross-platform CI, CLI/MCP/VS Code, packaging, privacy/security and final diff review.
+1. Review the [candidate record](FULL_SCOPE_CANDIDATE.md), final stacked diff and cross-platform CI on the final PR head; the developer gate has passed, while owner acceptance is pending.
 2. Present the verified candidate to the owner for review of the stacked PRs, versioning and a separate Feature Freeze decision. No PR merge or protected-branch change is implied by green developer tests.
 3. Preserve the separately authorized operational Phase 8 and owner-led Dogfooding gates. Synthetic developer checks do not count as user evidence.
 

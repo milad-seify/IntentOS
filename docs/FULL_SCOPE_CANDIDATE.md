@@ -1,6 +1,6 @@
 # F01–F10 feature candidate — developer acceptance record
 
-**Status:** Feature-complete *candidate* on the stacked development branch, pending one consolidated verification run, GitHub CI, review, and separate owner acceptance. This document does not enact a Feature Freeze, release, operational Phase 8 session, or deployment. Public Core `1.0.1` and VS Code `0.1.1` remain unchanged.
+**Status:** Feature-complete *candidate* on the stacked development branch. The consolidated developer gate passed on code revision `709fc4a388665187d59d5d51c3db87f39e9500ae`; final documentation and GitHub CI remain subject to review. This document does not enact a Feature Freeze, release, operational Phase 8 session, or deployment. Public Core `1.0.1` and VS Code `0.1.1` remain unchanged.
 
 The source of truth for scope is [D-031](DECISIONS.md) and the [finite delivery program](DELIVERY_PROGRAM.md). All new access is development CLI; existing MCP and VS Code public contracts are preserved. External references, model metadata, operation ledgers, approvals and outcome checks remain caller assertions unless an independent source is cited. IntentOS never equates an agent turn, passing checklist, or matching digest with task verification or launch authorization.
 
@@ -25,5 +25,15 @@ The source of truth for scope is [D-031](DECISIONS.md) and the [finite delivery 
 - Wheel/sdist build, artifact and clean-install validation; no publication.
 - Security/privacy and failure review: bounded inputs, explicit approvals, no raw stderr or secrets in receipts, replay/stale-source rejection, safe local document writes, and no automatic launch claim.
 - Final diff review, `git diff --check`, clean working tree, and all GitHub CI jobs green.
+
+## Developer gate result
+
+- Windows/Python 3.13 local suite: **243 run, 242 passed, one Windows symlink test skipped**; F01–F10 integrated CLI flow passed. CLI read-only review smoke reached `ready`.
+- Real installed VS Code Extension Host: **workspace and no-workspace passed**. Both activated `milad-seyfi.intentos-vscode`, resolved the repository `.venv` executable and returned CLI `ready` in isolated user-data directories. JavaScript syntax checks passed.
+- An earlier F04 synthetic read-only Codex CLI dispatch in a temporary Git project completed with exit code 0 and a `completed_unverified` receipt. This is developer adapter verification, not task correctness or Phase 8 evidence.
+- Local wheel and sdist built from Git-archived code revision `709fc4a3`; artifact hygiene and metadata checks passed for `intentos_engineering-1.0.1-py3-none-any.whl` and `intentos_engineering-1.0.1.tar.gz`. No artifact was published.
+- [Candidate CI](https://github.com/milad-seify/IntentOS/pull/65) passed **7/7** jobs on that code revision: Python 3.11/3.12/3.13, Windows regression, MCP protocol/stdio parity, VS Code syntax, and clean wheel/sdist installation/validation.
+- Local MCP scripts could not start because the development virtual environment lacked the existing optional `mcp` extra and pip could not resolve `files.pythonhosted.org` while installing it. The GitHub CI MCP and distribution jobs passed; no product or dependency change was made for this local DNS failure.
+- `git diff --check` passed and the candidate source tree was clean after commit. The review found no raw stderr/credential echo in Codex receipts, no automatic high-risk workspace-write, no silent governance document write, and no automatic launch approval. The external executor, caller-provided evidence and owner sign-off remain explicit trust boundaries.
 
 After the gate, the owner still decides whether to accept and merge the stacked PRs, how to version these development capabilities, and whether to record a new Feature Freeze. Operational Phase 8A/8B/8C and owner-led dogfooding remain separately authorized and unstarted.
