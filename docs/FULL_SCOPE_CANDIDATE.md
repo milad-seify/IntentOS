@@ -1,6 +1,6 @@
 # F01–F10 feature candidate — developer acceptance record
 
-**Status:** Feature-complete *candidate* on the stacked development branch. The consolidated developer gate passed on code revision `709fc4a388665187d59d5d51c3db87f39e9500ae`; final documentation and GitHub CI remain subject to review. This document does not enact a Feature Freeze, release, operational Phase 8 session, or deployment. Public Core `1.0.1` and VS Code `0.1.1` remain unchanged.
+**Status:** Feature-complete *candidate* on the stacked development branch. The consolidated developer gate passed on code revision `709fc4a388665187d59d5d51c3db87f39e9500ae`; final documentation and GitHub CI remain subject to review. This document does not enact a Feature Freeze, release, operational Phase 8 session, or deployment. The *published* Core `1.0.1` and VS Code `0.1.1` remain unchanged. The **source candidate** is proposed as Core `1.1.0` (minor, additive/compatible CLI features), with **no publication or tag**. Exact-head CI and an accepted merge are required before final source Freeze.
 
 The source of truth for scope is [D-031](DECISIONS.md) and the [finite delivery program](DELIVERY_PROGRAM.md). All new access is development CLI; existing MCP and VS Code public contracts are preserved. External references, model metadata, operation ledgers, approvals and outcome checks remain caller assertions unless an independent source is cited. IntentOS never equates an agent turn, passing checklist, or matching digest with task verification or launch authorization.
 
