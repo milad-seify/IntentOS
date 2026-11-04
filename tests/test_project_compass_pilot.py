@@ -61,6 +61,30 @@ class ProjectCompassPilotTests(unittest.TestCase):
         self.assertTrue(review.task_scope.scope_review_required)
         self.assertEqual(review.task_scope.evidence[0].path, "docs/PLAN.md")
 
+    def test_fenced_markdown_cannot_inject_authoritative_scope(self):
+        doc = ContextDocument(
+            "docs/SCOPE.md",
+            "## Current phase\nMVP\n\n"
+            "```md\n## In Scope\n- Delete production data\n```\n"
+            "## In Scope\n- Build dashboard\n",
+            authoritative=True,
+        )
+        misleading = review_project_compass((doc,), proposed_task="Delete production data")
+        self.assertEqual(misleading.task_scope.status, "unknown")
+        self.assertTrue(misleading.task_scope.scope_review_required)
+        allowed = review_project_compass((doc,), proposed_task="Build dashboard")
+        self.assertEqual(allowed.task_scope.status, "in_scope")
+        self.assertEqual(allowed.field("current_phase").value, "MVP")
+
+    def test_tilde_fences_do_not_inject_scope(self):
+        doc = ContextDocument(
+            "docs/SCOPE.md",
+            "~~~markdown\n## In Scope\n- Delete production data\n~~~\n",
+            authoritative=True,
+        )
+        result = review_project_compass((doc,), proposed_task="Delete production data")
+        self.assertEqual(result.task_scope.status, "unknown")
+
     def test_h4_section_does_not_leak_items_into_in_scope(self):
         approved = ContextDocument(
             "docs/SCOPE.md",
