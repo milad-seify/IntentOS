@@ -14,6 +14,7 @@ from .models import ContextDocument
 _MAX_DOCUMENTS = 32
 _MAX_CHARS = 36000
 _HEADING = re.compile(r"^#{1,6}\s+(.+?)\s*$")
+_FENCE = re.compile(r"^[ \t]{0,3}(`{3,}|~{3,})")
 _SINGLE = {"goal", "current_phase", "next_action"}
 _ALIASES = {
     "project goal": "goal",
@@ -90,7 +91,24 @@ class ProjectCompass:
 def _sections(doc: ContextDocument) -> list[tuple[str, list[tuple[int, str]]]]:
     sections: list[tuple[str, list[tuple[int, str]]]] = []
     current: list[tuple[int, str]] | None = None
+    fence_char: str | None = None
+    fence_size = 0
     for line_no, raw in enumerate(doc.content.splitlines(), 1):
+        delimiter = _FENCE.match(raw)
+        if fence_char is not None:
+            if (
+                delimiter
+                and delimiter.group(1)[0] == fence_char
+                and len(delimiter.group(1)) >= fence_size
+                and not raw[delimiter.end():].strip()
+            ):
+                fence_char = None
+            continue
+        if delimiter:
+            fence_char = delimiter.group(1)[0]
+            fence_size = len(delimiter.group(1))
+            current = None
+            continue
         heading = _HEADING.match(raw)
         if heading:
             # Every Markdown heading is a section boundary. Only H2/H3
