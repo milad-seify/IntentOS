@@ -2,6 +2,8 @@
 
 **Status: PROTOCOL APPROVED — OPERATIONAL EXECUTION DEFERRED UNTIL FINAL VALIDATION.** First-use sessions and downstream task runs have not begun. The Phase 8 methodology and numerical targets are unchanged; this is a sequencing decision, not an approved runtime capability.
 
+**Scheduling note (2026-11-04; proposed documentation change):** After initially authorizing 8A planning, the maintainer paused operational 8A/8B/8C because real first-time-user sessions are not currently feasible and requested a review of the desired remaining product scope. No observed session or eligible outcome has been collected; Phase 8 remains **DEFERRED / NOT STARTED**. Before resuming, accept the intended scope, update/revalidate any changed feature-freeze baseline, secure actual participants, and obtain fresh explicit owner authorization. All existing targets, privacy rules, eligibility criteria and correctness-first comparisons remain **unchanged**. This pause is not an authorization for new features. See [next-scope review](NEXT_SCOPE_REVIEW.md).
+
 Under [decision D-024](DECISIONS.md), operational 8A/8B/8C work begins only after the bounded [post-Phase-7 program](POST_PHASE_7_PROGRAM.md) reaches an accepted feature freeze and receives separate session authorization. A lightweight pre-development baseline is kept distinct from Phase 8 evidence. Final validation will also dogfood one genuine Idea-to-Production project; its observations count toward protocol targets only when they independently satisfy the same criteria, with no double counting. This scheduling update does not change any worksheet, eligibility criterion, comparison control, privacy rule, or promotion threshold.
 
 Phase 8 asks:
