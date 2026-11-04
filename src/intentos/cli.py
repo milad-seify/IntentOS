@@ -4,6 +4,7 @@ import argparse
 import difflib
 import hashlib
 import json
+import subprocess
 import sys
 from pathlib import Path
 from typing import Sequence
@@ -12,6 +13,7 @@ from .compass import review_project_compass
 from .continuity import git_blob_sha, propose_decision_append, propose_scope_amendment, propose_status_continuity
 from .continuity_store import apply_continuity_proposal, proposal_approval_digest
 from .governance import CheckEvidence, Milestone, MilestoneRequirement, review_project_gates
+from .handoff import PlanStep, VerifiedStep, checkpoint_from_dict, make_checkpoint, review_resume
 from .models import CapabilityClass, ContextDocument, CostClass, IntentRequest, ModelMetadata
 from .project import optimize_project_prompt
 from .result_contract import RESULT_SCHEMA_VERSION, error_dict, result_dict
@@ -111,6 +113,22 @@ def _build_parser() -> argparse.ArgumentParser:
     _add_intent_arguments(route)
     route.add_argument("--models-file", help="Optional caller-supplied model metadata JSON; no provider discovery.")
     route.add_argument("--json", action="store_true", help="Emit machine-readable route review.")
+
+    checkpoint = subparsers.add_parser("checkpoint", help="Save or review an approved task checkpoint.")
+    checkpoint_actions = checkpoint.add_subparsers(dest="checkpoint_action", required=True)
+    for action in ("create", "review"):
+        action_parser = checkpoint_actions.add_parser(action)
+        action_parser.add_argument("--root", default=".", help="Git project root.")
+        action_parser.add_argument("--context-file", action="append", required=True, help="Pinned project context file; repeatable.")
+        action_parser.add_argument("--json", action="store_true", help="Emit machine-readable checkpoint result.")
+        if action == "create":
+            action_parser.add_argument("--spec", required=True, help="Approved plan and state summary JSON.")
+            action_parser.add_argument("--output", required=True, help="New checkpoint JSON path; will not overwrite.")
+        else:
+            action_parser.add_argument("--checkpoint", required=True, help="Previously saved checkpoint JSON.")
+            action_parser.add_argument("--ledger-reviewed", action="store_true", help="Assert external operation ledger was checked.")
+            action_parser.add_argument("--executed-operation", action="append", default=[], help="Operation already executed; repeatable.")
+            action_parser.add_argument("--accepted-approval", action="append", default=[], help="Externally accepted approval ID; repeatable.")
 
     return parser
 
@@ -499,6 +517,117 @@ def _run_route(args: argparse.Namespace) -> int:
     return 0
 
 
+def _git_project_revision(root: Path) -> str:
+    top = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"], cwd=root,
+        capture_output=True, text=True, encoding="utf-8", check=False,
+    )
+    if top.returncode != 0 or Path(top.stdout.strip()).resolve() != root:
+        raise ValueError("checkpoint root must be a Git repository root")
+    current = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=root,
+        capture_output=True, text=True, encoding="utf-8", check=False,
+    )
+    revision = current.stdout.strip()
+    if current.returncode != 0 or len(revision) != 40:
+        raise ValueError("checkpoint requires a committed Git source revision")
+    return revision
+
+
+def _checkpoint_context(root: Path, raw_paths: Sequence[str]) -> str:
+    if not raw_paths or len(raw_paths) > 32:
+        raise ValueError("checkpoint requires 1 to 32 explicit context files")
+    parts = []
+    labels = set()
+    for raw_path in raw_paths:
+        selected = Path(raw_path)
+        if not selected.is_absolute():
+            selected = root / selected
+        selected = selected.resolve(strict=True)
+        if not selected.is_relative_to(root) or not selected.is_file():
+            raise ValueError("checkpoint context must be a project file")
+        label = selected.relative_to(root).as_posix()
+        if label.casefold() in labels:
+            raise ValueError("duplicate checkpoint context file")
+        labels.add(label.casefold())
+        content = selected.read_bytes().decode("utf-8")
+        parts.append(f"[{label}]\n{content}\n")
+    context_text = "".join(parts)
+    if len(context_text) > 36000:
+        raise ValueError("checkpoint context exceeds 36000 characters")
+    return context_text
+
+
+def _read_small_json(path: str) -> dict[str, object]:
+    source = Path(path)
+    if source.stat().st_size > 100_000:
+        raise ValueError("checkpoint input exceeds bounded size limit")
+    data = json.loads(source.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ValueError("checkpoint input must be a JSON object")
+    return data
+
+
+def _run_checkpoint(args: argparse.Namespace) -> int:
+    root = Path(args.root).resolve(strict=True)
+    revision = _git_project_revision(root)
+    context_text = _checkpoint_context(root, args.context_file)
+    context_digest = hashlib.sha256(context_text.encode("utf-8")).hexdigest()
+    if args.checkpoint_action == "create":
+        spec = _read_small_json(args.spec)
+        try:
+            if not isinstance(spec.get("approved_plan"), list) or not isinstance(spec.get("completed", []), list):
+                raise ValueError("approved_plan and completed must be lists")
+            for key in ("operation_ids", "required_approval_ids"):
+                if not isinstance(spec.get(key, []), list):
+                    raise ValueError(f"{key} must be a list")
+            checkpoint = make_checkpoint(
+                task_id=spec["task_id"], source_revision=revision,
+                next_step_id=spec["next_step_id"],
+                approved_plan=tuple(PlanStep(**item) for item in spec["approved_plan"]),
+                plan_approval_ref=spec["plan_approval_ref"],
+                state_summary=spec["state_summary"],
+                state_evidence_ref=spec["state_evidence_ref"],
+                completed=tuple(VerifiedStep(**item) for item in spec.get("completed", [])),
+                operation_ids=tuple(spec.get("operation_ids", [])),
+                required_approval_ids=tuple(spec.get("required_approval_ids", [])),
+                context_text=context_text,
+                estimated_remaining_tokens=spec.get("estimated_remaining_tokens"),
+            )
+        except (KeyError, TypeError, AttributeError) as error:
+            raise ValueError("checkpoint spec is malformed") from error
+        with Path(args.output).open("x", encoding="utf-8", newline="\n") as stream:
+            json.dump(checkpoint.to_dict(), stream, ensure_ascii=False, indent=2)
+            stream.write("\n")
+        payload = {"status": "saved", "path": str(Path(args.output)), "checkpoint": checkpoint.to_dict()}
+    else:
+        checkpoint = checkpoint_from_dict(_read_small_json(args.checkpoint))
+        if args.executed_operation and not args.ledger_reviewed:
+            raise ValueError("--executed-operation requires --ledger-reviewed")
+        review = review_resume(
+            checkpoint, current_source_revision=revision,
+            current_context_digest=context_digest,
+            already_executed_operation_ids=tuple(args.executed_operation) if args.ledger_reviewed else None,
+            externally_accepted_approval_ids=tuple(args.accepted_approval),
+        )
+        payload = {
+            "status": review.status, "task_id": review.task_id,
+            "next_step_id": review.next_step_id, "reasons": list(review.reasons),
+            "approved_to_execute": review.approved_to_execute,
+            "approved_plan": checkpoint.to_dict()["approved_plan"],
+            "state_summary": checkpoint.state_summary,
+            "source_revision": checkpoint.source_revision,
+        }
+    if args.json:
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+    else:
+        print(f"Checkpoint {payload['status']}: {payload.get('path', payload.get('task_id'))}")
+        if args.checkpoint_action == "review":
+            for reason in payload["reasons"]:
+                print(f"- {reason}")
+    return 0 if payload["status"] in {"saved", "ready_for_owner_review"} else 2
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     _configure_output_encoding()
     args = _build_parser().parse_args(argv)
@@ -517,6 +646,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_gates(args)
         if args.command == "route":
             return _run_route(args)
+        if args.command == "checkpoint":
+            return _run_checkpoint(args)
     except (OSError, ValueError) as error:
         if getattr(args, "json", False):
             print(json.dumps(error_dict(error), indent=2, ensure_ascii=False))

@@ -1,7 +1,7 @@
 import unittest
 
 from intentos.handoff import (
-    VerifiedStep, build_agent_handoff, make_checkpoint, review_resume,
+    PlanStep, VerifiedStep, build_agent_handoff, checkpoint_from_dict, make_checkpoint, review_resume,
 )
 from intentos.models import NormalizedIntent, PromptResult
 
@@ -14,6 +14,12 @@ class HandoffCheckpointTests(unittest.TestCase):
             operation_ids=("migration-1",), required_approval_ids=("owner-production-approval",),
             context_text="Pinned status and constraints",
             estimated_remaining_tokens=1200,
+            approved_plan=(
+                PlanStep("build", "Build and verify the application"),
+                PlanStep("deploy-review", "Review deployment readiness"),
+            ),
+            plan_approval_ref="owner issue #7", state_summary="Milestone 2 under review",
+            state_evidence_ref="status commit-123",
         )
 
     def test_checkpoint_is_deterministic_versioned_and_digest_not_raw_context(self):
@@ -22,6 +28,7 @@ class HandoffCheckpointTests(unittest.TestCase):
         self.assertEqual(len(cp.context_digest), 64)
         self.assertNotIn("Pinned status", str(cp))
         self.assertEqual(cp, self.checkpoint())
+        self.assertEqual(checkpoint_from_dict(cp.to_dict()), cp)
 
     def test_resume_matches_but_never_self_approves_execution(self):
         cp = self.checkpoint()
@@ -29,6 +36,7 @@ class HandoffCheckpointTests(unittest.TestCase):
             cp, current_source_revision="commit-123",
             externally_accepted_approval_ids=("owner-production-approval",),
             current_context_digest=cp.context_digest,
+            already_executed_operation_ids=(),
         )
         self.assertEqual(result.status, "ready_for_owner_review")
         self.assertFalse(result.approved_to_execute)
@@ -60,6 +68,37 @@ class HandoffCheckpointTests(unittest.TestCase):
         r = review_resume(cp, current_source_revision="commit-123")
         self.assertEqual(r.status, "blocked")
         self.assertFalse(r.approved_to_execute)
+
+    def test_resume_without_external_ledger_or_context_is_blocked(self):
+        cp = self.checkpoint()
+        missing_ledger = review_resume(
+            cp, current_source_revision="commit-123", current_context_digest=cp.context_digest,
+            externally_accepted_approval_ids=("owner-production-approval",),
+        )
+        self.assertEqual(missing_ledger.status, "blocked")
+        self.assertIn("ledger", " ".join(missing_ledger.reasons))
+        missing_context = review_resume(
+            cp, current_source_revision="commit-123", already_executed_operation_ids=(),
+            externally_accepted_approval_ids=("owner-production-approval",),
+        )
+        self.assertEqual(missing_context.status, "blocked")
+        self.assertIn("fingerprint", " ".join(missing_context.reasons))
+
+    def test_missing_plan_or_state_cannot_be_checkpointed(self):
+        with self.assertRaises(ValueError):
+            make_checkpoint(task_id="task", source_revision="sha", next_step_id="next")
+        with self.assertRaises(ValueError):
+            make_checkpoint(
+                task_id="task", source_revision="sha", next_step_id="next",
+                approved_plan=(PlanStep("next", "Run checks"),), plan_approval_ref="owner #7",
+                state_summary="MVP", state_evidence_ref="",
+            )
+
+    def test_malformed_serialized_checkpoint_is_rejected(self):
+        data = self.checkpoint().to_dict()
+        data["approved_plan"] = []
+        with self.assertRaises(ValueError):
+            checkpoint_from_dict(data)
 
     def test_unreviewed_completed_steps_cannot_be_checkpointed(self):
         with self.assertRaises(ValueError):

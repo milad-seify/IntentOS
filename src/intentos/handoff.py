@@ -4,7 +4,7 @@ No external tool is invoked; an executor must separately verify its own approval
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 import hashlib
 import re
 
@@ -22,6 +22,12 @@ class VerifiedStep:
 
 
 @dataclass(frozen=True, slots=True)
+class PlanStep:
+    step_id: str
+    action: str
+
+
+@dataclass(frozen=True, slots=True)
 class TaskCheckpoint:
     schema_version: int
     task_id: str
@@ -32,6 +38,16 @@ class TaskCheckpoint:
     required_approval_ids: tuple[str, ...] = ()
     context_digest: str = ""
     estimated_remaining_tokens: int | None = None
+    approved_plan: tuple[PlanStep, ...] = ()
+    plan_approval_ref: str = ""
+    state_summary: str = ""
+    state_evidence_ref: str = ""
+
+    def to_dict(self) -> dict[str, object]:
+        data = asdict(self)
+        for key in ("completed", "approved_plan", "operation_ids", "required_approval_ids"):
+            data[key] = list(data[key])
+        return data
 
 
 @dataclass(frozen=True, slots=True)
@@ -71,6 +87,47 @@ def _key(value: str) -> bool:
     return bool(_KEY.fullmatch(value))
 
 
+def _short_line(value: str, limit: int = 500) -> bool:
+    return bool(value.strip()) and len(value) <= limit and not any(
+        char in "\n\r\v\f\x85\u2028\u2029" or ord(char) < 32 or ord(char) == 127
+        for char in value
+    )
+
+
+def _validate_checkpoint(checkpoint: TaskCheckpoint) -> None:
+    if type(checkpoint.schema_version) is not int or checkpoint.schema_version != 1:
+        raise ValueError("unsupported checkpoint schema")
+    if not all(_key(item) for item in (checkpoint.task_id, checkpoint.source_revision, checkpoint.next_step_id)):
+        raise ValueError("task, source revision and next step must be bounded identifiers")
+    if not checkpoint.approved_plan or len(checkpoint.approved_plan) > 128:
+        raise ValueError("checkpoint needs a bounded approved plan")
+    plan_ids = [step.step_id for step in checkpoint.approved_plan]
+    if len(set(plan_ids)) != len(plan_ids) or any(not _key(step.step_id) or not _short_line(step.action) for step in checkpoint.approved_plan):
+        raise ValueError("plan steps need unique IDs and bounded actions")
+    if checkpoint.next_step_id not in plan_ids:
+        raise ValueError("next step must be part of the approved plan")
+    if not all(_short_line(item) for item in (checkpoint.plan_approval_ref, checkpoint.state_summary, checkpoint.state_evidence_ref)):
+        raise ValueError("approved plan and project state need bounded evidence")
+    completed_ids = [step.step_id for step in checkpoint.completed]
+    if (len(set(completed_ids)) != len(completed_ids)
+            or any(step.step_id not in plan_ids or not _short_line(step.evidence_ref)
+                   or step.accepted_by_owner is not True for step in checkpoint.completed)):
+        raise ValueError("completed steps need unique approved plan IDs and evidence")
+    if checkpoint.next_step_id in completed_ids:
+        raise ValueError("a completed step cannot also be the next step")
+    for group in (checkpoint.operation_ids, checkpoint.required_approval_ids):
+        if len(group) != len(set(group)) or any(not _key(value) for value in group):
+            raise ValueError("operation/approval IDs must be unique and bounded")
+    if (checkpoint.estimated_remaining_tokens is not None
+            and (type(checkpoint.estimated_remaining_tokens) is not int
+                 or not 0 <= checkpoint.estimated_remaining_tokens <= 10**9)):
+        raise ValueError("token estimate must be a nonnegative bounded user-supplied quantity")
+    if len(checkpoint.completed) > 128 or len(checkpoint.operation_ids) > 128 or len(checkpoint.required_approval_ids) > 128:
+        raise ValueError("checkpoint exceeds bounded input limits")
+    if not re.fullmatch(r"[0-9a-f]{64}", checkpoint.context_digest):
+        raise ValueError("checkpoint context digest must be SHA-256")
+
+
 def make_checkpoint(
     *,
     task_id: str,
@@ -81,37 +138,54 @@ def make_checkpoint(
     required_approval_ids: tuple[str, ...] = (),
     context_text: str = "",
     estimated_remaining_tokens: int | None = None,
+    approved_plan: tuple[PlanStep, ...] = (),
+    plan_approval_ref: str = "",
+    state_summary: str = "",
+    state_evidence_ref: str = "",
 ) -> TaskCheckpoint:
-    if not all(_key(item) for item in (task_id, source_revision, next_step_id)):
-        raise ValueError("task, source revision and next step must be bounded identifiers")
-    ids = [step.step_id for step in completed]
-    if len(set(ids)) != len(ids) or any(not _key(i) for i in ids):
-        raise ValueError("completed step IDs must be unique and valid")
-    if any(not step.evidence_ref.strip() or len(step.evidence_ref) > 500 for step in completed):
-        raise ValueError("completed steps need bounded external evidence references")
-    if any(not step.accepted_by_owner for step in completed):
-        raise ValueError("unapproved completed steps cannot be promoted to a checkpoint")
-    if next_step_id in ids:
-        raise ValueError("a completed step cannot also be the next step")
-    for group in (operation_ids, required_approval_ids):
-        if len(group) != len(set(group)) or any(not _key(v) for v in group):
-            raise ValueError("operation/approval IDs must be unique and bounded")
-    if estimated_remaining_tokens is not None and (estimated_remaining_tokens < 0 or estimated_remaining_tokens > 10**9):
-        raise ValueError("token estimate must be a nonnegative bounded user-supplied quantity")
-    if len(context_text) > 36000 or len(completed) > 128 or len(operation_ids) > 128:
+    if len(context_text) > 36000:
         raise ValueError("checkpoint exceeds bounded input limits")
     digest = hashlib.sha256(context_text.encode("utf-8")).hexdigest()
-    return TaskCheckpoint(
+    checkpoint = TaskCheckpoint(
         1, task_id, source_revision, next_step_id, completed,
         operation_ids, required_approval_ids, digest, estimated_remaining_tokens,
+        approved_plan, plan_approval_ref, state_summary, state_evidence_ref,
     )
+    _validate_checkpoint(checkpoint)
+    return checkpoint
+
+
+def checkpoint_from_dict(data: dict[str, object]) -> TaskCheckpoint:
+    """Load a portable checkpoint, rejecting missing or malformed approval claims."""
+    if not isinstance(data, dict):
+        raise ValueError("checkpoint must be an object")
+    for key in ("completed", "approved_plan", "operation_ids", "required_approval_ids"):
+        if key in data and not isinstance(data[key], list):
+            raise ValueError(f"{key} must be a list")
+    try:
+        completed = tuple(VerifiedStep(**item) for item in data["completed"])
+        plan = tuple(PlanStep(**item) for item in data["approved_plan"])
+        checkpoint = TaskCheckpoint(
+            schema_version=data["schema_version"], task_id=data["task_id"],
+            source_revision=data["source_revision"], next_step_id=data["next_step_id"],
+            completed=completed, operation_ids=tuple(data.get("operation_ids", ())),
+            required_approval_ids=tuple(data.get("required_approval_ids", ())),
+            context_digest=data["context_digest"],
+            estimated_remaining_tokens=data.get("estimated_remaining_tokens"),
+            approved_plan=plan, plan_approval_ref=data["plan_approval_ref"],
+            state_summary=data["state_summary"], state_evidence_ref=data["state_evidence_ref"],
+        )
+        _validate_checkpoint(checkpoint)
+    except (KeyError, TypeError, AttributeError) as error:
+        raise ValueError("checkpoint is malformed") from error
+    return checkpoint
 
 
 def review_resume(
     checkpoint: TaskCheckpoint,
     *,
     current_source_revision: str,
-    already_executed_operation_ids: tuple[str, ...] = (),
+    already_executed_operation_ids: tuple[str, ...] | None = None,
     externally_accepted_approval_ids: tuple[str, ...] = (),
     current_context_digest: str | None = None,
 ) -> ResumeReview:
@@ -120,13 +194,23 @@ def review_resume(
     This cannot verify actual filesystem state, external permissions or task success.
     """
     reasons: list[str] = []
-    if checkpoint.schema_version != 1 or not _key(checkpoint.task_id):
-        reasons.append("Unsupported or malformed checkpoint.")
+    try:
+        _validate_checkpoint(checkpoint)
+    except (ValueError, TypeError, AttributeError):
+        return ResumeReview(
+            "blocked", str(getattr(checkpoint, "task_id", "")),
+            str(getattr(checkpoint, "next_step_id", "")),
+            ("Unsupported or malformed checkpoint.",),
+        )
     if checkpoint.source_revision != current_source_revision:
         reasons.append("Source revision changed; re-evaluate task before resuming.")
-    if current_context_digest is not None and current_context_digest != checkpoint.context_digest:
+    if current_context_digest is None:
+        reasons.append("Current context fingerprint was not supplied.")
+    elif current_context_digest != checkpoint.context_digest:
         reasons.append("Context fingerprint changed; review before resuming.")
-    if set(checkpoint.operation_ids).intersection(already_executed_operation_ids):
+    if already_executed_operation_ids is None and checkpoint.operation_ids:
+        reasons.append("External operation ledger was not supplied; replay safety is unknown.")
+    elif set(checkpoint.operation_ids).intersection(already_executed_operation_ids or ()):
         reasons.append("A checkpoint operation may already have executed; never replay blindly.")
     if any(not step.accepted_by_owner or not step.evidence_ref for step in checkpoint.completed):
         reasons.append("A claimed completed step lacks approval or evidence.")

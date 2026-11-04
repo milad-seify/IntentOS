@@ -89,6 +89,8 @@ The development `intentos gates` command reads a caller-supplied JSON evidence f
 
 The development `intentos route` review shows why a caller-supplied model is eligible, excluded, or selected for a task's required capability and effort. It uses relative cost classes, includes a catalog fingerprint for reproducibility, and falls back when compatible verified metadata is missing or names conflict. `available` and `verified` are caller assertions; the review does not query providers or claim live prices.
 
+The development `intentos checkpoint` command saves a bounded, versioned approved plan, cited project-state summary, completed-step evidence and next action for an interrupted task. The CLI pins the actual Git HEAD and fingerprints only explicitly supplied local context files. A fresh process can review the checkpoint against current revision/context and caller-checked operation/approval records. Changed state, duplicate operation IDs or missing approvals block review. Even a passing check is only ready for owner review; it does not restart an agent or authorize execution. The command is not in Core 1.0.1.
+
 ### AI agent
 
 Agents should be able to consume IntentOS capabilities through an interoperability layer such as MCP rather than requiring custom integration with every agent product.
