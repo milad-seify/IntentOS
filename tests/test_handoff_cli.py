@@ -98,6 +98,12 @@ class HandoffCliTests(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn("high-risk", result["error"]["message"])
 
+    def test_non_codex_executable_is_rejected_before_approval(self):
+        self.prepare()
+        code, result = self.preview("--executable", "python")
+        self.assertEqual(code, 2)
+        self.assertIn("Codex executable", result["error"]["message"])
+
     def test_other_agent_has_portable_packet_and_explicit_unavailable_status(self):
         code, result = self.prepare(target="claude-code")
         self.assertEqual(code, 0)

@@ -16,6 +16,8 @@ def run_codex_handoff(
     """Run one approved handoff; a completed agent turn is not task verification."""
     if packet.target_tool != "codex":
         return {"status": "unavailable", "reason": f"Automatic dispatch is unavailable for {packet.target_tool}; copy the prepared task instead."}
+    if Path(executable).name.casefold() not in {"codex", "codex.exe", "codex.cmd"}:
+        raise ValueError("Codex executable must be named codex, codex.exe or codex.cmd")
     if sandbox not in {"read-only", "workspace-write"}:
         raise ValueError("Codex sandbox must be read-only or workspace-write")
     if not 1 <= timeout_seconds <= 3600:

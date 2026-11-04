@@ -2,9 +2,9 @@
 
 ## Current phase
 
-**ACTIVE FULL-SCOPE DEVELOPMENT — F01–F10 REQUIRED, NOT COMPLETE.** The owner has superseded the earlier early-Freeze plan and required all ten features be implemented before consolidated final testing and owner-led Phase 8/Dogfooding. [D-031](DECISIONS.md) and [one finite delivery program](DELIVERY_PROGRAM.md) are the authoritative execution scope; this is not a declaration that the new capabilities are ready.
+**F01–F10 FEATURE CANDIDATE — FINAL DEVELOPER GATE IN PROGRESS, NOT ACCEPTED.** [D-031](DECISIONS.md) and the [finite delivery program](DELIVERY_PROGRAM.md) require all ten capabilities before a new Feature Freeze. The stacked development branches contain working access for each feature; the [candidate acceptance record](FULL_SCOPE_CANDIDATE.md), consolidated verification, owner review, and merge decision remain separate gates.
 
-Existing public releases remain Core `1.0.1` and VS Code `0.1.1`. Completed Phase 0–7 contracts remain in force. Workstream 1 is under implementation: PR #54 contains internal continuity, governance, and handoff foundations; stacked CLI slices expose B1 Project Compass, explicit approved local state writes, audited scope amendments, and a milestone/launch evidence report. F05–F08 are still partial and must pass their full acceptance contracts. [Issue #52](https://github.com/milad-seify/IntentOS/issues/52) is reopened. Final acceptance must verify *all* F01–F10 and then establish a new Feature Freeze; operational Phase 8A/8B/8C and owner-led Idea-to-Production dogfooding remain **DEFERRED / NOT STARTED**, with their criteria unchanged.
+Existing public releases remain Core `1.0.1` and VS Code `0.1.1`. Completed Phase 0–7 contracts remain in force. Stacked PRs #54–#64 implement governance, routing, checkpoint/recovery, handoff, outcomes and integrated CLI access, but are not merged or a public release. [Issue #52](https://github.com/milad-seify/IntentOS/issues/52) tracks this delivery. Final acceptance must verify *all* F01–F10 and obtain owner sign-off before a new Feature Freeze; operational Phase 8A/8B/8C and owner-led Idea-to-Production dogfooding remain **DEFERRED / NOT STARTED**, with their criteria unchanged.
 
 ## Post-Phase-7 development program
 
@@ -134,9 +134,9 @@ The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-1. Follow the **finite** [Full-Scope Delivery Program](DELIVERY_PROGRAM.md), F01–F10. Start with project governance (B1 stable UX, B2 state/decisions, scope guard, milestones), then explainable routing/approved agent handoff/checkpoint-resume, then learning and access. Every required feature must have implementation + verification evidence; do not mark a missing feature deferred to end development.
-2. For each coherent code slice, run focused regressions and CI. Treat CI as developer safety, **not** the final owner acceptance or Phase 8 user study. Avoid docs-only loops and unrelated refactors.
-3. At the actual feature-complete revision, perform **one consolidated full integration/compatibility/privacy/release gate** and independently accepted Feature Freeze; stop before separately authorized operational Phase 8 and owner-led Dogfooding.
+1. Complete the [candidate record](FULL_SCOPE_CANDIDATE.md) on one exact stacked head: full tests, cross-platform CI, CLI/MCP/VS Code, packaging, privacy/security and final diff review.
+2. Present the verified candidate to the owner for review of the stacked PRs, versioning and a separate Feature Freeze decision. No PR merge or protected-branch change is implied by green developer tests.
+3. Preserve the separately authorized operational Phase 8 and owner-led Dogfooding gates. Synthetic developer checks do not count as user evidence.
 
 ## Constraints carried forward
 

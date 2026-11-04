@@ -748,6 +748,8 @@ def _run_handoff(args: argparse.Namespace) -> int:
             response = {"status": "unavailable", "target_tool": packet.target_tool,
                         "reason": "Automatic dispatch is unavailable for this agent; copy the prepared task instead."}
         else:
+            if Path(args.executable).name.casefold() not in {"codex", "codex.exe", "codex.cmd"}:
+                raise ValueError("Codex executable must be named codex, codex.exe or codex.cmd")
             if review.get("risk_level") == "high" and args.sandbox == "workspace-write":
                 raise ValueError("high-risk handoffs require read-only dispatch or separate manual execution approval")
             if args.model is not None and not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,79}", args.model):
