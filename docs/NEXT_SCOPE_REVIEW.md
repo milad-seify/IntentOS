@@ -1,5 +1,7 @@
 # Next Scope Review — Post-Phase-7 IntentOS
 
+**Status follow-up (2026-11-04; after the original pinned assessment):** [PR #49](https://github.com/milad-seify/IntentOS/pull/49) and [PR #50](https://github.com/milad-seify/IntentOS/pull/50) are merged; main at the subsequent recorded **pre-reconciliation** pin `8f2823348d94925605ba7a5ec62c2f3eb2982404` passed [CI 41820592581](https://github.com/milad-seify/IntentOS/actions/runs/41820592581), 7/7. [PR #48](https://github.com/milad-seify/IntentOS/pull/48) has since been **closed without merge** by the maintainer's disposition; **no formal final Freeze** became effective. The original review and its older SHA below remain historical, not today's current-HEAD assertion. See [D-029](DECISIONS.md) for the updated gate. No B2/C1/D1 product feature was approved.
+
 **Status:** documentation-only assessment and proposed next-scope gate; **no runtime implementation, Feature Freeze revision or Phase 8 execution approved by this document**.  
 **Reviewed:** 2026-11-04. **Pinned GitHub `main`:** `ac2a530c1a42e9fa0e270201fb08741895d49ccb`; [main CI 41809585163](https://github.com/milad-seify/IntentOS/actions/runs/41809585163) passed 7/7.  
 **Formal closeout discrepancy:** [PR #48](https://github.com/milad-seify/IntentOS/pull/48) was **still open and unmerged** on direct GitHub inspection; its [PR CI 41809944205](https://github.com/milad-seify/IntentOS/actions/runs/41809944205) passed 7/7. Do not represent D-028 as an effective final Freeze or invent its merge SHA.
