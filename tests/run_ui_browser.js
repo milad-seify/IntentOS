@@ -116,6 +116,11 @@ async function run() {
   });
   await command('Runtime.enable');await command('Page.enable');await command('DOM.enable');
   await until(()=>evaluate("Boolean(document.querySelector('#prepare-text'))"),'rendered first-use form');
+  await evaluate("document.querySelector('a.skip').focus();true");
+  await command('Input.dispatchKeyEvent',{type:'keyDown',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
+  await command('Input.dispatchKeyEvent',{type:'keyUp',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
+  assert.strictEqual(await evaluate("document.querySelector('#navigation').contains(document.activeElement)"),true,'Keyboard Tab must reach workflow navigation');
+  assert.strictEqual(await evaluate("document.querySelector('#feedback').getAttribute('role')"),'status');
   await screenshot('simple-ui-start.png');
 
   await evaluate("document.querySelector('#prepare-text').value='Codex: Refactor this function without changing behavior.';document.querySelector('form[data-action=prepare]').requestSubmit();true");
@@ -127,6 +132,7 @@ async function run() {
   await until(()=>evaluate("document.querySelector('#feedback').textContent.includes('copied') || document.querySelector('#feedback').textContent.includes('denied')"),'clipboard outcome');
 
   await evaluate("[...document.querySelectorAll('#navigation button')].find(x=>x.textContent==='Project').click();true");
+  assert.strictEqual(await evaluate("document.activeElement.id"),'main','Workflow navigation must move focus to main content');
   await chooseFile('#compass-authoritative',path.join(project,'AGENTS.md'));
   await evaluate("document.querySelector('#compass-task').value='Review API';document.querySelector('form[data-action=compass]').requestSubmit();true");
   await until(()=>evaluate("!document.querySelector('#result').hidden && document.querySelector('#result').textContent.includes('Project Compass review')"),'project review');
@@ -156,7 +162,7 @@ async function run() {
   assert.strictEqual(await evaluate('document.documentElement.scrollWidth <= window.innerWidth + 1'),true,'Small viewport has horizontal overflow');
   assert.strictEqual(await evaluate("[...document.querySelectorAll('#navigation button')].some(x=>x.textContent==='Start')"),true);
   await screenshot('simple-ui-small-screen.png');
-  console.log('Real browser passed: first-use prepare/review, clipboard outcome, selected-source Compass, non-mutating governance preview, route review, recovery navigation, light theme, and small-screen layout.');
+  console.log('Real browser passed: keyboard navigation/focus, first-use prepare/review, clipboard outcome, selected-source Compass, non-mutating governance preview, route review, recovery navigation, light theme, and small-screen layout.');
 } finally {
   try{socket?.close()}catch{}
   stop(browser);stop(server);
