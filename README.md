@@ -70,7 +70,7 @@ Current surfaces:
 - **VS Code extension** — the published `0.1.1` release provides Prepare → Review → Copy. The development candidate adds an Activity Bar workbench for the existing project, governance, delegation, recovery and outcome workflows.
 - **Agent Skills** — portable, reusable `SKILL.md` guidance.
 
-Deferred candidate surface:
+Additional source-candidate surface:
 
 - **Local Simple UI (development candidate)** — `intentos ui` opens an outcome-first local browser interface for Prepare → Review → Copy and guided access to the existing F01–F10 operations. See [the UI guide](docs/SIMPLE_UI.md).
 

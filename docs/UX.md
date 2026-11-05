@@ -158,7 +158,7 @@ When IntentOS recommends a capability, workflow, context file, or stronger verif
 
 ### Consistent behavior across surfaces
 
-The same request should produce semantically equivalent task/risk/policy decisions whether it enters through CLI, VS Code, MCP, Python API, or a future simple UI.
+The same request should produce semantically equivalent task/risk/policy decisions whether it enters through CLI, VS Code, MCP, Python API, or the local Simple UI candidate.
 
 ### No prompt-engineering prerequisite
 
