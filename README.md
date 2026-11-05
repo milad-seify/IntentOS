@@ -67,14 +67,14 @@ Current surfaces:
 - **CLI** — portable use from the terminal and scripts.
 - **Python API** — programmatic access for integrations and automation.
 - **MCP adapter** — optional local stdio connection exposing one bounded `prepare_task` tool.
-- **VS Code extension (minimum slice)** — one `IntentOS: Prepare Task` command with temporary review and Copy Prepared Task.
+- **VS Code extension** — the published `0.1.1` release provides Prepare → Review → Copy. The development candidate adds an Activity Bar workbench for the existing project, governance, delegation, recovery and outcome workflows.
 - **Agent Skills** — portable, reusable `SKILL.md` guidance.
 
 Deferred candidate surface:
 
-- **Simple UI** — an outcome-first experience for users who should not need CLI or prompt-engineering knowledge. Phase 7C evidence did not justify starting it; any future work remains evidence-gated.
+- **Local Simple UI (development candidate)** — `intentos ui` opens an outcome-first local browser interface for Prepare → Review → Copy and guided access to the existing F01–F10 operations. See [the UI guide](docs/SIMPLE_UI.md).
 
-Broader VS Code handoff/execution features remain gated by editor dogfooding rather than being assumed up front.
+The new graphical scope was explicitly owner authorized after the accepted F01–F10 core source freeze; the combined UI candidate still needs its own exact-SHA acceptance. Neither interface silently runs an agent.
 
 Advanced controls should use **progressive disclosure**: everyday users see simple outcome-first actions, while experts can inspect and control context, risk, policy, routing, cost, approvals, and verification.
 
@@ -239,9 +239,9 @@ Request
 
 The extension uses the editable package installation only for local development. IntentOS 1.0.1 is also available as the stable public package.
 
-The first editor slice lives in `integrations/vscode` and intentionally has no npm runtime dependencies or build pipeline.
+The editor extension lives in `integrations/vscode` and intentionally has no npm runtime dependencies or build pipeline. The development candidate adds an Activity Bar entry and a native-themed workbench while preserving the published Prepare → Review → Copy path.
 
-Current flow:
+Basic flow:
 
 1. make sure the `intentos` CLI is available to the VS Code extension host
 2. select request text in an editor, or leave nothing selected
@@ -254,7 +254,7 @@ Advanced routing/context details stay collapsed by default. The extension invoke
 
 `intentos.executable` defaults to `intentos` and can be changed when VS Code needs a specific virtual-environment executable path.
 
-This first slice intentionally does not include a permanent sidebar, automatic project-file discovery, agent-specific Send/Execute wiring, telemetry, or a background service. See [`integrations/vscode/README.md`](integrations/vscode/README.md).
+For the development workbench, open **IntentOS** in the Activity Bar, then choose Start, Project, Govern, Delegate, Recover or Outcomes. The workbench uses the installed Core `1.1.0` candidate CLI for advanced actions; the published Core `1.0.1` package does not contain those commands. Explicit source selection and approval previews preserve the existing CLI boundaries. There is no automatic project-file discovery, telemetry or background service. See [`integrations/vscode/README.md`](integrations/vscode/README.md).
 
 ## Python API
 
@@ -357,7 +357,7 @@ IntentOS is not:
 
 ## Development
 
-The core currently has no third-party runtime dependencies. MCP support is an optional extra rather than a core dependency. The minimum VS Code extension uses plain JavaScript and built-in VS Code/Node APIs.
+The core and local Simple UI have no third-party runtime dependencies. MCP support is an optional extra rather than a core dependency. The VS Code extension uses plain JavaScript and built-in VS Code/Node APIs.
 
 ```bash
 PYTHONPATH=src python -m unittest discover -s tests -v
@@ -369,11 +369,11 @@ GitHub Actions runs the full core suite on Ubuntu with Python 3.11, 3.12, and 3.
 
 The initial Phase 0–6 roadmap and independent-audit stabilization gate are complete. **Phase 7 is complete:** MCP parity was proven, VS Code is publicly distributed with a visible status-bar launcher, and the accepted workflow remains Prepare → Review → Copy. The evidence gate did not justify additional adapters or execution capabilities.
 
-Current baseline: **120 Python unit tests + CLI smoke + MCP protocol/stdio parity checks + VS Code contract, syntax, and package checks**, with Linux and Windows CI coverage. CI also builds and inspects wheel/sdist artifacts, then installs and smoke-tests each from clean environments without publishing.
+The current UI candidate passes **251 Python unit tests (one skipped)** locally, plus CLI/MCP smoke, VS Code contract/syntax/real-host checks, a real browser UI flow and package validation. CI builds and inspects wheel/sdist artifacts, then installs and smoke-tests them from clean environments without publishing. Use exact-head CI for a final gate rather than treating this local count as release acceptance.
 
 Core `1.0.1` is published on PyPI and GitHub, packaging the review-only classification/policy correction. See the [1.0.1 release notes](docs/RELEASE_NOTES_1.0.1.md) and [GitHub Release](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.1).
 
-The v1 public compatibility contract is frozen in `docs/PUBLIC_CONTRACT.md`. IntentOS `1.0.1` is the current stable core release; VS Code extension `0.1.1` is published. Phase 7D was intentionally deferred and closed without implementation because no additional adapter demand met the evidence threshold. Phase 7 is formally complete. [Phase 8 — Adoption & Outcome Validation](docs/PHASE_8_VALIDATION.md) has an approved protocol, but operational validation is deferred until the [post-Phase-7 program](docs/POST_PHASE_7_PROGRAM.md) reaches an accepted feature freeze. The post-release source includes an **internal, non-public B1 Project Compass pilot**; it is not in the published PyPI Core 1.0.1 artifact. B2/C1/D1 implementations are deferred. [Stage E freeze readiness](docs/STAGE_E_FREEZE_READINESS.md) is under review and does not publish a release or launch Phase 8. See the [release notes](docs/RELEASE_NOTES_1.0.1.md) and [release procedure](docs/RELEASING.md).
+The v1 public compatibility contract is frozen in `docs/PUBLIC_CONTRACT.md`. IntentOS `1.0.1` is the current stable published core release; VS Code extension `0.1.1` is published. Phase 7 is formally complete. The F01–F10 source scope was accepted at PR #65, and the owner subsequently authorized the bounded pre-release graphical access candidate in [D-033](docs/DECISIONS.md). Neither the new UI nor Core source `1.1.0` is published, and the revised integrated freeze awaits exact-SHA verification and owner acceptance. [Phase 8 — Adoption & Outcome Validation](docs/PHASE_8_VALIDATION.md) has an approved protocol, but operational validation and owner-led dogfooding have not started. See [status](docs/STATUS.md), [release notes](docs/RELEASE_NOTES_1.0.1.md) and [release procedure](docs/RELEASING.md).
 
 See [`docs/STATUS.md`](docs/STATUS.md) for the concise handoff, [`docs/DOGFOODING.md`](docs/DOGFOODING.md) for real-world findings, [`docs/MCP_DOGFOODING.md`](docs/MCP_DOGFOODING.md) for MCP parity evidence, [`docs/HUGGINGFACE_RESEARCH.md`](docs/HUGGINGFACE_RESEARCH.md) for the ecosystem research pass, [`docs/UX.md`](docs/UX.md) for usage/access principles, [`docs/INDEPENDENT_AUDIT.md`](docs/INDEPENDENT_AUDIT.md) for the review contract, and [`docs/ROADMAP.md`](docs/ROADMAP.md) for the roadmap.
 

@@ -23,7 +23,7 @@ The accepted user flow remains:
 Request → IntentOS preparation → Review → Copy Prepared Task → hand off to an AI tool
 ```
 
-The extension does not execute or send tasks to an agent. Phase 7D was intentionally deferred and closed without implementation after the Phase 7C evidence gate.
+The published `0.1.1` extension does not execute or send tasks to an agent. The later D-033 development workbench adds graphical access to the existing approval-bound Codex dispatch while preserving manual handoff for other targets; this is not in the published package. Phase 7D was intentionally deferred and closed without implementation after the Phase 7C evidence gate.
 
 ## 0.1.1 publication complete
 

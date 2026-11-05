@@ -41,7 +41,7 @@ const vscode = {
     getConfiguration: () => ({ get: () => process.argv[3] }),
   },
   commands: {
-    registerCommand: (_id, callback) => { command = callback; return { dispose() {} }; },
+    registerCommand: (id, callback) => { if (id === 'intentos.prepareTask') command = callback; return { dispose() {} }; },
   },
   ProgressLocation: { Notification: 1 },
   StatusBarAlignment: { Right: 2 },
@@ -69,19 +69,49 @@ command().then(() => process.stdout.write(JSON.stringify(observed)))
         )
         return json.loads(result.stdout)
 
-    def test_manifest_exposes_only_prepare_task_command(self) -> None:
+    def test_manifest_exposes_prepare_and_workbench_entry_points(self) -> None:
         manifest = json.loads((EXTENSION_DIR / "package.json").read_text(encoding="utf-8"))
 
         self.assertIn("onStartupFinished", manifest["activationEvents"])
         commands = manifest["contributes"]["commands"]
         self.assertEqual(
             commands,
-            [{"command": "intentos.prepareTask", "title": "IntentOS: Prepare Task"}],
+            [
+                {"command": "intentos.prepareTask", "title": "IntentOS: Prepare Task"},
+                {"command": "intentos.openWorkbench", "title": "IntentOS: Open Workbench"},
+            ],
         )
-        self.assertNotIn("views", manifest["contributes"])
-        self.assertNotIn("viewsContainers", manifest["contributes"])
+        self.assertEqual(manifest["contributes"]["viewsContainers"]["activitybar"][0]["id"], "intentos")
+        self.assertEqual(manifest["contributes"]["views"]["intentos"][0]["id"], "intentos.start")
         self.assertNotIn("dependencies", manifest)
         self.assertNotIn("devDependencies", manifest)
+
+    def test_workbench_webviews_have_csp_and_valid_embedded_scripts(self) -> None:
+        node = shutil.which("node")
+        if node is None:
+            self.skipTest("Node.js is required to validate the graphical extension")
+        script = r"""
+const assert = require('assert');
+const vm = require('vm');
+const { sidebarHtml, workbenchHtml } = require(process.argv[1]);
+for (const html of [sidebarHtml(), workbenchHtml()]) {
+  assert(html.includes("default-src 'none'"));
+  assert(html.includes("script-src 'nonce-"));
+  const match = html.match(/<script nonce="[a-f0-9]+">([\s\S]*?)<\/script>/);
+  assert(match, 'The webview script must use a nonce.');
+  new vm.Script(match[1]);
+}
+const html = workbenchHtml();
+for (const label of ['Project Compass', 'Status update', 'Scope amendment', 'Codex dispatch', 'Checkpoints and recovery', 'Compare task variants']) {
+  assert(html.includes(label), `Missing graphical workflow: ${label}`);
+}
+assert(!html.includes('http://'));
+assert(!html.includes('https://'));
+"""
+        subprocess.run(
+            [node, "-e", script, str(EXTENSION_DIR / "workbench.js")],
+            check=True, capture_output=True, text=True,
+        )
 
     def test_marketplace_manifest_metadata_keeps_the_extension_identity(self) -> None:
         manifest = json.loads((EXTENSION_DIR / "package.json").read_text(encoding="utf-8"))
@@ -112,7 +142,7 @@ command().then(() => process.stdout.write(JSON.stringify(observed)))
 const assert = require('assert');
 const Module = require('module');
 const originalLoad = Module._load;
-let registered;
+const registered = {};
 let launcher;
 const vscode = {
   window: {
@@ -127,8 +157,8 @@ const vscode = {
   },
   commands: {
     registerCommand: (id, callback) => {
-      registered = { id, callback, disposed: false };
-      return { dispose() { registered.disposed = true; } };
+      registered[id] = { callback, disposed: false };
+      return { dispose() { registered[id].disposed = true; } };
     },
   },
   StatusBarAlignment: { Right: 2 },
@@ -142,15 +172,17 @@ require(process.argv[1]).activate({
   subscriptions,
   extensionUri: { fsPath: '/repo/integrations/vscode' },
 });
-assert.strictEqual(registered.id, 'intentos.prepareTask');
-assert.strictEqual(launcher.command, registered.id);
+assert.strictEqual(typeof registered['intentos.prepareTask'].callback, 'function');
+assert.strictEqual(typeof registered['intentos.openWorkbench'].callback, 'function');
+assert.strictEqual(launcher.command, 'intentos.prepareTask');
 assert.strictEqual(launcher.text, '$(sparkle) IntentOS');
 assert.strictEqual(launcher.tooltip, 'Prepare a task with IntentOS');
 assert.strictEqual(launcher.visible, true);
 assert.strictEqual(subscriptions.includes(launcher), true);
 subscriptions.forEach((subscription) => subscription.dispose());
 assert.strictEqual(launcher.disposed, true);
-assert.strictEqual(registered.disposed, true);
+assert.strictEqual(registered['intentos.prepareTask'].disposed, true);
+assert.strictEqual(registered['intentos.openWorkbench'].disposed, true);
 """
         subprocess.run(
             [node, "-e", script, str(EXTENSION_DIR / "extension.js")],
@@ -163,9 +195,9 @@ assert.strictEqual(registered.disposed, true);
         source = (EXTENSION_DIR / "extension.js").read_text(encoding="utf-8").lower()
         manifest = json.loads((EXTENSION_DIR / "package.json").read_text(encoding="utf-8"))
 
-        self.assertEqual(
+        self.assertIn(
+            {"command": "intentos.prepareTask", "title": "IntentOS: Prepare Task"},
             manifest["contributes"]["commands"],
-            [{"command": "intentos.prepareTask", "title": "IntentOS: Prepare Task"}],
         )
         self.assertNotIn("telemetry", source)
         self.assertNotIn("sendtoagent", source)
@@ -193,7 +225,7 @@ assert.strictEqual(registered.disposed, true);
     def test_marketplace_ignore_keeps_runtime_and_listing_files(self) -> None:
         ignored = (EXTENSION_DIR / ".vscodeignore").read_text(encoding="utf-8")
 
-        for filename in ("extension.js", "executable.js", "package.json", "README.md", "CHANGELOG.md", "LICENSE"):
+        for filename in ("extension.js", "executable.js", "workbench.js", "package.json", "README.md", "CHANGELOG.md", "LICENSE"):
             self.assertNotIn(filename, ignored)
         self.assertIn("test/**", ignored)
         self.assertIn("**/*.vsix", ignored)
@@ -210,6 +242,7 @@ assert.strictEqual(registered.disposed, true);
             "extension/assets/review-ready.png": (EXTENSION_DIR / "assets" / "review-ready.png").read_bytes(),
             "extension/executable.js": b"module.exports",
             "extension/extension.js": b"module.exports",
+            "extension/workbench.js": b"module.exports",
             "extension/package.json": manifest,
         }
 

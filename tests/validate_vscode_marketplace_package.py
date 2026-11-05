@@ -21,6 +21,7 @@ REQUIRED_FILES = {
     "extension/assets/review-ready.png",
     "extension/executable.js",
     "extension/extension.js",
+    "extension/workbench.js",
     "extension/package.json",
 }
 ALLOWED_FILES = REQUIRED_FILES | {"[content_types].xml", "extension.vsixmanifest"}

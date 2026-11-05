@@ -30,6 +30,7 @@
   "main": "./extension.js",
   "activationEvents": [
     "onCommand:intentos.prepareTask",
+    "onCommand:intentos.openWorkbench",
     "onStartupFinished"
   ],
   "contributes": {
@@ -37,8 +38,25 @@
       {
         "command": "intentos.prepareTask",
         "title": "IntentOS: Prepare Task"
+      },
+      {
+        "command": "intentos.openWorkbench",
+        "title": "IntentOS: Open Workbench"
       }
     ],
+    "viewsContainers": {
+      "activitybar": [{
+        "id": "intentos",
+        "title": "IntentOS",
+        "icon": "assets/icon.png"
+      }]
+    },
+    "views": {
+      "intentos": [{
+        "id": "intentos.start",
+        "name": "Start"
+      }]
+    },
     "configuration": {
       "title": "IntentOS",
       "properties": {
