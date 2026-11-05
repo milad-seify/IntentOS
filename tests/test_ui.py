@@ -104,6 +104,52 @@ class LocalUITests(unittest.TestCase):
         self.assertIsNone(payload["selected_model"])
         self.assertTrue(payload["fallback"])
 
+    def test_readiness_evidence_remains_owner_review_not_launch_approval(self):
+        evidence = {
+            "schema_version": 1,
+            "requirements": [{"key": "R01", "outcome": "Review passes", "checks": ["build"],
+                              "accepted_by_owner": True, "approval_ref": "owner #7"}],
+            "milestones": [{"key": "M01", "requirement_keys": ["R01"], "state": "approved",
+                            "approval_ref": "owner #8"}],
+            "evidence": [{"requirement_key": "R01", "check": "build", "passed": True,
+                          "source_ref": "CI #12", "source_revision": "base-123",
+                          "independently_reviewed": True}],
+        }
+        status, _, data = self.post("/api/action", {"action": "gates", "fields": {
+            "evidence": {"name": "gates.json", "content": json.dumps(evidence)},
+        }})
+        self.assertEqual(status, 200)
+        result = json.loads(data)
+        self.assertEqual(result["status"], "ready_for_owner_review")
+        self.assertFalse(result["launch_approved"])
+
+    def test_outcome_record_and_controlled_pair_use_existing_comparator(self):
+        def observed(variant, passed):
+            return {"schema_version": 1, "task_id": "task-1", "variant": variant,
+                    "conditions": {"executor": "Codex CLI", "model": "pinned", "effort": "high",
+                                   "base_revision": "base-123", "context": "same-context",
+                                   "permissions": "read-only", "environment": "same-test-env"},
+                    "checks": [{"name": "focused tests", "passed": passed, "evidence_ref": "CI #12"}],
+                    "execution_success": passed, "metrics": {"input_tokens": None},
+                    "source_ref": f"issue #{variant}", "friction": "", "rework": "",
+                    "context_gap": "", "verification_gap": "", "lesson_hint": ""}
+
+        records = {}
+        for variant, passed in (("raw", False), ("prepared", True)):
+            status, _, data = self.post("/api/action", {"action": "outcomeRecord", "fields": {
+                "evidence": {"name": f"{variant}.json", "content": json.dumps(observed(variant, passed))},
+            }})
+            self.assertEqual(status, 200)
+            payload = json.loads(data)
+            self.assertEqual(payload["status"], "recorded")
+            records[variant] = {"name": f"{variant}-record.json", "content": payload["download"]["content"]}
+
+        status, _, data = self.post("/api/action", {"action": "outcomeCompare", "fields": records})
+        self.assertEqual(status, 200)
+        comparison = json.loads(data)
+        self.assertEqual(comparison["comparison"]["winner"], "prepared")
+        self.assertIsNone(comparison["comparison"]["input_tokens_delta"])
+
     def project(self):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
@@ -166,6 +212,35 @@ class LocalUITests(unittest.TestCase):
         }})
         self.assertEqual(status, 400)
         self.assertIn("high-risk", json.loads(data)["error"])
+
+    def test_checkpoint_create_and_review_never_authorize_execution(self):
+        root = self.project()
+        spec = {
+            "task_id": "task-1", "next_step_id": "verify",
+            "approved_plan": [{"step_id": "build", "action": "Build"},
+                              {"step_id": "verify", "action": "Verify"}],
+            "plan_approval_ref": "owner #7", "state_summary": "Awaiting verification",
+            "state_evidence_ref": "AGENTS.md at base",
+            "completed": [{"step_id": "build", "evidence_ref": "CI #8", "accepted_by_owner": True}],
+            "operation_ids": [], "required_approval_ids": ["owner-verify"],
+            "estimated_remaining_tokens": 100,
+        }
+        status, _, data = self.post("/api/action", {"action": "checkpointCreate", "fields": {
+            "root": str(root), "spec": {"name": "checkpoint-spec.json", "content": json.dumps(spec)},
+            "context_file": "AGENTS.md",
+        }})
+        self.assertEqual(status, 200)
+        created = json.loads(data)
+        self.assertEqual(created["status"], "saved")
+        status, _, data = self.post("/api/action", {"action": "checkpointReview", "fields": {
+            "root": str(root), "checkpoint": {"name": "checkpoint.json", "content": created["download"]["content"]},
+            "context_file": "AGENTS.md", "ledger_reviewed": True,
+            "accepted_approval": "owner-verify",
+        }})
+        self.assertEqual(status, 200)
+        reviewed = json.loads(data)
+        self.assertEqual(reviewed["status"], "ready_for_owner_review")
+        self.assertFalse(reviewed["approved_to_execute"])
 
 
 if __name__ == "__main__":

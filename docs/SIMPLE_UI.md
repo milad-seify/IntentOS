@@ -22,9 +22,9 @@ The navigation offers **Project**, **Governance**, **Delegation**, **Recovery** 
 | F05 Project Compass | Project → Review project direction | Project → Review direction | `compass`; explicit-source browser check and core tests |
 | F06 status and decisions | Govern → Status / Decision | Governance → Status / Decision | `state`; preview, stale/replay approval tests |
 | F07 scope guardrails | Govern → Scope amendment | Governance → Scope amendment | `state scope`; revision and approval tests |
-| F08 requirement/readiness gates | Govern → Requirements and readiness | Governance → Readiness | `gates`; CLI contract tests |
-| F09 checkpoints and recovery | Recover → Save / Review | Recovery → Save / Review | `checkpoint`; CLI contract tests |
-| F10 outcomes and learning | Outcomes → Record / Compare / Learn | Outcomes → Record / Compare / Learn | `outcome`; CLI comparison and evidence tests |
+| F08 requirement/readiness gates | Govern → Requirements and readiness | Governance → Readiness | `gates`; local UI HTTP and CLI contract tests |
+| F09 checkpoints and recovery | Recover → Save / Review | Recovery → Save / Review | `checkpoint`; local UI HTTP and CLI contract tests |
+| F10 outcomes and learning | Outcomes → Record / Compare / Learn | Outcomes → Record / Compare / Learn | `outcome`; local UI HTTP and CLI comparison tests |
 
 The advanced screens are graphical entry points to existing contracts, not evidence collection automation. They do not fabricate outcomes, live model availability, approved decisions or Phase 8 observations. Caller-supplied evidence and approvals remain necessary. Codex dispatch is the only supported automatic target and requires its existing exact-packet approval; other targets use manual copy/export.
 

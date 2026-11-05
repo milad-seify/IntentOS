@@ -58,7 +58,7 @@ No slice is complete: 8A sessions have not begun, 8B is at the manual-template s
 
 ## Current verification baseline
 
-The current UI candidate passed 251 Python unit tests locally (one existing skip) before its final exact-head gate. Historical pre-B1 baseline was 120 tests. Use exact-head CI for the final pass/fail gate rather than treating a local count as release acceptance. Coverage includes review-only classification/policy, release identity, artifact, workflow permission, local UI HTTP security, Marketplace package, launcher and main-history regressions, plus CLI smoke and dedicated integration checks:
+The current UI candidate passed 254 Python unit tests locally (one existing skip) before its final exact-head gate. Historical pre-B1 baseline was 120 tests. Use exact-head CI for the final pass/fail gate rather than treating a local count as release acceptance. Coverage includes review-only classification/policy, release identity, artifact, workflow permission, local UI HTTP security, Marketplace package, launcher and main-history regressions, plus CLI smoke and dedicated integration checks:
 
 - in-memory MCP v2 protocol smoke
 - stdio subprocess MCP host-parity dogfood across four representative cases

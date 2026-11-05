@@ -369,7 +369,7 @@ GitHub Actions runs the full core suite on Ubuntu with Python 3.11, 3.12, and 3.
 
 The initial Phase 0–6 roadmap and independent-audit stabilization gate are complete. **Phase 7 is complete:** MCP parity was proven, VS Code is publicly distributed with a visible status-bar launcher, and the accepted workflow remains Prepare → Review → Copy. The evidence gate did not justify additional adapters or execution capabilities.
 
-The current UI candidate passes **251 Python unit tests (one skipped)** locally, plus CLI/MCP smoke, VS Code contract/syntax/real-host checks, a real browser UI flow and package validation. CI builds and inspects wheel/sdist artifacts, then installs and smoke-tests them from clean environments without publishing. Use exact-head CI for a final gate rather than treating this local count as release acceptance.
+The current UI candidate passes **254 Python unit tests (one skipped)** locally, plus CLI/MCP smoke, VS Code contract/syntax/real-host checks, a real browser UI flow and package validation. CI builds and inspects wheel/sdist artifacts, then installs and smoke-tests them from clean environments without publishing. Use exact-head CI for a final gate rather than treating this local count as release acceptance.
 
 Core `1.0.1` is published on PyPI and GitHub, packaging the review-only classification/policy correction. See the [1.0.1 release notes](docs/RELEASE_NOTES_1.0.1.md) and [GitHub Release](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.1).
 
