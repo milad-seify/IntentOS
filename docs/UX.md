@@ -12,9 +12,15 @@ Ease of use is a product requirement, not a wrapper to add after the core is com
 
 The [Reliable AI Delegation vision](VISION.md) serves professionals across domains; software engineering and DevOps remain the currently implemented domain-policy support. Users should understand and control the delegation: goal, supplied context and provenance, assumptions, risk, permitted actions and human approval boundaries, target agent/capability, verification, and eventual outcome evidence.
 
-The desired future UX organizes those decisions and evidence rather than adding another generic chat interface. This is a product direction, not a committed sidebar, screen layout, or new access surface. Phase 8 adoption evidence should inform the exact UX. Prepare → Review → Copy remains the accepted workflow; outcome evidence is supplied externally rather than automatically captured by the current editor UI.
+The development graphical surfaces organize those decisions and evidence without adding another generic chat interface. The owner authorized this bounded pre-release UI work in [D-033](DECISIONS.md), after the F01–F10 source freeze. Prepare → Review → Copy remains the basic workflow; outcome evidence is supplied externally rather than automatically captured by the UI.
 
 Trust comes from understanding boundaries and checking outcomes. Ready means the request is ready for handoff, not that the downstream work is correct. Approval guidance does not grant an agent permission to act; the user and executing system retain that authority.
+
+### Graphical access candidate
+
+The VS Code Activity Bar opens a native-themed IntentOS workbench. Start prepares and reviews a task; Project, Govern, Delegate, Recover and Outcomes expose the existing F01–F10 operations. The status-bar and Command Palette path remain available. Project sources are chosen explicitly; the workbench does not scan a workspace or silently execute an agent. Persistent project updates and Codex dispatch use the CLI's proposal digest plus a separate modal approval.
+
+`intentos ui` launches a local browser experience for a user without VS Code. Its first screen asks for a goal and optional AI tool or project documents, then explains the task interpretation, risk, approval boundaries and verification before Copy Prepared Task. Advanced sections use selected evidence files and a separate preview/approval step for consequential operations. Missing or conflicting facts remain visible; readiness is not a claim that work was completed or verified. See [Simple UI](SIMPLE_UI.md) for the exact workflow and limits.
 
 ## One core, multiple surfaces
 
@@ -152,7 +158,7 @@ When IntentOS recommends a capability, workflow, context file, or stronger verif
 
 ### Consistent behavior across surfaces
 
-The same request should produce semantically equivalent task/risk/policy decisions whether it enters through CLI, VS Code, MCP, Python API, or a future simple UI.
+The same request should produce semantically equivalent task/risk/policy decisions whether it enters through CLI, VS Code, MCP, Python API, or the local Simple UI candidate.
 
 ### No prompt-engineering prerequisite
 

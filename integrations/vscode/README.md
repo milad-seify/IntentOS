@@ -16,7 +16,7 @@ Confirm that `intentos` is available in the environment used by VS Code:
 intentos --help
 ```
 
-## Use the extension
+## Prepare a task
 
 1. Select a request in an editor, or leave text unselected to enter a request when prompted.
 2. Click **IntentOS** in the VS Code status bar, or open the Command Palette and run **IntentOS: Prepare Task**.
@@ -24,11 +24,24 @@ intentos --help
 4. Choose **Copy Prepared Task**.
 5. Paste the prepared task into Codex, ChatGPT, Claude, Gemini, Cursor, or another AI tool.
 
-The status bar is the easy entry point; the Command Palette remains available for keyboard-oriented use.
+The status bar and Command Palette remain available for keyboard-oriented use. The published Marketplace `0.1.1` release contains this basic flow.
 
 ![IntentOS Review showing a ready Codex task, risk, approval boundaries, verification, and Copy Prepared Task](assets/review-ready.png)
 
-The extension does not send the task to an AI tool or execute it.
+The basic flow does not send the task to an AI tool or execute it.
+
+## Development workbench
+
+The current source candidate adds an **IntentOS** Activity Bar entry. Choose **Open workbench** to get a larger native-themed view:
+
+- **Start:** prepare, clarify, review risk/context/approvals/verification and copy the result.
+- **Project:** review explicitly selected project sources and their provenance.
+- **Govern:** preview status, decision and scope changes, or review requirement/readiness evidence.
+- **Delegate:** inspect a route, prepare a portable handoff packet, or preview supported Codex dispatch.
+- **Recover:** create or review a checkpoint against selected context and external operation evidence.
+- **Outcomes:** record, compare and learn from caller-supplied evidence.
+
+These screens require the unpublished Core `1.1.0` source candidate CLI; the public Core `1.0.1` package lacks the advanced commands. Files are selected explicitly with the VS Code picker. Project writes and Codex dispatch require an exact CLI preview and a separate modal approval. An agent turn is never proof of a verified result. See [the UI contract](../../docs/UX.md) and [graphical coverage matrix](../../docs/SIMPLE_UI.md).
 
 ## Configuration
 
@@ -44,8 +57,8 @@ The extension does not send the task to an AI tool or execute it.
 
 - The extension invokes the local IntentOS CLI. It has no telemetry or hosted backend.
 - It does not automatically crawl repository files or collect project context.
-- The extension does not require AI-provider credentials and does not autonomously execute or send tasks.
-- It provides one prepare, review, and copy workflow; it does not include a sidebar, agent-specific send action, or MCP client.
+- Basic preparation does not require AI-provider credentials. The development workbench supports only the existing approval-bound Codex dispatch and manual handoff for other targets.
+- It has no MCP client, telemetry or hosted backend.
 
 ## Development
 

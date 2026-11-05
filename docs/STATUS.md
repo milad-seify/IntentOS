@@ -2,15 +2,15 @@
 
 ## Current phase
 
-**F01–F10 FULL-SCOPE INTEGRATION — STATUS RESOLVED BY PR #65 CLOSEOUT.** [D-031](DECISIONS.md) and the [finite delivery program](DELIVERY_PROGRAM.md) require all ten capabilities. The [developer acceptance record](FULL_SCOPE_CANDIDATE.md) captures the consolidated pre-merge checks. Owner-authorized integrated [PR #65](https://github.com/milad-seify/IntentOS/pull/65) is the **single source-Freeze gate**: until it is merged and its **exact resulting main SHA** has successful 7/7 post-merge CI plus the final acceptance/SHA/CI evidence comment on PR #65, this remains an **unaccepted candidate**. Once those objective checks are recorded, the F01–F10 **source feature scope is Frozen for pre-validation**; that does **not** mean a PyPI/VS Code publication or Phase 8 user validation. See [D-032](DECISIONS.md).
+**PRE-RELEASE UI/UX COMPLETION — IMPLEMENTATION CANDIDATE.** F01–F10 core source was accepted and frozen at `8b9b49fc82a5f038dcd36577e3037f697a5c0819` after [PR #65](https://github.com/milad-seify/IntentOS/pull/65) merged and seven post-merge CI jobs passed. [D-032](DECISIONS.md) records that exact historical scope. The owner then authorized [D-033](DECISIONS.md): graphical access through VS Code and a local-first Simple UI before publication and Phase 8. This new integrated candidate is **not yet accepted or frozen**; it needs its own exact-SHA verification and owner review.
 
-Existing **published** releases remain Core `1.0.1` and VS Code `0.1.1`; the unmerged F01–F10 source candidate now has Core metadata `1.1.0` (minor, additive), **not a published release**. Integrated [PR #65](https://github.com/milad-seify/IntentOS/pull/65) targets `main` for review of the full stacked diff. Completed Phase 0–7 contracts remain in force. Stacked PRs #54–#64 implement governance, routing, checkpoint/recovery, handoff, outcomes and integrated CLI access, but are not merged or a public release. [Issue #52](https://github.com/milad-seify/IntentOS/issues/52) tracks this delivery. Final acceptance must verify *all* F01–F10 and obtain owner sign-off before a new Feature Freeze; operational Phase 8A/8B/8C and owner-led Idea-to-Production dogfooding remain **DEFERRED / NOT STARTED**, with their criteria unchanged.
+Existing **published** releases remain Core `1.0.1` and VS Code `0.1.1`; source metadata is Core `1.1.0`, **not published**. The current development branch adds editor and local browser access without changing the published artifacts. Operational Phase 8A/8B/8C and owner-led Idea-to-Production dogfooding remain **DEFERRED / NOT STARTED**, with their criteria unchanged.
 
 ## Post-Phase-7 development program
 
 - **Current direction:** [D-031](DECISIONS.md) and [DELIVERY_PROGRAM.md](DELIVERY_PROGRAM.md) require all F01–F10 outcomes. Earlier B2/C1/D1 deferrals and the early Freeze proposal are historical decisions superseded for this delivery scope.
-- **Current implementation:** B1's internal reviewer is exposed through an explicit-document CLI command and includes decision headings. Local status and decision updates have a proposal, explicit approval digest, revision check, and safe replay path in development. Bounded `docs/SCOPE.md` amendments leave an audit entry. A local evidence file drives a lifecycle-aware requirement/milestone readiness report. A synthetic cross-process integration test covers the combined governance flow; it is developer verification, not operational Phase 8 evidence. Workstream 2 has caller-supplied, explainable routing and conservative model fallback. A development checkpoint CLI saves approved plans and reviews interruption safety across fresh processes; it grants no execution approval. Portable handoff preparation and digest-approved Codex CLI dispatch are implemented in development; agent completion is not task verification, and other agents remain manual handoffs. Development outcome capture, controlled paired comparison and approval-bound repeated-lesson proposals are available; final integrated access and acceptance are still required.
-- **Historical evidence:** Stage E readiness and [B2-OBS-001](B2_CONTINUITY_OBSERVATION_001.md) remain accurate as observations. They do not establish that the new features are complete or that a final Freeze is effective.
+- **Current implementation:** F01–F10 source and CLI access were accepted in PR #65. The current UI branch adapts those operations to an editor workbench and a standalone loopback browser interface. Its new integration and security checks are developer verification, not operational Phase 8 evidence. Codex dispatch still requires explicit approval; agent completion is not verification, and other agents remain manual handoffs.
+- **Historical evidence:** Stage E readiness, [B2-OBS-001](B2_CONTINUITY_OBSERVATION_001.md) and PR #65's accepted source freeze remain accurate for their respective revisions. None establishes acceptance of the new integrated UI candidate.
 - **Deferred activity:** operational Phase 8A/8B/8C and owner-led Idea-to-Production dogfooding await complete implementation, one final integrated acceptance, and separately authorized execution.
 
 ## Implemented
@@ -52,19 +52,21 @@ Existing **published** releases remain Core `1.0.1` and VS Code `0.1.1`; the unm
 
 ## Phase 8 — final validation protocol (execution deferred)
 
-The approved first slice defines first-use validation, a manual outcome-evidence worksheet, comparison controls, and an external evidence gate in [PHASE_8_VALIDATION.md](PHASE_8_VALIDATION.md). It uses existing Phase 5 evaluation mechanics. No new runtime capability has been approved; `intentos compare` remains conditional and is not implemented.
+The approved first slice defines first-use validation, a manual outcome-evidence worksheet, comparison controls, and an external evidence gate in [PHASE_8_VALIDATION.md](PHASE_8_VALIDATION.md). It uses existing Phase 5 evaluation mechanics. That protocol itself authorizes no new Phase 8 runtime tooling; D-033 is a separate pre-release UI access authorization. `intentos compare` remains conditional and is not implemented.
 
 No slice is complete: 8A sessions have not begun, 8B is at the manual-template stage, and 8C task collection has not begun. First-use targets are 3 sessions and at least 2 first-time users, covering Windows and POSIX, with at least 2 independent completions. The external gate targets 20 new task observations and at least 12 eligible controlled pairs across users/projects; the protocol defines the full coverage and promotion rules.
 
 ## Current verification baseline
 
-Historical pre-B1 baseline: 120 Python unit tests, plus subsequent internal B1 focused regression cases; use the exact-head CI run for the current pass/fail gate rather than treating that old count as a fresh count. Coverage includes review-only classification/policy, release identity, artifact, workflow permission, Marketplace package, launcher and main-history regressions, plus CLI smoke and dedicated integration checks:
+The current UI candidate passed 254 Python unit tests locally (one existing skip) before its final exact-head gate. Historical pre-B1 baseline was 120 tests. Use exact-head CI for the final pass/fail gate rather than treating a local count as release acceptance. Coverage includes review-only classification/policy, release identity, artifact, workflow permission, local UI HTTP security, Marketplace package, launcher and main-history regressions, plus CLI smoke and dedicated integration checks:
 
 - in-memory MCP v2 protocol smoke
 - stdio subprocess MCP host-parity dogfood across four representative cases
 - VS Code extension JavaScript syntax smoke with no npm install/build pipeline
 - static regression for the repository Extension Development Host launch contract
 - real VS Code Extension Host integration checks for workspace and no-workspace executable resolution
+- real VS Code Webview task submission/navigation and isolated installed-VSIX activation
+- real Chromium local UI first-use, Project Compass, governance preview, route and theme checks
 - release-artifact CI builds and inspects wheel/sdist, then tests clean core, MCP-extra, and sdist installations without publishing
 
 CI covers:
@@ -80,31 +82,11 @@ CI covers:
 
 The 10/10 real-task evidence target is complete. The aggregate result supports no IntentOS product change: no repeated workflow friction met the promotion threshold and no consistent raw-versus-prepared winner emerged. The existing Phase 7B Prepare → Review → Copy workflow remains accepted. Task 7's classifier correction is incorporated; the Task 8 external ARIS baseline repair did not reveal an IntentOS defect. See `docs/PHASE_7C_EVIDENCE.md` and [Issue #21](https://github.com/milad-seify/IntentOS/issues/21) for the concise decision and detailed evidence log.
 
-## Phase 7B boundary
+## Current graphical access candidate
 
-The first VS Code slice intentionally stays thin and local.
+The Phase 7B Command Palette, status-bar and Review Panel still work. The development extension adds an Activity Bar entry and workbench for preparation, explicit-source Project Compass, governance preview, routing, handoff, checkpoint and outcome workflows. The editor invokes existing CLI commands; it does not duplicate core decision logic. Files enter through the native picker and a persistent update or Codex dispatch requires an exact preview and explicit approval. Automatic project scanning, new providers, npm runtime dependencies and MCP client wiring are absent. See [the extension guide](../integrations/vscode/README.md).
 
-It currently:
-
-- exposes the existing `IntentOS: Prepare Task` command through the Command Palette and visible `$(sparkle) IntentOS` status-bar launcher
-- uses selected editor text when present, otherwise asks for the request
-- invokes `intentos optimize ... --json` rather than reimplementing core logic
-- shows interpretation, risk, consequential approval boundaries, context summary, and verification in a temporary review panel
-- keeps routing/context internals behind a collapsed Advanced section
-- copies the prepared prompt to the clipboard on explicit user action
-- allows one optional `intentos.executable` setting for PATH/virtual-environment cases
-- surfaces structured CLI errors rather than presenting them as clarification
-- can be launched from the repository root with `F5` using `.vscode/launch.json`
-
-It does **not**:
-
-- add a permanent sidebar/activity-bar view
-- discover or read project files automatically
-- execute or send prepared tasks to an agent
-- embed an MCP client inside the extension
-- add npm runtime dependencies, TypeScript, bundlers, telemetry, background services, or provider settings
-
-See `integrations/vscode/README.md` for the editor workflow and `docs/VSCODE_DOGFOODING.md` for the real-UI acceptance protocol.
+The development `intentos ui` command starts a loopback-only browser interface with a guided Prepare → Review → Copy flow. Advanced sections expose the same existing F01–F10 CLI operations and require explicit project paths or evidence files where the core contract does. The local server uses a one-time session URL, cookie, Origin and CSRF checks, bounded inputs and named operations only. See [the UI guide](SIMPLE_UI.md).
 
 ## Phase 7A boundary
 
@@ -117,16 +99,16 @@ Project context is limited to 32 caller-supplied documents and 6000 characters t
 To avoid over-engineering, current access work does **not** add:
 
 - additional MCP tools or Streamable HTTP deployment
-- a permanent VS Code sidebar or settings framework
-- agent-specific execution wiring
+- an editor settings framework
+- new provider integrations or unattended agent execution
 - automatic editor filesystem/context discovery
-- `@vscode/test-electron` or a downloaded/headless VS Code CI harness before a real UI failure justifies it
+- `@vscode/test-electron` or a downloaded VS Code test harness; local checks use the installed editor
 - an LLM-based classifier
 - embeddings or a vector database
 - a policy/plugin framework
 - provider discovery or failover orchestration
 - a telemetry backend
-- a standalone simple UI
+- a hosted/cloud UI
 - an autonomous multi-agent execution/checking runtime
 - a benchmark-framework dependency
 
@@ -134,9 +116,9 @@ The classifier remains advisory rather than a security authorization boundary.
 
 ## Next
 
-1. Follow [PR #65](https://github.com/milad-seify/IntentOS/pull/65) for the **single authorized integrated review and Merge**, with exact-head seven-job CI and source version `1.1.0`. Verify merged `main` SHA and its successful exact-SHA seven-job CI; record acceptance and final source SHA in a durable comment on PR #65. The conditional [D-032](DECISIONS.md) then defines an effective **pre-validation source Feature Freeze**, not a release.
-2. After that integrated Merge, close PRs #54–#64 individually as **superseded by the integrated PR**, with evidence links; do not merge the same changes twice or start another docs-review cycle.
-3. **STOP** pre-validation development. Core `1.1.0` publication and VS Code releases need separate permission. Preserve unchanged Phase 8A/B/C protocol and owner-led Dogfooding for their later separate authorization; developer synthetic tests never count as those sessions.
+1. Complete the D-033 graphical access candidate and verify its exact final source revision, including installed wheel/VSIX and real interactive flows.
+2. Present the candidate diff, screenshots, CI and known limits for explicit owner acceptance. The revised integrated source freeze is not effective before that review.
+3. Keep Core `1.1.0` publication, a new VS Code Marketplace version, Phase 8A/B/C and owner-led dogfooding separate. Developer UI tests never count as Phase 8 observations.
 
 ## Constraints carried forward
 

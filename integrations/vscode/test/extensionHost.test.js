@@ -69,6 +69,23 @@ async function run() {
     assert(extension, `Development extension ${extensionId} is not present.`);
     await extension.activate();
     assert.strictEqual(extension.isActive, true, `${extensionId} did not activate.`);
+    const commands = await vscode.commands.getCommands(true);
+    assert(commands.includes('intentos.prepareTask'), 'The Command Palette prepare path is missing.');
+    assert(commands.includes('intentos.openWorkbench'), 'The graphical workbench command is missing.');
+    const selectedText = 'Codex: Refactor this function without changing behavior.';
+    const selectionDocument = await vscode.workspace.openTextDocument({ content: selectedText });
+    const selectionEditor = await vscode.window.showTextDocument(selectionDocument, { viewColumn: vscode.ViewColumn.One });
+    selectionEditor.selection = new vscode.Selection(new vscode.Position(0, 0), new vscode.Position(0, selectedText.length));
+    assert.strictEqual(selectionEditor.document.getText(selectionEditor.selection), selectedText);
+    await vscode.commands.executeCommand('intentos.openWorkbench');
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      if (vscode.window.tabGroups.all.some((group) => group.tabs.some((tab) => tab.label === 'IntentOS Workbench'))) break;
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    assert(
+      vscode.window.tabGroups.all.some((group) => group.tabs.some((tab) => tab.label === 'IntentOS Workbench')),
+      `The graphical workbench did not open in the real Extension Host. Tabs: ${JSON.stringify(vscode.window.tabGroups.all.flatMap((group) => group.tabs.map((tab) => tab.label)))}`
+    );
 
     assert.strictEqual(typeof workspaceCwd, 'function', 'Production workspace resolver is unavailable.');
     assert.strictEqual(typeof resolveExecutable, 'function', 'Production executable resolver is unavailable.');
@@ -139,11 +156,16 @@ async function run() {
       executable,
       cwd,
       status: payload.status,
+      selectedTextAfterWorkbench: selectionEditor.document.getText(selectionEditor.selection),
+      activeEditorAfterWorkbench: vscode.window.activeTextEditor?.document.uri.toString() || null,
       extensionPath,
       mode: expectNoWorkspace ? 'no-workspace' : 'workspace',
     };
     writeResult(result);
     console.log(`INTENTOS_EXTENSION_HOST_TEST_RESULT=${JSON.stringify(result)}`);
+    if (process.env.INTENTOS_EXTENSION_TEST_HOLD_MS) {
+      await new Promise((resolve) => setTimeout(resolve, Number(process.env.INTENTOS_EXTENSION_TEST_HOLD_MS)));
+    }
   } catch (error) {
     writeResult({ ok: false, error: error.stack || String(error) });
     console.error(error.stack || error);

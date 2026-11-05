@@ -2,7 +2,7 @@
 
 IntentOS Core 1.0.1 is the current PyPI release as `intentos-engineering`. The [`v1.0.1` tag and GitHub Release](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.1) are published, the [Trusted Publishing workflow succeeded](https://github.com/milad-seify/IntentOS/actions/runs/41685995740), and a clean external public installation was verified. Version 1.0.0 and its [original release](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.0) remain preserved. This document retains the release controls for future versions.
 
-**Unpublished next-version candidate (2026-11-05):** F01–F10 source changes are staged as **Core `1.1.0`**, a backward-compatible minor release candidate adding CLI capabilities while retaining stable Python/MCP/VS Code v1 contracts. **No v1.1.0 tag, package publication or GitHub Release is authorized by this planning note.** Its exact merged source must pass CI, distribution/installation checks and explicit publication approval in a separate release action. The public current Core is still `1.0.1`.
+**Unpublished next-version candidate (2026-11-05):** F01–F10 source changes are staged as **Core `1.1.0`**, a backward-compatible minor release candidate adding CLI capabilities while retaining stable Python/MCP/VS Code v1 contracts. [D-033](DECISIONS.md) separately authorizes a local Simple UI and editor graphical access before publication. The new integrated revision requires fresh exact-SHA source acceptance, installed wheel/sdist UI launch and interactive checks, plus a separate VSIX/version decision. **No v1.1.0 tag, package publication or GitHub Release is authorized by this planning note.** The public current Core is still `1.0.1`.
 
 ## Patch 1.0.1 publication (completed)
 

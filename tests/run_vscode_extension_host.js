@@ -8,6 +8,8 @@ const extensionPath = path.join(repository, 'integrations', 'vscode');
 const extensionTestsPath = path.join(extensionPath, 'test', 'extensionHost.test.js');
 const timeoutMs = Number(process.env.INTENTOS_VSCODE_TEST_TIMEOUT_MS || 120000);
 const noWorkspace = process.argv.includes('--no-workspace');
+const packagedVsix = process.env.INTENTOS_PACKAGED_VSIX;
+const screenshotDirectory = process.env.INTENTOS_VSCODE_SCREENSHOTS_DIR;
 
 function findVSCodeExecutable() {
   const configured = process.env.VSCODE_EXECUTABLE;
@@ -130,14 +132,95 @@ function terminateIsolatedVSCode(userDataDir) {
 }
 
 async function removeTemporaryRoot(directory) {
-  for (let attempt = 0; attempt < 20; attempt += 1) {
+  for (let attempt = 0; attempt < 40; attempt += 1) {
     try {
       fs.rmSync(directory, { recursive: true, force: true });
       return;
     } catch (error) {
-      if (attempt === 19) throw error;
-      await new Promise((resolve) => setTimeout(resolve, 250));
+      if (attempt === 39) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
+  }
+}
+
+async function captureWorkbenchScreenshot(userDataDir) {
+  if (!screenshotDirectory) return;
+  const activePort = path.join(userDataDir, 'DevToolsActivePort');
+  for (let attempt = 0; attempt < 30 && !fs.existsSync(activePort); attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  if (!fs.existsSync(activePort)) throw new Error('VS Code did not expose its isolated DevTools port for a real screenshot.');
+  const port = fs.readFileSync(activePort, 'utf8').split(/\r?\n/)[0];
+  const targets = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
+  const pages = targets.filter((item) => item.type === 'page' && item.webSocketDebuggerUrl);
+  if (!pages.length) throw new Error('No inspectable VS Code page was available for a real screenshot.');
+  const webview = targets.find((item) => item.type === 'iframe' && item.webSocketDebuggerUrl);
+  if (!webview) throw new Error('No inspectable IntentOS Webview was available.');
+  fs.mkdirSync(screenshotDirectory, { recursive: true });
+  async function connect(target) {
+    const socket = new WebSocket(target.webSocketDebuggerUrl);
+    await new Promise((resolve, reject) => { socket.addEventListener('open', resolve, { once: true }); socket.addEventListener('error', reject, { once: true }); });
+    let nextId = 0;
+    return {
+      socket,
+      call(method, params = {}) {
+        const id = ++nextId;
+        return new Promise((resolve, reject) => {
+          const onMessage = (event) => {
+            const packet = JSON.parse(event.data);
+            if (packet.id !== id) return;
+            socket.removeEventListener('message', onMessage);
+            if (packet.error) reject(new Error(packet.error.message)); else resolve(packet.result);
+          };
+          socket.addEventListener('message', onMessage);
+          socket.send(JSON.stringify({ id, method, params }));
+        });
+      },
+    };
+  }
+  const page = await connect(pages[0]);
+  const frame = await connect(webview);
+  const doc = '(document.querySelector("#active-frame")?.contentDocument)';
+  async function evaluate(expression) {
+    const response = await frame.call('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
+    if (response.exceptionDetails) throw new Error(response.exceptionDetails.exception?.description || response.exceptionDetails.text);
+    return response.result?.value;
+  }
+  async function waitFor(check, label) {
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      if (await evaluate(check)) return;
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    throw new Error(`Timed out waiting for real VS Code Webview ${label}.`);
+  }
+  async function screenshot(name) {
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    const response = await page.call('Page.captureScreenshot', { format: 'png' });
+    fs.writeFileSync(path.join(screenshotDirectory, name), Buffer.from(response.data, 'base64'));
+  }
+  try {
+    await waitFor(`Boolean(${doc}?.querySelector('#prepare-text'))`, 'task form');
+    await screenshot('vscode-workbench-start.png');
+    if (!packagedVsix) {
+      await evaluate(`(Array.from(${doc}.querySelectorAll('form[data-action=prepare] button')).find(button=>button.textContent==='Use selected editor text').click(),true)`);
+      await waitFor(`${doc}.querySelector('#prepare-text')?.value === 'Codex: Refactor this function without changing behavior.'`, 'selected editor request');
+    } else {
+      await evaluate(`(${doc}.querySelector('#prepare-text').value='Codex: Refactor this function without changing behavior.',true)`);
+    }
+    await evaluate(`(${doc}.querySelector('form[data-action=prepare]').requestSubmit(),true)`);
+    await waitFor(`${doc}.querySelector('#result')?.textContent.includes('Copy Prepared Task')`, 'prepared review');
+    const review = await evaluate(`${doc}.querySelector('#result').textContent`);
+    if (!review.includes('Codex: Refactor this function without changing behavior.') || !review.includes('Approval boundaries') || !review.includes('Verification') || !review.includes('medium')) throw new Error('VS Code prepared review omitted the selected goal or a required delegation field.');
+    await screenshot('vscode-workbench-review.png');
+    for (const [name, screenshotName] of [['Project', 'vscode-workbench-project.png'], ['Govern', 'vscode-workbench-governance.png'], ['Delegate', 'vscode-workbench-delegation.png'], ['Recover', 'vscode-workbench-recovery.png']]) {
+      await evaluate(`(${doc}.querySelectorAll('#nav button').forEach(button=>{if(button.textContent===${JSON.stringify(name)})button.click()}),true)`);
+      await waitFor(`${doc}.querySelector('main h2')?.textContent === ${JSON.stringify(({ Project: 'Project Compass', Govern: 'Project governance', Delegate: 'Agent and routing', Recover: 'Checkpoints and recovery' })[name])}`, name);
+      await screenshot(screenshotName);
+    }
+    console.log(`Real VS Code Webview interaction passed: ${packagedVsix ? 'task entry' : 'selected editor text'}, task submission, ready review, and Project/Govern/Delegate/Recover navigation.`);
+  } finally {
+    frame.socket.close();
+    page.socket.close();
   }
 }
 
@@ -149,19 +232,39 @@ async function run() {
   const resultFile = path.join(temporaryRoot, 'result.json');
   fs.mkdirSync(userDataDir);
   fs.mkdirSync(extensionsDir);
+  let installedExtensionPath;
+  if (packagedVsix) {
+    const packagedTest = path.join(extensionPath, 'test', 'packagedHost.test.js');
+    const executableForSettings = path.join(repository, '.venv', process.platform === 'win32' ? 'Scripts' : 'bin', process.platform === 'win32' ? 'intentos.exe' : 'intentos');
+    if (!fs.existsSync(packagedVsix) || !fs.existsSync(executableForSettings)) throw new Error('Packaged VSIX and local CLI must exist.');
+    const settings = path.join(userDataDir, 'User');
+    fs.mkdirSync(settings);
+    fs.writeFileSync(path.join(settings, 'settings.json'), JSON.stringify({ 'intentos.executable': executableForSettings }));
+    const install = spawnSync(executable, [
+      ...(cliScript ? [cliScript] : []),
+      `--user-data-dir=${userDataDir}`, `--extensions-dir=${extensionsDir}`,
+      '--install-extension', packagedVsix, '--force',
+    ], { encoding: 'utf8', windowsHide: true, env: { ...process.env, ...(cliScript ? { ELECTRON_RUN_AS_NODE: '1' } : {}) } });
+    if (install.status !== 0) throw new Error(`Isolated VSIX install failed: ${install.stdout}\n${install.stderr}`);
+    console.log(`Isolated VSIX install: ${install.stdout.trim()}`);
+    installedExtensionPath = path.join(extensionsDir, fs.readdirSync(extensionsDir).find((name) => name.startsWith('milad-seyfi.intentos-vscode-')) || 'missing');
+    if (!fs.existsSync(path.join(installedExtensionPath, 'package.json'))) throw new Error('The installed VSIX contents were not found.');
+    if (!fs.existsSync(packagedTest)) throw new Error('Packaged host test script is missing.');
+  }
 
   const args = [
     ...(cliScript ? [cliScript] : []),
     `--user-data-dir=${userDataDir}`,
     `--extensions-dir=${extensionsDir}`,
-    '--disable-extensions',
+    ...(!packagedVsix ? ['--disable-extensions'] : []),
     '--disable-updates',
     '--disable-workspace-trust',
     '--skip-welcome',
     '--skip-release-notes',
     '--new-window',
-    `--extensionDevelopmentPath=${extensionPath}`,
-    `--extensionTestsPath=${extensionTestsPath}`,
+    ...(screenshotDirectory ? ['--remote-debugging-port=0', '--remote-allow-origins=*'] : []),
+    `--extensionDevelopmentPath=${packagedVsix ? installedExtensionPath : extensionPath}`,
+    `--extensionTestsPath=${packagedVsix ? path.join(extensionPath, 'test', 'packagedHost.test.js') : extensionTestsPath}`,
     ...(!noWorkspace ? [repository] : []),
   ];
   const child = spawn(executable, args, {
@@ -170,6 +273,7 @@ async function run() {
       ...(cliScript ? { ELECTRON_RUN_AS_NODE: '1' } : {}),
       INTENTOS_EXTENSION_TEST_RESULT: resultFile,
       INTENTOS_EXPECT_NO_WORKSPACE: noWorkspace ? '1' : '0',
+      ...(screenshotDirectory ? { INTENTOS_EXTENSION_TEST_HOLD_MS: '20000' } : {}),
     },
     stdio: ['ignore', 'pipe', 'pipe'],
     windowsHide: true,
@@ -202,6 +306,8 @@ async function run() {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
     if (!testResult) throw new Error(`Timed out after ${timeoutMs} ms waiting for Extension Host integration tests.`);
+
+    await captureWorkbenchScreenshot(userDataDir);
 
     const exitedNaturally = await waitForExit(child, 2500);
     if (exitedNaturally && child.exitCode !== 0) {
