@@ -201,17 +201,23 @@ async function captureWorkbenchScreenshot(userDataDir) {
   try {
     await waitFor(`Boolean(${doc}?.querySelector('#prepare-text'))`, 'task form');
     await screenshot('vscode-workbench-start.png');
-    await evaluate(`(${doc}.querySelector('#prepare-text').value='Codex: Refactor this function without changing behavior.',${doc}.querySelector('form[data-action=prepare]').requestSubmit(),true)`);
+    if (!packagedVsix) {
+      await evaluate(`(Array.from(${doc}.querySelectorAll('form[data-action=prepare] button')).find(button=>button.textContent==='Use selected editor text').click(),true)`);
+      await waitFor(`${doc}.querySelector('#prepare-text')?.value === 'Codex: Refactor this function without changing behavior.'`, 'selected editor request');
+    } else {
+      await evaluate(`(${doc}.querySelector('#prepare-text').value='Codex: Refactor this function without changing behavior.',true)`);
+    }
+    await evaluate(`(${doc}.querySelector('form[data-action=prepare]').requestSubmit(),true)`);
     await waitFor(`${doc}.querySelector('#result')?.textContent.includes('Copy Prepared Task')`, 'prepared review');
     const review = await evaluate(`${doc}.querySelector('#result').textContent`);
-    if (!review.includes('Approval boundaries') || !review.includes('Verification') || !review.includes('medium')) throw new Error('VS Code prepared review omitted a required delegation field.');
+    if (!review.includes('Codex: Refactor this function without changing behavior.') || !review.includes('Approval boundaries') || !review.includes('Verification') || !review.includes('medium')) throw new Error('VS Code prepared review omitted the selected goal or a required delegation field.');
     await screenshot('vscode-workbench-review.png');
     for (const [name, screenshotName] of [['Project', 'vscode-workbench-project.png'], ['Govern', 'vscode-workbench-governance.png'], ['Delegate', 'vscode-workbench-delegation.png'], ['Recover', 'vscode-workbench-recovery.png']]) {
       await evaluate(`(${doc}.querySelectorAll('#nav button').forEach(button=>{if(button.textContent===${JSON.stringify(name)})button.click()}),true)`);
       await waitFor(`${doc}.querySelector('main h2')?.textContent === ${JSON.stringify(({ Project: 'Project Compass', Govern: 'Project governance', Delegate: 'Agent and routing', Recover: 'Checkpoints and recovery' })[name])}`, name);
       await screenshot(screenshotName);
     }
-    console.log('Real VS Code Webview interaction passed: task submission, ready review, and Project/Govern/Delegate/Recover navigation.');
+    console.log(`Real VS Code Webview interaction passed: ${packagedVsix ? 'task entry' : 'selected editor text'}, task submission, ready review, and Project/Govern/Delegate/Recover navigation.`);
   } finally {
     frame.socket.close();
     page.socket.close();

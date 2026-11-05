@@ -72,6 +72,11 @@ async function run() {
     const commands = await vscode.commands.getCommands(true);
     assert(commands.includes('intentos.prepareTask'), 'The Command Palette prepare path is missing.');
     assert(commands.includes('intentos.openWorkbench'), 'The graphical workbench command is missing.');
+    const selectedText = 'Codex: Refactor this function without changing behavior.';
+    const selectionDocument = await vscode.workspace.openTextDocument({ content: selectedText });
+    const selectionEditor = await vscode.window.showTextDocument(selectionDocument, { viewColumn: vscode.ViewColumn.One });
+    selectionEditor.selection = new vscode.Selection(new vscode.Position(0, 0), new vscode.Position(0, selectedText.length));
+    assert.strictEqual(selectionEditor.document.getText(selectionEditor.selection), selectedText);
     await vscode.commands.executeCommand('intentos.openWorkbench');
     for (let attempt = 0; attempt < 20; attempt += 1) {
       if (vscode.window.tabGroups.all.some((group) => group.tabs.some((tab) => tab.label === 'IntentOS Workbench'))) break;
@@ -151,6 +156,8 @@ async function run() {
       executable,
       cwd,
       status: payload.status,
+      selectedTextAfterWorkbench: selectionEditor.document.getText(selectionEditor.selection),
+      activeEditorAfterWorkbench: vscode.window.activeTextEditor?.document.uri.toString() || null,
       extensionPath,
       mode: expectNoWorkspace ? 'no-workspace' : 'workspace',
     };

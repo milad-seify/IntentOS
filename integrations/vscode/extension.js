@@ -5,13 +5,15 @@ const { workspaceCwd, resolveExecutable, formatSpawnError } = require('./executa
 const { sidebarHtml, workbenchHtml } = require('./workbench');
 
 let workbenchPanel;
+let lastTextEditor;
 
 function selectedRequest() {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor || editor.selection.isEmpty) {
-    return '';
+  for (const editor of [vscode.window.activeTextEditor, lastTextEditor]) {
+    if (editor && !editor.selection.isEmpty) {
+      return editor.document.getText(editor.selection);
+    }
   }
-  return editor.document.getText(editor.selection);
+  return '';
 }
 
 function runIntentOS(request, extensionPath, options = {}) {
@@ -202,7 +204,12 @@ function openWorkbench(extensionPath) {
         if (!pending) return;
         const candidate = pending;
         pending = undefined;
-        const answer = await vscode.window.showWarningMessage(candidate.action === 'handoffDispatch' ? 'Dispatch this exact reviewed packet to Codex? Completion will still need verification.' : 'Apply this exact reviewed project update?', { modal: true }, 'Approve exact change');
+        const prompt = candidate.action === 'handoffDispatch'
+          ? 'Dispatch this exact reviewed packet to Codex? Completion will still need verification.'
+          : candidate.action === 'outcomeLearn'
+            ? 'Save this exact reviewed learning proposal? Runtime policy will not change.'
+            : 'Apply this exact reviewed project update?';
+        const answer = await vscode.window.showWarningMessage(prompt, { modal: true }, 'Approve exact change');
         if (answer !== 'Approve exact change') return;
         const approvalArgs = candidate.action === 'outcomeLearn'
           ? ['--approval-ref', candidate.approvalRef, '--output', candidate.output]
@@ -413,6 +420,17 @@ async function prepareTask(extensionPath) {
 
 function activate(context) {
   const extensionPath = context.extensionUri.fsPath;
+  lastTextEditor = vscode.window.activeTextEditor;
+  if (vscode.window.onDidChangeActiveTextEditor) {
+    context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor((editor) => {
+      if (editor) lastTextEditor = editor;
+    }));
+  }
+  if (vscode.workspace?.onDidCloseTextDocument) {
+    context.subscriptions.push(vscode.workspace.onDidCloseTextDocument((document) => {
+      if (lastTextEditor?.document === document) lastTextEditor = undefined;
+    }));
+  }
   context.subscriptions.push(
     vscode.commands.registerCommand('intentos.prepareTask', () => prepareTask(extensionPath))
   );
