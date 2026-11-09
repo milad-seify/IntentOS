@@ -10,6 +10,7 @@ const timeoutMs = Number(process.env.INTENTOS_VSCODE_TEST_TIMEOUT_MS || 120000);
 const noWorkspace = process.argv.includes('--no-workspace');
 const packagedVsix = process.env.INTENTOS_PACKAGED_VSIX;
 const screenshotDirectory = process.env.INTENTOS_VSCODE_SCREENSHOTS_DIR;
+const interactiveUI = Boolean(screenshotDirectory || process.env.INTENTOS_VSCODE_UI_TEST === '1');
 
 function findVSCodeExecutable() {
   const configured = process.env.VSCODE_EXECUTABLE;
@@ -99,10 +100,12 @@ async function terminateProcessTree(child) {
 }
 
 function terminateIsolatedVSCode(userDataDir) {
+  const profileRoot = path.dirname(path.resolve(userDataDir));
+  if (path.dirname(profileRoot) !== path.resolve(os.tmpdir()) || !path.basename(profileRoot).startsWith('intentos-vscode-extension-test-')) throw new Error('Refusing to stop VS Code outside the isolated test directory.');
   if (process.platform === 'win32') {
     const encoded = Buffer.from(userDataDir, 'utf8').toString('base64');
     const script = [
-      `$needle=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encoded}'))`,
+      `$needle=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('${encoded}'));`,
       'Get-CimInstance Win32_Process -Filter "name=\'Code.exe\'" |',
       'Where-Object { $_.CommandLine -and $_.CommandLine.IndexOf($needle, [StringComparison]::OrdinalIgnoreCase) -ge 0 } |',
       'Select-Object -ExpandProperty ProcessId',
@@ -115,7 +118,7 @@ function terminateIsolatedVSCode(userDataDir) {
       for (const pid of result.stdout.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)) {
         spawnSync('taskkill.exe', ['/pid', pid, '/t', '/f'], { windowsHide: true });
       }
-    }
+    } else throw new Error(`Could not inspect isolated VS Code processes: ${result.stderr?.trim() || result.error?.message || result.status}`);
     return;
   }
 
@@ -132,9 +135,11 @@ function terminateIsolatedVSCode(userDataDir) {
 }
 
 async function removeTemporaryRoot(directory) {
+  const target = path.resolve(directory);
+  if (path.dirname(target) !== path.resolve(os.tmpdir()) || !path.basename(target).startsWith('intentos-vscode-extension-test-')) throw new Error('Temporary cleanup escaped the isolated test directory.');
   for (let attempt = 0; attempt < 40; attempt += 1) {
     try {
-      fs.rmSync(directory, { recursive: true, force: true });
+      fs.rmSync(target, { recursive: true, force: true });
       return;
     } catch (error) {
       if (attempt === 39) throw error;
@@ -144,19 +149,24 @@ async function removeTemporaryRoot(directory) {
 }
 
 async function captureWorkbenchScreenshot(userDataDir) {
-  if (!screenshotDirectory) return;
+  if (!interactiveUI) return;
   const activePort = path.join(userDataDir, 'DevToolsActivePort');
   for (let attempt = 0; attempt < 30 && !fs.existsSync(activePort); attempt += 1) {
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
   if (!fs.existsSync(activePort)) throw new Error('VS Code did not expose its isolated DevTools port for a real screenshot.');
   const port = fs.readFileSync(activePort, 'utf8').split(/\r?\n/)[0];
-  const targets = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
+  let targets = [];
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    try { targets = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json(); } catch {}
+    if (targets.some((item) => item.type === 'page' && item.webSocketDebuggerUrl) && targets.some((item) => item.type === 'iframe' && item.webSocketDebuggerUrl)) break;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
   const pages = targets.filter((item) => item.type === 'page' && item.webSocketDebuggerUrl);
   if (!pages.length) throw new Error('No inspectable VS Code page was available for a real screenshot.');
   const webview = targets.find((item) => item.type === 'iframe' && item.webSocketDebuggerUrl);
   if (!webview) throw new Error('No inspectable IntentOS Webview was available.');
-  fs.mkdirSync(screenshotDirectory, { recursive: true });
+  if (screenshotDirectory) fs.mkdirSync(screenshotDirectory, { recursive: true });
   async function connect(target) {
     const socket = new WebSocket(target.webSocketDebuggerUrl);
     await new Promise((resolve, reject) => { socket.addEventListener('open', resolve, { once: true }); socket.addEventListener('error', reject, { once: true }); });
@@ -166,13 +176,17 @@ async function captureWorkbenchScreenshot(userDataDir) {
       call(method, params = {}) {
         const id = ++nextId;
         return new Promise((resolve, reject) => {
+          const cleanup = () => { clearTimeout(timer); socket.removeEventListener('message', onMessage); socket.removeEventListener('close', onClose); };
+          const onClose = () => { cleanup(); reject(new Error(`VS Code browser connection closed during ${method}.`)); };
+          const timer = setTimeout(() => { cleanup(); reject(new Error(`VS Code browser command timed out: ${method}.`)); }, 30000);
           const onMessage = (event) => {
             const packet = JSON.parse(event.data);
             if (packet.id !== id) return;
-            socket.removeEventListener('message', onMessage);
+            cleanup();
             if (packet.error) reject(new Error(packet.error.message)); else resolve(packet.result);
           };
           socket.addEventListener('message', onMessage);
+          socket.addEventListener('close', onClose, { once: true });
           socket.send(JSON.stringify({ id, method, params }));
         });
       },
@@ -194,6 +208,7 @@ async function captureWorkbenchScreenshot(userDataDir) {
     throw new Error(`Timed out waiting for real VS Code Webview ${label}.`);
   }
   async function screenshot(name) {
+    if (!screenshotDirectory) return;
     await new Promise((resolve) => setTimeout(resolve, 250));
     const response = await page.call('Page.captureScreenshot', { format: 'png' });
     fs.writeFileSync(path.join(screenshotDirectory, name), Buffer.from(response.data, 'base64'));
@@ -217,7 +232,32 @@ async function captureWorkbenchScreenshot(userDataDir) {
       await waitFor(`${doc}.querySelector('main h2')?.textContent === ${JSON.stringify(({ Project: 'Project Compass', Govern: 'Project governance', Delegate: 'Agent and routing', Recover: 'Checkpoints and recovery' })[name])}`, name);
       await screenshot(screenshotName);
     }
-    console.log(`Real VS Code Webview interaction passed: ${packagedVsix ? 'task entry' : 'selected editor text'}, task submission, ready review, and Project/Govern/Delegate/Recover navigation.`);
+    async function navigate(label) { await evaluate(`(${doc}.querySelectorAll('#nav button').forEach(b=>{if(b.textContent===${JSON.stringify(label)})b.click()}),true)`); }
+    await navigate('Govern');
+    await evaluate(`(${doc}.querySelector('#stateDecision-title').value='Unsent owner review draft',true)`);
+    await navigate('Outcomes');
+    await waitFor(`${doc}.querySelector('.input-guide')?.textContent.includes('Example only')`, 'safe evidence example');
+    await navigate('Govern');
+    if (!(await evaluate(`${doc}.querySelector('#stateDecision-title').value==='Unsent owner review draft'`))) throw new Error('VS Code navigation lost the unsent decision draft.');
+    await evaluate(`(${doc}.querySelector('form[data-action=stateStatus]').requestSubmit(),true)`);
+    await waitFor(`${doc}.querySelector('#feedback')?.getAttribute('role')==='alert'`, 'associated validation error');
+    if (!(await evaluate(`(()=>{const d=${doc},e=d.querySelector('#feedback'),r=e.getBoundingClientRect();return d.activeElement===e&&r.top>=0&&r.bottom<=d.defaultView.innerHeight&&!d.querySelector('form[data-action=stateStatus] button[type=submit]').disabled})()`))) throw new Error('VS Code error feedback or control recovery is not accessible.');
+    await screenshot('vscode-workbench-inline-error.png');
+    await navigate('Delegate');
+    await evaluate(`(${doc}.querySelector('#route-text').value='Codex: Review this module without changing code',${doc}.querySelector('form[data-action=route]').requestSubmit(),true)`);
+    await waitFor(`${doc}.querySelector('#result')?.innerText.includes('Recommendation and limits')`, 'routing summary');
+    for (const width of [390, 320]) {
+      await frame.call('Runtime.evaluate', { expression: `document.querySelector('#active-frame').style.width='${width}px'` });
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      const size = await evaluate(`({width:${doc}.defaultView.innerWidth,page:${doc}.documentElement.scrollWidth})`);
+      if (size.page > size.width + 1) throw new Error(`VS Code workbench overflows at ${width}px: ${JSON.stringify(size)}`);
+    }
+    await frame.call('Runtime.evaluate', { expression: "document.querySelector('#active-frame').style.width='100%'" });
+    await screenshot('vscode-workbench-routing-summary.png');
+    await navigate('Start');
+    await evaluate(`([...${doc}.querySelectorAll('#result button')].find(b=>b.textContent==='Copy Prepared Task').click(),true)`);
+    await waitFor(`${doc}.querySelector('#feedback')?.textContent.includes('copied')`, 'copy confirmation');
+    console.log(`Real VS Code Webview acceptance passed: ${packagedVsix ? 'task entry' : 'selected editor text'}, prepare/review/copy, all six sections, retained draft, inline error/focus/control recovery, safe examples, route fallback summary, and 390/320px iframe layouts.`);
   } finally {
     frame.socket.close();
     page.socket.close();
@@ -262,7 +302,7 @@ async function run() {
     '--skip-welcome',
     '--skip-release-notes',
     '--new-window',
-    ...(screenshotDirectory ? ['--remote-debugging-port=0', '--remote-allow-origins=*'] : []),
+    ...(interactiveUI ? ['--remote-debugging-port=0', '--remote-allow-origins=*'] : []),
     `--extensionDevelopmentPath=${packagedVsix ? installedExtensionPath : extensionPath}`,
     `--extensionTestsPath=${packagedVsix ? path.join(extensionPath, 'test', 'packagedHost.test.js') : extensionTestsPath}`,
     ...(!noWorkspace ? [repository] : []),
@@ -273,7 +313,7 @@ async function run() {
       ...(cliScript ? { ELECTRON_RUN_AS_NODE: '1' } : {}),
       INTENTOS_EXTENSION_TEST_RESULT: resultFile,
       INTENTOS_EXPECT_NO_WORKSPACE: noWorkspace ? '1' : '0',
-      ...(screenshotDirectory ? { INTENTOS_EXTENSION_TEST_HOLD_MS: '20000' } : {}),
+      ...(interactiveUI ? { INTENTOS_EXTENSION_TEST_HOLD_MS: '120000' } : {}),
     },
     stdio: ['ignore', 'pipe', 'pipe'],
     windowsHide: true,

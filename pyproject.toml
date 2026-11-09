@@ -27,4 +27,4 @@ intentos-mcp = "intentos.mcp_server:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-intentos = ["ui.html", "ui.css", "ui.js"]
+intentos = ["ui.html", "ui.css", "ui.js", "ui-support.js"]

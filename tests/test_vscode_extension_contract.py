@@ -97,9 +97,9 @@ const { sidebarHtml, workbenchHtml } = require(process.argv[1]);
 for (const html of [sidebarHtml(), workbenchHtml()]) {
   assert(html.includes("default-src 'none'"));
   assert(html.includes("script-src 'nonce-"));
-  const match = html.match(/<script nonce="[a-f0-9]+">([\s\S]*?)<\/script>/);
-  assert(match, 'The webview script must use a nonce.');
-  new vm.Script(match[1]);
+  const matches = [...html.matchAll(/<script nonce="[a-f0-9]+">([\s\S]*?)<\/script>/g)];
+  assert(matches.length, 'The webview scripts must use a nonce.');
+  for (const match of matches) new vm.Script(match[1]);
 }
 const html = workbenchHtml();
 for (const label of ['Project Compass', 'Status update', 'Scope amendment', 'Codex dispatch', 'Checkpoints and recovery', 'Compare task variants']) {
@@ -111,6 +111,12 @@ assert(!html.includes('https://'));
         subprocess.run(
             [node, "-e", script, str(EXTENSION_DIR / "workbench.js")],
             check=True, capture_output=True, text=True,
+        )
+
+    def test_shared_ui_presentation_and_examples_match_the_packaged_adapters(self) -> None:
+        self.assertEqual(
+            (EXTENSION_DIR / "ui-support.js").read_text(encoding="utf-8"),
+            (ROOT / "src" / "intentos" / "ui-support.js").read_text(encoding="utf-8"),
         )
 
     def test_marketplace_manifest_metadata_keeps_the_extension_identity(self) -> None:
@@ -225,7 +231,7 @@ assert.strictEqual(registered['intentos.openWorkbench'].disposed, true);
     def test_marketplace_ignore_keeps_runtime_and_listing_files(self) -> None:
         ignored = (EXTENSION_DIR / ".vscodeignore").read_text(encoding="utf-8")
 
-        for filename in ("extension.js", "executable.js", "workbench.js", "package.json", "README.md", "CHANGELOG.md", "LICENSE"):
+        for filename in ("extension.js", "executable.js", "workbench.js", "ui-support.js", "package.json", "README.md", "CHANGELOG.md", "LICENSE"):
             self.assertNotIn(filename, ignored)
         self.assertIn("test/**", ignored)
         self.assertIn("**/*.vsix", ignored)
@@ -243,6 +249,7 @@ assert.strictEqual(registered['intentos.openWorkbench'].disposed, true);
             "extension/executable.js": b"module.exports",
             "extension/extension.js": b"module.exports",
             "extension/workbench.js": b"module.exports",
+            "extension/ui-support.js": b"module.exports",
             "extension/package.json": manifest,
         }
 
@@ -271,8 +278,12 @@ assert.strictEqual(registered['intentos.openWorkbench'].disposed, true);
         self.assertIn("payload?.status === 'error'", source)
         self.assertIn("createWebviewPanel", source)
         self.assertIn("clipboard.writeText", source)
-        self.assertNotIn("readFile", source)
-        self.assertNotIn("workspace.fs", source)
+        self.assertEqual(source.count("readFileSync("), 1)
+        self.assertIn("fs.readFileSync(fields.output)", source)
+        self.assertNotIn("readdir", source)
+        self.assertEqual(source.count("workspace.fs.writeFile("), 1)
+        self.assertIn("JSON.stringify(sample.value", source)
+        self.assertNotIn("workspace.fs.delete", source)
         self.assertNotIn("mcp", source.lower())
 
     def test_default_cli_resolution_prefers_workspace_virtual_environment(self) -> None:

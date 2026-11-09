@@ -86,6 +86,43 @@ class LocalUITests(unittest.TestCase):
         self.assertTrue(payload["questions"])
         self.assertIsNone(payload["prompt"])
 
+    def test_windows_documents_preserve_unicode_meaning_and_provenance(self):
+        content = "## Current phase\nبررسی رابط کاربری\n\n## Next action\nReview evidence\n"
+        results = []
+        for newline in ("\n", "\r\n"):
+            document = {"name": "STATUS.md", "content": content.replace("\n", newline), "authoritative": True}
+            status, _, prepared = self.post("/api/prepare", {
+                "text": "Codex: review UI without changing files", "target": "codex", "documents": [document],
+            })
+            self.assertEqual(status, 200)
+            status, _, compass = self.post("/api/compass", {"documents": [document], "task": "Review evidence"})
+            self.assertEqual(status, 200)
+            results.append((json.loads(prepared), json.loads(compass)))
+        self.assertEqual(results[0], results[1])
+        self.assertIn("بررسی رابط کاربری", results[1][0]["prompt"])
+        self.assertTrue(any(item["path"] == "STATUS.md" and item["line"] == 2
+                            for field in results[1][1]["fields"].values() for item in field["evidence"]))
+
+    def test_controls_and_original_input_limits_are_not_weakened(self):
+        for content in ("one\rtwo", "one\x00two", "one\x1btwo", "one\x0btwo", "one\x7ftwo"):
+            with self.subTest(content=repr(content)):
+                status, _, _ = self.post("/api/compass", {"documents": [{
+                    "name": "STATUS.md", "content": content, "authoritative": True,
+                }], "task": "Review"})
+                self.assertEqual(status, 400)
+        status, _, _ = self.post("/api/prepare", {"text": "x" * 9999 + "\r\n", "target": "", "documents": []})
+        self.assertEqual(status, 400)
+
+    def test_windows_model_catalog_upload_uses_existing_router(self):
+        catalog = {"schema_version": 1, "models": [{"name": "test-model", "provider": "test-only",
+                   "surfaces": ["codex"], "capability": "balanced", "cost": "low", "available": True, "verified": True}]}
+        status, _, data = self.post("/api/action", {"action": "route", "fields": {
+            "text": "Refactor the parser", "target": "codex",
+            "models": {"name": "models.json", "content": json.dumps(catalog, indent=2).replace("\n", "\r\n")},
+        }})
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(data)["selected_model"], "test-model")
+
     def test_security_rejects_missing_session_origin_csrf_and_unknown_action(self):
         status, _, _ = self.request("GET", "/ui.js")
         self.assertEqual(status, 403)
@@ -116,7 +153,7 @@ class LocalUITests(unittest.TestCase):
                           "independently_reviewed": True}],
         }
         status, _, data = self.post("/api/action", {"action": "gates", "fields": {
-            "evidence": {"name": "gates.json", "content": json.dumps(evidence)},
+            "evidence": {"name": "gates.json", "content": json.dumps(evidence, indent=2).replace("\n", "\r\n")},
         }})
         self.assertEqual(status, 200)
         result = json.loads(data)
@@ -137,7 +174,7 @@ class LocalUITests(unittest.TestCase):
         records = {}
         for variant, passed in (("raw", False), ("prepared", True)):
             status, _, data = self.post("/api/action", {"action": "outcomeRecord", "fields": {
-                "evidence": {"name": f"{variant}.json", "content": json.dumps(observed(variant, passed))},
+                "evidence": {"name": f"{variant}.json", "content": json.dumps(observed(variant, passed), indent=2).replace("\n", "\r\n")},
             }})
             self.assertEqual(status, 200)
             payload = json.loads(data)
@@ -226,7 +263,7 @@ class LocalUITests(unittest.TestCase):
             "estimated_remaining_tokens": 100,
         }
         status, _, data = self.post("/api/action", {"action": "checkpointCreate", "fields": {
-            "root": str(root), "spec": {"name": "checkpoint-spec.json", "content": json.dumps(spec)},
+            "root": str(root), "spec": {"name": "checkpoint-spec.json", "content": json.dumps(spec, indent=2).replace("\n", "\r\n")},
             "context_file": "AGENTS.md",
         }})
         self.assertEqual(status, 200)

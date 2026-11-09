@@ -43,6 +43,8 @@ The current source candidate adds an **IntentOS** Activity Bar entry. Choose **O
 
 These screens require the unpublished Core `1.1.0` source candidate CLI; the public Core `1.0.1` package lacks the advanced commands. Files are selected explicitly with the VS Code picker. Project writes and Codex dispatch require an exact CLI preview and a separate modal approval. An agent turn is never proof of a verified result. See [the UI contract](../../docs/UX.md) and [graphical coverage matrix](../../docs/SIMPLE_UI.md).
 
+Drafts and chosen files remain only in this workbench panel's memory while you navigate. Close the panel or choose **Clear session drafts** to remove them. A previous review is labeled and requires a new preview before approval. Errors appear beside the action and receive keyboard focus; controls recover after failure. **File format and example** explains the advanced evidence inputs and can save a conservative JSON starting point through a native save dialog. Replace its placeholders with real evidence; it supplies no approval or observed outcome. Portable handoffs show readable instructions with Copy as well as the saved packet, and exact technical results stay expandable.
+
 ## Configuration
 
 `intentos.executable` defaults to `intentos`. Set it to a full executable path when VS Code cannot find your CLI. For example, on Windows:

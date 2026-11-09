@@ -1,6 +1,8 @@
 const vscode = require('vscode');
 const { execFile } = require('child_process');
 const { randomBytes } = require('crypto');
+const fs = require('fs');
+const { examples } = require('./ui-support');
 const { workspaceCwd, resolveExecutable, formatSpawnError } = require('./executable');
 const { sidebarHtml, workbenchHtml } = require('./workbench');
 
@@ -110,12 +112,12 @@ function validatedFields(action, supplied, selectedFiles) {
     if (name === 'ledger_reviewed') {
       if (typeof value !== 'boolean') throw new Error('Review confirmation must be true or false.');
       fields[name] = value;
-    } else if (typeof value !== 'string' || value.length > 36000 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value)) {
+    } else if (typeof value !== 'string' || value.length > 36000 || /[\u0000-\u0008\u000b-\u000d\u000e-\u001f\u007f]/.test(value.replace(/\r\n/g, '\n'))) {
       throw new Error('A workbench field is invalid or too long.');
     } else if (fileFields.has(name)) {
       if (value && selectedFiles.get(`${action}-${name}`) !== value) throw new Error('Choose files with the file picker.');
       fields[name] = value;
-    } else fields[name] = value.trim();
+    } else fields[name] = value.replace(/\r\n/g, '\n').trim();
   }
   return fields;
 }
@@ -163,9 +165,27 @@ function openWorkbench(extensionPath) {
   let pending;
   let latestPrompt;
   let latestRequest;
+  let latestPrepareOptions;
+  let latestHandoffPrompt;
+  let operationRunning = false;
   panel.webview.onDidReceiveMessage(async (message) => {
     if (!message || typeof message !== 'object' || Array.isArray(message)) return;
+    const operation = ['run', 'apply', 'retry'].includes(message.type);
+    if (operationRunning && (operation || ['clearSession', 'invalidateApproval'].includes(message.type))) return;
+    if (operation) operationRunning = true;
     try {
+      if (message.type === 'invalidateApproval') { pending = undefined; return; }
+      if (message.type === 'clearSession') {
+        pending = undefined; latestPrompt = undefined; latestRequest = undefined; latestPrepareOptions = undefined; latestHandoffPrompt = undefined;
+        selectedFiles.clear(); return;
+      }
+      if (message.type === 'saveExample') {
+        const sample = typeof message.kind === 'string' && Object.hasOwn(examples, message.kind) ? examples[message.kind] : undefined;
+        if (!sample) return;
+        const uri = await vscode.window.showSaveDialog({ filters: { 'JSON example': ['json'] } });
+        if (uri) await vscode.workspace.fs.writeFile(uri, Buffer.from(JSON.stringify(sample.value, null, 2) + '\n', 'utf8'));
+        return;
+      }
       if (message.type === 'pickFile') {
         const field = message.field;
         if (typeof field !== 'string' || !/^[A-Za-z]+-[a-z_0-9]+$/.test(field)) return;
@@ -188,15 +208,27 @@ function openWorkbench(extensionPath) {
         if (!latestPrompt) return;
         await vscode.env.clipboard.writeText(latestPrompt);
         void vscode.window.showInformationMessage('IntentOS prepared task copied.');
+        await panel.webview.postMessage({ type: 'notice', message: 'Prepared task copied. Paste it into your AI tool, then verify its work.' });
+        return;
+      }
+      if (message.type === 'copyHandoffInstructions') {
+        if (latestHandoffPrompt) {
+          await vscode.env.clipboard.writeText(latestHandoffPrompt);
+          await panel.webview.postMessage({ type: 'notice', message: 'Portable instructions copied. No agent was started.' });
+        }
         return;
       }
       if (message.type === 'retry') {
         if (!latestRequest) return;
         const revised = await vscode.window.showInputBox({ title: 'Answer clarification and retry', prompt: 'Revise the task to answer the questions shown in Review.', value: latestRequest, ignoreFocusOut: true });
-        if (!revised?.trim()) return;
+        if (!revised?.trim()) {
+          await panel.webview.postMessage({ type: 'notice', message: 'Clarification retry cancelled. Edit the task and prepare again when ready.' });
+          return;
+        }
         latestRequest = revised;
-        const payload = await runIntentOS(revised, extensionPath);
+        const payload = await runIntentOS(revised, extensionPath, latestPrepareOptions);
         latestPrompt = payload.prompt || undefined;
+        await panel.webview.postMessage({ type: 'selection', text: revised });
         await panel.webview.postMessage({ type: 'result', action: 'prepare', payload });
         return;
       }
@@ -210,7 +242,10 @@ function openWorkbench(extensionPath) {
             ? 'Save this exact reviewed learning proposal? Runtime policy will not change.'
             : 'Apply this exact reviewed project update?';
         const answer = await vscode.window.showWarningMessage(prompt, { modal: true }, 'Approve exact change');
-        if (answer !== 'Approve exact change') return;
+        if (answer !== 'Approve exact change') {
+          await panel.webview.postMessage({ type: 'notice', message: 'Approval cancelled. Preview again before requesting approval.' });
+          return;
+        }
         const approvalArgs = candidate.action === 'outcomeLearn'
           ? ['--approval-ref', candidate.approvalRef, '--output', candidate.output]
           : [];
@@ -225,13 +260,22 @@ function openWorkbench(extensionPath) {
       const root = projectRoot(action);
       if (action === 'prepare') {
         latestRequest = required(fields.text, 'Task');
-        const payload = await runIntentOS(latestRequest, extensionPath, { target: fields.target, contextFile: fields.context_file });
+        latestPrepareOptions = { target: fields.target, contextFile: fields.context_file };
+        const payload = await runIntentOS(latestRequest, extensionPath, latestPrepareOptions);
         latestPrompt = payload.prompt || undefined;
         await panel.webview.postMessage({ type: 'result', action, payload });
         return;
       }
       const args = commandFor(action, fields, root);
       const payload = await runCli(args, extensionPath);
+      if (action === 'handoffPrepare' && payload.status === 'saved') {
+        const bytes = fs.readFileSync(fields.output);
+        if (bytes.length <= 2 * 1024 * 1024) {
+          const packet = JSON.parse(bytes.toString('utf8'));
+          latestHandoffPrompt = packet.handoff?.prepared_prompt;
+          payload.packet_preview = packet;
+        }
+      }
       if (action.startsWith('state') && payload.approval_digest) {
         payload.diff_preview = await runCli(args, extensionPath, false);
       }
@@ -245,6 +289,11 @@ function openWorkbench(extensionPath) {
       const detail = error instanceof Error ? error.message : 'Unknown error';
       const hint = detail.includes('ENOENT') ? ' Install the local IntentOS CLI, or set intentos.executable to its full path in VS Code settings.' : '';
       await panel.webview.postMessage({ type: 'error', message: `IntentOS: ${detail}${hint}` });
+    } finally {
+      if (operation) {
+        operationRunning = false;
+        await panel.webview.postMessage({ type: 'idle' });
+      }
     }
   });
 }

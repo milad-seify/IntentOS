@@ -1,4 +1,7 @@
 const { randomBytes } = require('crypto');
+const { readFileSync } = require('fs');
+const path = require('path');
+const supportScript = readFileSync(path.join(__dirname, 'ui-support.js'), 'utf8');
 
 function nonce() {
   return randomBytes(16).toString('hex');
@@ -37,7 +40,11 @@ function workbenchHtml() {
     .item{border-top:1px solid var(--vscode-panel-border);padding:12px 0}.item:first-child{border-top:0}.item strong{display:block}.item small{color:var(--vscode-descriptionForeground)}
     pre{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--vscode-textCodeBlock-background);padding:14px;border-radius:5px;max-height:480px;overflow:auto}details{margin-top:14px}summary{cursor:pointer;font-weight:600}
     @media(max-width:680px){.shell{padding:16px}header{display:block}.panel{padding:14px}.file{flex-wrap:wrap}.file button{width:100%}}
-  </style></head><body><div class="shell"><header><div><div class="eyebrow">Reliable AI delegation</div><h1>IntentOS workbench</h1><p>Prepare, review, and hand off with clear boundaries. Your AI tool performs the work.</p></div><span class="eyebrow">Local CLI</span></header><nav id="nav" aria-label="Workbench sections"></nav><main id="main"></main><div id="feedback" role="status" aria-live="polite"></div><section id="result" class="panel result" aria-live="polite" hidden></section></div><script nonce="${key}">
+    body{overflow-wrap:anywhere}.shell,.workflow,.panel,.item,.fact{min-width:0;max-width:100%}.item span,.item small{overflow-wrap:anywhere}
+    .facts,.summary-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));gap:10px;margin:16px 0}.summary-facts small,.summary-facts strong{display:block}
+    pre{max-width:100%;tab-size:2}[hidden],#feedback:empty{display:none!important}.input-guide p{margin-top:12px}.result-guidance{margin-top:12px}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
+  </style></head><body><div class="shell"><header><div><div class="eyebrow">Reliable AI delegation</div><h1>IntentOS workbench</h1><p>Prepare, review, and hand off with clear boundaries. Your AI tool performs the work.</p><p>Drafts and selected files stay in this panel until you close or clear it.</p></div><button type="button" class="secondary" id="clear-session">Clear session drafts</button></header><nav id="nav" aria-label="Workbench sections"></nav><main id="main"></main><div id="feedback" role="status" aria-live="polite" hidden tabindex="-1"></div><section id="result" class="panel result" aria-live="polite" hidden></section></div><script nonce="${key}">${supportScript}</script><script nonce="${key}">
   const vscode=acquireVsCodeApi();
   const sections=[
     {id:'start',label:'Start',title:'Prepare a task',intro:'Describe the outcome. IntentOS will show its interpretation, risk, approvals, and what to verify.',forms:[
@@ -62,42 +69,55 @@ function workbenchHtml() {
       {action:'outcomeLearn',title:'Review repeated lessons',description:'Repeated external failures may produce a proposal. Saving it needs an exact approval and never changes runtime policy.',fields:[['record1','Outcome record 1','file'],['record2','Outcome record 2','file'],['approval_ref','Owner approval reference','text'],['output','Save approved proposal as','save']],button:'Review lessons'}]}
   ];
   const nav=document.getElementById('nav'),main=document.getElementById('main'),result=document.getElementById('result'),feedback=document.getElementById('feedback');
-  const fileFields=new Set();let current='start';
+  const fileFields=new Set(),drafts=new Map(),reviews=new Map();const ui=globalThis.IntentOSUI;let current='start',activeForm=null,busy=false,locked=[];
+  function inform(text='',error=false,focus=false){feedback.textContent=text;feedback.hidden=!text;feedback.className=text?'notice'+(error?' error':''):'';feedback.setAttribute('role',error?'alert':'status');if(focus&&text){feedback.focus({preventScroll:true});feedback.scrollIntoView({behavior:'instant',block:'nearest'})}}
+  function begin(form){if(busy)return false;busy=true;activeForm=form;form.insertBefore(feedback,form.querySelector('.actions')||null);form.setAttribute('aria-busy','true');form.setAttribute('aria-describedby','feedback');locked=[...document.querySelectorAll('button,input,textarea,select')].map(b=>[b,b.disabled]);for(const [b]of locked)b.disabled=true;inform('Working locally…');return true}
+  function finish(){busy=false;activeForm?.setAttribute('aria-busy','false');for(const [b,disabled]of locked)if(b.isConnected)b.disabled=disabled;locked=[]}
   function element(tag,cls,text){const node=document.createElement(tag);if(cls)node.className=cls;if(text!==undefined)node.textContent=text;return node}
-  function renderSection(id){current=id;nav.replaceChildren();main.replaceChildren();result.hidden=true;feedback.textContent='';fileFields.clear();
+  function renderSection(id){if(busy)return;document.querySelector('.shell').append(feedback);inform();if(main.childNodes.length)drafts.set(current,[...main.childNodes]);current=id;nav.replaceChildren();main.replaceChildren();result.replaceChildren();result.hidden=true;fileFields.clear();vscode.postMessage({type:'invalidateApproval'});
     for(const section of sections){const button=element('button',section.id===id?'active':'',section.label);button.type='button';button.setAttribute('aria-current',section.id===id?'page':'false');button.onclick=()=>renderSection(section.id);nav.append(button)}
-    const section=sections.find(item=>item.id===id);const heading=element('h2','',section.title);heading.tabIndex=-1;main.append(heading,element('p','',section.intro));
+    const section=sections.find(item=>item.id===id);const heading=element('h2','',section.title);heading.tabIndex=-1;
+    if(drafts.has(id)){main.append(...drafts.get(id));for(const input of main.querySelectorAll('input[readonly]'))fileFields.add(input.id)}else{
+    main.append(heading,element('p','',section.intro));
     for(const formSpec of section.forms){const form=element('form','workflow');form.dataset.action=formSpec.action;form.append(element('h3','',formSpec.title),element('p','',formSpec.description));
       for(const [name,label,type,initial,options] of formSpec.fields){const fieldId=formSpec.action+'-'+name;const caption=element('label','',label);caption.htmlFor=fieldId;form.append(caption);let input;
         if(type==='textarea')input=element('textarea');else if(type==='select'){input=element('select');for(const option of options){const item=element('option','',option||'Detect from task');item.value=option;input.append(item)}input.value=initial||''}
         else{input=element('input');input.type=type==='checkbox'?'checkbox':'text'}
         input.id=fieldId;input.name=name;if(initial&&type!=='select')input.value=initial;
-        if(type==='file'||type==='save'){input.readOnly=true;fileFields.add(fieldId);const wrap=element('div','file');const pick=element('button','secondary',type==='save'?'Choose location':'Choose file');pick.type='button';pick.onclick=()=>vscode.postMessage({type:'pickFile',field:fieldId,save:type==='save'});wrap.append(input,pick);form.append(wrap)}else form.append(input);
+        if(type==='file'||type==='save'){input.readOnly=true;fileFields.add(fieldId);const wrap=element('div','file');const pick=element('button','secondary',type==='save'?'Choose location':'Choose file');pick.type='button';pick.onclick=()=>{activeForm=form;vscode.postMessage({type:'pickFile',field:fieldId,save:type==='save'})};wrap.append(input,pick);form.append(wrap)}else form.append(input);
       }
       const actions=element('div','actions');const submit=element('button','',formSpec.button);submit.type='submit';actions.append(submit);if(formSpec.action==='prepare'){const selected=element('button','secondary','Use selected editor text');selected.type='button';selected.onclick=()=>vscode.postMessage({type:'useSelection'});actions.append(selected)}form.append(actions);
-      form.onsubmit=(event)=>{event.preventDefault();const fields={};for(const input of form.querySelectorAll('[name]'))fields[input.name]=input.type==='checkbox'?input.checked:input.value;feedback.textContent='Working locally…';result.hidden=true;vscode.postMessage({type:'run',action:formSpec.action,fields})};main.append(form);
+      const example={route:'models',gates:'gates',checkpointCreate:'checkpoint',outcomeRecord:'outcome'}[formSpec.action];if(example)ui.addExample(form,example,()=>vscode.postMessage({type:'saveExample',kind:example}));
+      form.onsubmit=(event)=>{event.preventDefault();if(!begin(form))return;const fields={};for(const input of form.querySelectorAll('[name]'))fields[input.name]=input.type==='checkbox'?input.checked:input.value;result.hidden=true;vscode.postMessage({type:'run',action:formSpec.action,fields})};main.append(form);
     }
-    window.scrollTo(0,0);heading.focus({preventScroll:true});
+    }
+    if(reviews.has(id)){const prior=reviews.get(id);showResult(prior.action,prior.payload,true)}
+    window.scrollTo({top:0,behavior:'instant'});main.querySelector('h2')?.focus({preventScroll:true});
   }
   function addValue(parent,label,value){const row=element('div','item');row.append(element('strong','',label));if(Array.isArray(value)){if(!value.length)row.append(element('small','','None supplied'));for(const item of value)addValue(row,'',item)}else if(value&&typeof value==='object'){for(const [key,item] of Object.entries(value))addValue(row,key.replaceAll('_',' '),item)}else row.append(element('span','',value===null||value===undefined?'Unknown':String(value)));parent.append(row)}
-  function showResult(action,payload){feedback.textContent='';result.hidden=false;result.replaceChildren();result.append(element('div','eyebrow',action.replace(/([A-Z])/g,' $1')));result.append(element('h2','',payload.status==='ready'?'Ready for review':payload.needs_clarification?'Needs clarification':String(payload.status||'Review')));
+  function showResult(action,payload,restored=false){inform();if(result.contains(feedback))document.querySelector('.shell').append(feedback);if(!restored)reviews.set(current,{action,payload:ui.reviewOnly(payload)});result.hidden=false;result.replaceChildren();result.append(element('div','eyebrow',action.replace(/([A-Z])/g,' $1')));const heading=element('h2','',payload.status==='ready'?'Ready for review':payload.needs_clarification?'Needs clarification':String(payload.status||'Review').replaceAll('_',' '));heading.tabIndex=-1;result.append(heading);if(restored)result.append(element('p','','Previous review from this panel. Sources may have changed. Preview again before approval.'));
     if(action==='prepare'){const intent=payload.intent||{};const facts=element('div','facts');for(const [label,value] of [['Goal',intent.goal],['Risk',payload.risk_level],['Task',payload.task_type],['Agent',intent.target_tool]]){const card=element('div','fact');card.append(element('b','',label),element('span','',value||'Not specified'));facts.append(card)}result.append(facts);
       result.append(element('p','','Risk describes the consequence of a wrong or unsafe handoff. Approval boundaries name actions to confirm before execution.'));
       for(const [label,value] of [['Clarification questions',payload.questions],['Approval boundaries',payload.approval_boundaries],['Project context and source reasons',payload.context?.selected],['Verification',payload.done_criteria],['Engineering guidance',payload.engineering_rules]]){if(label==='Clarification questions'&&!value?.length)continue;const heading=element('h3','',label);result.append(heading);addValue(result,'',value||[])}
       if(payload.routing?.reason){result.append(element('h3','','Agent and capability guidance'),element('p','',payload.routing.reason))}
       if(payload.prompt){result.append(element('h3','','Prepared task'),element('pre','',payload.prompt));const copy=element('button','','Copy Prepared Task');copy.onclick=()=>vscode.postMessage({type:'copyPreparedTask'});result.append(copy)}
-      if(payload.needs_clarification){const retry=element('button','','Answer and retry');retry.onclick=()=>vscode.postMessage({type:'retry'});result.append(retry)}
-    }else{for(const [name,value] of Object.entries(payload)){if(name==='schema_version')continue;addValue(result,name.replaceAll('_',' '),value)}
-      if(payload.approval_digest&&(action.startsWith('state')||action==='handoffDispatch'||action==='outcomeLearn')){const approve=element('button','','Approve exact reviewed action');approve.onclick=()=>vscode.postMessage({type:'apply'});result.append(approve)}
+      if(payload.needs_clarification){const retry=element('button','','Answer and retry');retry.onclick=()=>{if(begin(result))vscode.postMessage({type:'retry'})};result.append(retry)}
+    }else{ui.summarize(result,action,payload);
+      if(payload.approval_digest&&(action.startsWith('state')||action==='handoffDispatch'||action==='outcomeLearn')){const approve=element('button','','Approve exact reviewed action');approve.className='approve';approve.onclick=()=>{if(begin(result))vscode.postMessage({type:'apply'})};result.append(approve)}
     }
-    const details=element('details');details.append(element('summary','','Advanced: exact CLI result'),element('pre','',JSON.stringify(payload,null,2)));result.append(details);result.scrollIntoView({behavior:'smooth',block:'start'});
+    const details=element('details');details.append(element('summary','','Advanced: exact CLI result'),element('pre','',JSON.stringify(payload,null,2)));result.append(details);if(!restored){result.scrollIntoView({behavior:'instant',block:'start'});heading.focus({preventScroll:true})}
   }
   window.addEventListener('message',(event)=>{const message=event.data;if(!message||typeof message!=='object')return;
-    if(message.type==='picked'){const input=document.getElementById(message.field);if(input&&fileFields.has(message.field))input.value=message.path||''}
+    if(message.type==='picked'){const input=document.getElementById(message.field);if(input&&fileFields.has(message.field)){input.value=message.path||'';result.querySelector('.approve')?.remove();vscode.postMessage({type:'invalidateApproval'})}}
     if(message.type==='selection'){const input=document.getElementById('prepare-text');if(input){input.value=message.text||'';input.focus()}}
-    if(message.type==='result')showResult(message.action,message.payload);
-    if(message.type==='error'){feedback.textContent=message.message;feedback.className='notice error'}
+    if(message.type==='result'){finish();showResult(message.action,message.payload)}
+    if(message.type==='idle')finish();
+    if(message.type==='notice'){result.insertBefore(feedback,result.querySelector('button'));if(message.message.includes('cancelled'))result.querySelector('.approve')?.remove();inform(message.message)}
+    if(message.type==='error'){finish();if(activeForm&&!activeForm.contains(feedback))activeForm.append(feedback);inform(message.message+' Review the inputs and preview again before approval.',true,true);const approval=result.querySelector('.approve');if(approval)approval.disabled=true}
   });renderSection('start');
+  result.addEventListener('copy-handoff',()=>vscode.postMessage({type:'copyHandoffInstructions'}));
+  main.addEventListener('input',()=>{result.querySelector('.approve')?.remove();vscode.postMessage({type:'invalidateApproval'})});
+  document.getElementById('clear-session').onclick=()=>{if(busy)return;drafts.clear();reviews.clear();main.replaceChildren();vscode.postMessage({type:'clearSession'});renderSection('start')};
   </script></body></html>`;
 }
 

@@ -33,8 +33,15 @@ _APPROVABLE = {"stateStatus", "stateDecision", "stateScope", "handoffDispatch", 
 
 
 def _text(value: object, label: str, *, required: bool = False, maximum: int = _MAX_FIELD) -> str:
-    if not isinstance(value, str) or len(value) > maximum or any(ord(char) < 32 and char not in "\n\t" for char in value):
+    if not isinstance(value, str):
         raise ValueError(f"{label} must be bounded text")
+    if len(value) > maximum:
+        raise ValueError(f"{label} exceeds {maximum} characters; use shorter text or a smaller file")
+    # Browser file uploads preserve Windows newlines. Normalize only paired CRLF;
+    # a bare CR or another control character is still an invalid input.
+    value = value.replace("\r\n", "\n")
+    if any((ord(char) < 32 and char not in "\n\t") or ord(char) == 127 for char in value):
+        raise ValueError(f"{label} contains unsupported control characters; use LF or CRLF text without embedded controls")
     value = value.strip()
     if required and not value:
         raise ValueError(f"{label} is required")
@@ -81,7 +88,10 @@ def _upload(server: "IntentOSUIServer", value: object, label: str) -> str:
     name = _text(value["name"], label, required=True, maximum=120)
     if not name.lower().endswith(".json") or any(char in name for char in "/\\:"):
         raise ValueError(f"{label} must be a JSON file")
-    content = _text(value["content"], label, required=True, maximum=100_000)
+    raw = value["content"]
+    if isinstance(raw, str) and len(raw.encode("utf-8")) > 100_000:
+        raise ValueError(f"{label} must contain one bounded JSON object")
+    content = _text(raw, label, required=True, maximum=100_000)
     if len(content.encode("utf-8")) > 100_000 or not isinstance(json.loads(content), dict):
         raise ValueError(f"{label} must contain one bounded JSON object")
     with server.pending_lock:
@@ -359,6 +369,7 @@ class IntentOSUIHandler(BaseHTTPRequestHandler):
             self._reply(HTTPStatus.FORBIDDEN, {"error": "Open IntentOS from its local launcher"})
             return
         assets = {"/": ("ui.html", "text/html; charset=utf-8"), "/ui.css": ("ui.css", "text/css; charset=utf-8"),
+                  "/ui-support.js": ("ui-support.js", "text/javascript; charset=utf-8"),
                   "/ui.js": ("ui.js", "text/javascript; charset=utf-8")}
         if self.path not in assets:
             self._reply(HTTPStatus.NOT_FOUND, {"error": "Not found"})

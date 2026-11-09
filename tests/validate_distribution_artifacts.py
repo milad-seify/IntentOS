@@ -39,7 +39,7 @@ with IntentOSUIServer() as server:
     client.open(server.launch_url)
     with client.open(server.origin + '/') as response:
         assert b'IntentOS' in response.read()
-    for name in ('ui.js', 'ui.css'):
+    for name in ('ui.js', 'ui.css', 'ui-support.js'):
         with client.open(server.origin + '/' + name) as response:
             assert response.status == 200 and response.read()
     server.shutdown()

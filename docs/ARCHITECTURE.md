@@ -112,6 +112,8 @@ The editor-native adapter calls the local CLI with bounded, named commands. Its 
 
 `intentos ui` serves bundled HTML/CSS/JavaScript from a Python standard-library HTTP server bound to loopback. Its basic Prepare/Project review invokes the existing Python core. Advanced named actions call the installed CLI's supported contracts, with explicit uploaded evidence and temporary artifacts; the UI has no general command or filesystem endpoint. A one-time local session URL, cookie, Origin and CSRF checks, bounded inputs, digest-bound approvals and source revision checks protect the local workflow. The browser adds presentation only, with outcome-first language and progressive disclosure.
 
+The two independent packages bundle the same `ui-support.js` presentation helpers and conservative evidence examples; a contract test keeps the mirrored assets identical. This shares labels and result presentation, not classifier, router or approval logic. Browser drafts remain in tab/panel memory. Cached results lose approval tokens/digests before restoration; active approvals still use the core's exact-preview checks. The VS Code adapter reads only the explicitly chosen generated handoff output for its readable preview and exports an example only through a native save dialog.
+
 ## Extensibility
 
 Profiles/adapters should be independently versionable and replaceable:

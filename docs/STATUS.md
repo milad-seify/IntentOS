@@ -58,7 +58,7 @@ No slice is complete: 8A sessions have not begun, 8B is at the manual-template s
 
 ## Current verification baseline
 
-The current UI candidate passed 254 Python unit tests locally (one existing skip) before its final exact-head gate. Historical pre-B1 baseline was 120 tests. Use exact-head CI for the final pass/fail gate rather than treating a local count as release acceptance. Coverage includes review-only classification/policy, release identity, artifact, workflow permission, local UI HTTP security, Marketplace package, launcher and main-history regressions, plus CLI smoke and dedicated integration checks:
+The current UI candidate ran 258 Python unit tests locally, OK with one existing skip, before its final exact-head gate. Historical pre-B1 baseline was 120 tests. Use exact-head CI for the final pass/fail gate rather than treating a local count as release acceptance. Coverage includes review-only classification/policy, release identity, artifact, workflow permission, local UI HTTP security, Windows CRLF inputs, shared presentation assets, Marketplace package, launcher and main-history regressions, plus CLI smoke and dedicated integration checks:
 
 - in-memory MCP v2 protocol smoke
 - stdio subprocess MCP host-parity dogfood across four representative cases
@@ -66,7 +66,7 @@ The current UI candidate passed 254 Python unit tests locally (one existing skip
 - static regression for the repository Extension Development Host launch contract
 - real VS Code Extension Host integration checks for workspace and no-workspace executable resolution
 - real VS Code Webview task submission/navigation and isolated installed-VSIX activation
-- real Chromium local UI first-use, Project Compass, governance preview, route and theme checks
+- real Chromium local UI acceptance across all six sections, including visible progress/errors, session draft/file retention, CRLF evidence, conservative templates, approvals, and desktop/390px/320px layouts
 - release-artifact CI builds and inspects wheel/sdist, then tests clean core, MCP-extra, and sdist installations without publishing
 
 CI covers:

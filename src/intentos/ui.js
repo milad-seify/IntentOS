@@ -4,6 +4,9 @@ const navigation = document.getElementById('navigation');
 const workspace = document.getElementById('workspace');
 const result = document.getElementById('result');
 const feedback = document.getElementById('feedback');
+const ui = globalThis.IntentOSUI;
+const drafts = new Map(), reviews = new Map();
+let activeOperation = null;
 let current = 'start';
 let lastTask = '';
 let projectFolder = '';
@@ -45,16 +48,34 @@ function field(form,name,label,type='text',options,help) {
   if(type==='upload'){input.accept='.json,application/json';if(name==='records')input.multiple=true}
   if(name==='root')input.value=projectFolder;
   if(name==='text'&&lastTask)input.value=lastTask;
-  form.append(input);
+  if(type==='checkbox'){labelNode.className='inline-label';labelNode.prepend(input)}else form.append(input);
   if(help)form.append(el('p','hint',help));
   return input;
+}
+
+function inform(text='',error=false,focus=false) {
+  feedback.textContent=text;feedback.hidden=!text;feedback.className=text?'notice'+(error?' error':''):'';
+  feedback.setAttribute('role',error?'alert':'status');
+  if(focus&&text){feedback.focus({preventScroll:true});feedback.scrollIntoView({behavior:'instant',block:'nearest'})}
+}
+
+async function operate(container,handler) {
+  if(activeOperation)return;
+  activeOperation=container;
+  container.insertBefore(feedback,container.querySelector('.actions')||null);
+  container.setAttribute('aria-busy','true');container.setAttribute('aria-describedby','feedback');
+  const locked=[...document.querySelectorAll('button,input,textarea,select')].map(button=>[button,button.disabled]);
+  for(const [button]of locked)button.disabled=true;
+  inform('Working locally…');result.hidden=container!==result&&!result.contains(container);
+  try{await handler()}catch(error){inform((error.message||'The operation failed.')+' Review the inputs and try this action again.',true,true)}
+  finally{container.setAttribute('aria-busy','false');for(const [button,disabled]of locked)if(button.isConnected)button.disabled=disabled;activeOperation=null}
 }
 
 function card(action,title,description,fields,buttonText,handler) {
   const form=el('form','card');form.dataset.action=action;heading(form,title,description);
   for(const spec of fields)field(form,...spec);
   const actions=el('div','actions');const submit=el('button','primary',buttonText);submit.type='submit';actions.append(submit);form.append(actions);
-  form.addEventListener('submit',async(event)=>{event.preventDefault();submit.disabled=true;try{await handler(form)}finally{submit.disabled=false}});
+  form.addEventListener('submit',async(event)=>{event.preventDefault();await operate(form,()=>handler(form))});
   workspace.append(form);
   return form;
 }
@@ -63,7 +84,7 @@ async function upload(input) {
   const files=[...input.files];
   if(!files.length)return null;
   const items=[];
-  for(const file of files){if(file.size>100000)throw new Error('Choose a JSON file smaller than 100 KB.');items.push({name:file.name,content:await file.text()})}
+  for(const file of files){if(file.size>100000)throw new Error('Choose a file smaller than 100 KB.');const content=await file.text();if(input.accept.includes('json')){try{const value=JSON.parse(content);if(!value||typeof value!=='object'||Array.isArray(value))throw Error()}catch{throw new Error(file.name+' must contain one valid JSON object. Open File format and example for guidance.')}}items.push({name:file.name,content})}
   return input.multiple?items:items[0];
 }
 
@@ -74,19 +95,20 @@ async function values(form) {
     else if(input.type==='checkbox')out[input.name]=input.checked;
     else out[input.name]=input.value.trim();
   }
-  if(out.root)projectFolder=out.root;
+  if(out.root){projectFolder=out.root;for(const input of document.querySelectorAll('input[name=root]'))if(!input.value)input.value=projectFolder}
   if(out.text)lastTask=out.text;
   return out;
 }
 
 async function request(path,body) {
-  feedback.className='notice';feedback.textContent='Working locally…';result.hidden=true;
+  const encoded=JSON.stringify(body);
+  if(new TextEncoder().encode(encoded).length>64000)throw new Error('Selected text and files exceed the 64 KB local request limit. Choose smaller evidence files.');
   try{
-    const response=await fetch(path,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-IntentOS-CSRF':csrf},body:JSON.stringify(body)});
+    const response=await fetch(path,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-IntentOS-CSRF':csrf},body:encoded});
     const payload=await response.json();
     if(!response.ok)throw new Error(payload.error||'The local operation could not be completed.');
-    feedback.textContent='';return payload;
-  }catch(error){feedback.className='notice error';feedback.textContent=error.message||'The local operation failed.';throw error}
+    inform();return payload;
+  }catch(error){throw new Error(error.message||'The local operation failed. Keep the launcher terminal running and retry.')}
 }
 
 function list(parent,items,empty='None supplied') {
@@ -125,12 +147,16 @@ function download(data) {
   const url=URL.createObjectURL(blob);const anchor=el('a');anchor.href=url;anchor.download=data.filename||'intentos-result.json';document.body.append(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
-function show(action,payload) {
+function show(action,payload,restored=false) {
+  if(!restored)reviews.set(current,{action,payload:ui.reviewOnly(payload)});
+  if(result.contains(feedback))document.getElementById('main').append(feedback);
   result.replaceChildren();result.hidden=false;
   const top=el('div','result-top');const title=el('h2','',action==='prepare'?'Review your prepared task':action==='compass'?'Project Compass review':'Review the result');
   const status=el('span','status-pill',String(payload.status||'review').replaceAll('_',' '));
   if(payload.needs_clarification||payload.status==='blocked'||payload.status==='unavailable')status.classList.add('warn');
+  title.id='result-title';title.tabIndex=-1;result.setAttribute('aria-labelledby',title.id);
   top.append(title,status);result.append(top);
+  if(restored)result.append(el('div','notice warning','Previous review from this tab. Sources may have changed. Preview again before requesting approval.'));
   if(action==='prepare'){
     const intent=payload.intent||{};
     facts(result,[['Interpreted goal',intent.goal],['Risk',payload.risk_level],['Task type',payload.task_type],['AI tool',intent.target_tool]]);
@@ -144,36 +170,38 @@ function show(action,payload) {
     section(result,'Engineering guidance',payload.engineering_rules,'No additional engineering rule was needed.');
     section(result,'Context used',payload.context?.selected_paths,'No project document was supplied.');
     if(payload.routing?.reason)section(result,'AI tool and capability guidance',payload.routing.reason,'');
-    if(payload.prompt){preparedPrompt=payload.prompt;result.append(el('h3','','Prepared instructions'));const pre=el('pre','prepared',payload.prompt);result.append(pre);const copy=el('button','primary','Copy Prepared Task');copy.onclick=async()=>{try{await navigator.clipboard.writeText(preparedPrompt);feedback.className='notice';feedback.textContent='Prepared task copied. Paste it into your chosen AI tool; review its work afterward.'}catch{feedback.className='notice error';feedback.textContent='Clipboard access was denied. Select and copy the prepared text above.'}};result.append(copy)}
+    if(payload.prompt){preparedPrompt=payload.prompt;result.append(el('h3','','Prepared instructions'));const pre=el('pre','prepared',payload.prompt);result.append(pre);const copy=el('button','primary','Copy Prepared Task');copy.onclick=()=>copyText(payload.prompt,copy);result.append(copy)}
   }else if(action==='compass'){
     for(const [name,value] of Object.entries(payload.fields||{})){
       const block=el('section','section');block.append(el('h3','',name.replaceAll('_',' ')));
       facts(block,[['Evidence state',value.status],['Current claim',value.value]]);
-      for(const item of value.evidence||[])generic(block,item.path+':'+item.line,item);
+      for(const item of value.evidence||[])section(block,item.path+':'+item.line,item.text+' · '+(item.authoritative?'Owner-designated source':'Supporting source')+(item.stale?' · Stale — review required':''));
       result.append(block);
     }
     section(result,'Scope review',payload.task_scope?.explanation,'No task was supplied.');
     facts(result,[['Scope state',payload.task_scope?.status],['Further review required',payload.task_scope?.scope_review_required]]);
   }else{
-    if(action==='gates'&&payload.launch_approved===false){const note=el('div','notice warning','This review does not approve launch. An owner decision remains separate.');result.append(note)}
-    for(const [key,value] of Object.entries(payload)){
-      if(['download','approval_token','schema_version'].includes(key))continue;
-      generic(result,key,value);
-    }
+    ui.summarize(result,action,payload);
   }
   if(payload.download){const save=el('button','secondary','Download reviewable artifact');save.onclick=()=>download(payload.download);result.append(save)}
   if(payload.approval_token){const box=el('div','approval');box.append(el('h3','','Explicit approval required'),el('p','','Review the full result above. Approval applies only to this exact preview; stale source and replay checks remain active.'));
-    if(action==='outcomeLearn'){const label=el('label','','Owner approval reference');label.htmlFor='approval-ref';const input=el('input');input.id='approval-ref';input.placeholder='Issue, decision, or review reference';box.append(label,input)}
+    if(action==='outcomeLearn'){const label=el('label','','Owner approval reference');label.htmlFor='approval-ref';const input=el('input');input.id='approval-ref';input.required=true;input.placeholder='Issue, decision, or review reference';box.append(label,input)}
     const label=el('label','inline-label');const check=el('input');check.type='checkbox';label.append(check,el('span','','I reviewed this exact proposal and authorize this action.'));box.append(label);
     const button=el('button','primary',action==='handoffDispatch'?'Dispatch approved packet':'Apply approved proposal');button.disabled=true;check.onchange=()=>{button.disabled=!check.checked};
-    button.onclick=async()=>{button.disabled=true;try{const approved=await request('/api/approve',{approval_token:payload.approval_token,approval_ref:document.getElementById('approval-ref')?.value||''});show(action,approved)}catch{button.disabled=false}};box.append(button);result.append(box);
+    let token=payload.approval_token;
+    button.onclick=async()=>{const reference=box.querySelector('#approval-ref');if(reference&&!reference.reportValidity())return;if(!token||activeOperation)return;const exactToken=token;token=null;await operate(box,async()=>{const approved=await request('/api/approve',{approval_token:exactToken,approval_ref:reference?.value||''});show(action,approved)});button.disabled=true;check.disabled=true;if(button.isConnected)button.textContent='Preview again before another approval'};box.append(button);result.append(box);
   }
-  const details=el('details');details.append(el('summary','','Advanced: exact result'),el('pre','',JSON.stringify(payload,null,2)));result.append(details);
-  result.scrollIntoView({behavior:'auto',block:'start'});
+  const exact={...payload};delete exact.approval_token;
+  const details=el('details');details.append(el('summary','','Advanced: exact result'),el('pre','',JSON.stringify(exact,null,2)));result.append(details);
+  if(!restored){result.scrollIntoView({behavior:'instant',block:'start'});title.focus({preventScroll:true})}
 }
 
+async function copyText(text,button){result.insertBefore(feedback,button);try{await navigator.clipboard.writeText(text);inform('Prepared task copied. Paste it into your chosen AI tool; review its work afterward.')}catch{inform('Clipboard access was denied. Select and copy the prepared text above.',true,true)}}
+result.addEventListener('copy-handoff',event=>copyText(event.detail,event.target.querySelector('button')));
+workspace.addEventListener('input',()=>{const approval=result.querySelector('.approval');if(approval){approval.remove();result.append(el('p','notice warning','Inputs changed. Preview this workflow again before approval.'))}});
+
 async function runAction(action,form) {
-  try{const payload=await request('/api/action',{action,fields:await values(form)});show(action,payload)}catch{}
+  const payload=await request('/api/action',{action,fields:await values(form)});show(action,payload);
 }
 
 function rootField(){return ['root','Git project folder','text',undefined,'Enter the exact root of a project you chose. IntentOS reads or writes only the supported project files.']}
@@ -184,10 +212,10 @@ function renderStart(){
   const form=card('prepare','What would you like an AI tool to do?','A normal sentence is enough. You can revise it if IntentOS needs clarification.',[
     ['text','Your task','textarea'],['target','AI tool (optional)','select',[['','Detect from task'],['codex','Codex'],['claude-code','Claude Code'],['chatgpt','ChatGPT'],['cursor','Cursor']]],
     ['context','Project document (optional)','file',undefined,'Select a file only if you want its text included as context. No files are read automatically.'],
-    ['authority','This document is an approved authority','checkbox'],
+    ['authority','This is an owner-approved project source','checkbox',undefined,'Mark this only when the project owner accepted the document as authoritative.'],
   ],'Prepare task',async(form)=>{
-    try{const v=await values(form);const file=form.querySelector('[name=context]').files[0];const documents=file?[{name:file.name,content:await file.text(),authoritative:v.authority}]:[];
-      const payload=await request('/api/prepare',{text:v.text,target:v.target,documents});show('prepare',payload)}catch{}
+    const v=await values(form);const file=form.querySelector('[name=context]').files[0];const documents=file?[{name:file.name,content:await file.text(),authoritative:v.authority}]:[];
+    const payload=await request('/api/prepare',{text:v.text,target:v.target,documents});show('prepare',payload);
   });
   form.querySelector('[name=text]').placeholder='Codex: Refactor this function without changing behavior.';
   const note=el('div','notice');note.append(el('strong','','Before you hand off'),el('p','','Ready means the instructions are prepared. Your AI tool still needs the permissions you choose, and its result still needs verification.'));workspace.append(note);
@@ -197,10 +225,10 @@ function renderProject(){
   card('compass','Review selected project sources','Mark only genuinely approved sources as authoritative. The review does not change files.',[
     ['authoritative','Approved source (optional)','file'],['supporting','Additional source (optional)','file'],['task','Task to compare with scope (optional)','textarea'],
   ],'Review project',async(form)=>{
-    try{const v=await values(form);const approved=form.querySelector('[name=authoritative]').files[0];const supporting=form.querySelector('[name=supporting]').files[0];const documents=[];
+    const v=await values(form);const approved=form.querySelector('[name=authoritative]').files[0];const supporting=form.querySelector('[name=supporting]').files[0];const documents=[];
       if(approved)documents.push({name:approved.name,content:await approved.text(),authoritative:true});
       if(supporting)documents.push({name:supporting.name,content:await supporting.text(),authoritative:false});
-      const payload=await request('/api/compass',{documents,task:v.task});show('compass',payload)}catch{}
+    const payload=await request('/api/compass',{documents,task:v.task});show('compass',payload);
   });
 }
 
@@ -229,17 +257,29 @@ const advanced={
 
 function renderAdvanced(id){
   const note=el('div','notice warning');note.append(el('strong','','Advanced, evidence-based workflows'),el('p','','These operations use the existing Core 1.1 CLI contracts. Select files explicitly. JSON evidence is supplied by you; IntentOS does not attest its source.'));workspace.append(note);
-  for(const [action,title,description,fields,button] of advanced[id])card(action,title,description,fields,button,(form)=>runAction(action,form));
+  for(const [action,title,description,fields,button] of advanced[id]){
+    const form=card(action,title,description,fields,button,(form)=>runAction(action,form));
+    const example={route:'models',gates:'gates',checkpointCreate:'checkpoint',outcomeRecord:'outcome'}[action];
+    if(example)ui.addExample(form,example,download);
+  }
 }
 
 function navigate(id,moveFocus=false){
-  current=id;workspace.replaceChildren();result.hidden=true;feedback.textContent='';navigation.replaceChildren();
+  if(activeOperation)return;
+  document.getElementById('main').append(feedback);inform();
+  if(workspace.childNodes.length)drafts.set(current,[...workspace.childNodes]);
+  current=id;workspace.replaceChildren();result.replaceChildren();result.hidden=true;navigation.replaceChildren();
   const page=pages.find(item=>item.id===id)||pages[0];
   document.getElementById('eyebrow').textContent=page.label;document.getElementById('page-title').textContent=page.title;document.getElementById('page-description').textContent=page.description;
   for(const item of pages){const button=el('button',item.id===id?'active':'',item.label);button.type='button';button.setAttribute('aria-current',item.id===id?'page':'false');button.onclick=()=>navigate(item.id,true);navigation.append(button)}
-  if(id==='start')renderStart();else if(id==='project')renderProject();else renderAdvanced(id);
-  window.scrollTo(0,0);
-  if(moveFocus)document.getElementById('main').focus();
+  if(drafts.has(id))workspace.append(...drafts.get(id));
+  else if(id==='start')renderStart();else if(id==='project')renderProject();else renderAdvanced(id);
+  for(const input of workspace.querySelectorAll('input[name=root]'))if(!input.value)input.value=projectFolder;
+  if(reviews.has(id)){const prior=reviews.get(id);show(prior.action,prior.payload,true)}
+  window.scrollTo({top:0,behavior:'instant'});
+  if(moveFocus)document.getElementById('main').focus({preventScroll:true});
 }
+
+document.getElementById('clear-session').onclick=()=>{if(activeOperation)return;if(!confirm('Clear drafts, selected files and reviews in this tab? This does not undo approved changes.'))return;drafts.clear();reviews.clear();workspace.replaceChildren();lastTask='';projectFolder='';preparedPrompt='';navigate('start',true)};
 
 navigate('start');

@@ -22,6 +22,8 @@ The VS Code Activity Bar opens a native-themed IntentOS workbench. Start prepare
 
 `intentos ui` launches a local browser experience for a user without VS Code. Its first screen asks for a goal and optional AI tool or project documents, then explains the task interpretation, risk, approval boundaries and verification before Copy Prepared Task. Advanced sections use selected evidence files and a separate preview/approval step for consequential operations. Missing or conflicting facts remain visible; readiness is not a claim that work was completed or verified. See [Simple UI](SIMPLE_UI.md) for the exact workflow and limits.
 
+Both graphical candidates retain unsent drafts and chosen files only in the current tab/panel memory, provide an explicit clear action, and label restored reviews. Returning to a review never restores an approval action: fresh previews and the existing revision/digest checks remain necessary. Feedback belongs beside the initiating action, with busy controls and accessible error focus. Advanced workflows offer clearly marked evidence examples and semantic summaries before exact technical details; those examples supply no approvals or observed results.
+
 ## One core, multiple surfaces
 
 All user-facing surfaces should call the same IntentOS core rather than reimplementing routing, policy, context, or verification logic.
