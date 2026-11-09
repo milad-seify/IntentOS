@@ -61,7 +61,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Check VS Code extension syntax
-        run: node --check integrations/vscode/extension.js
+        run: |
+          node --check integrations/vscode/extension.js
+          node --check integrations/vscode/executable.js
+          node --check integrations/vscode/workbench.js
+          node --check src/intentos/ui.js
+          node --check src/intentos/ui-support.js
+          node --check integrations/vscode/ui-support.js
 
   distribution-artifacts:
     runs-on: ubuntu-latest

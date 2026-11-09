@@ -27,6 +27,24 @@ package = pathlib.Path(intentos.__file__).resolve()
 site = pathlib.Path(sysconfig.get_paths()["purelib"]).resolve()
 assert package.is_relative_to(site), (package, site)
 """
+INSTALLED_UI_CHECK = """
+from intentos.ui import IntentOSUIServer
+from urllib.request import build_opener, HTTPCookieProcessor
+import http.cookiejar
+import threading
+with IntentOSUIServer() as server:
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    client = build_opener(HTTPCookieProcessor(http.cookiejar.CookieJar()))
+    client.open(server.launch_url)
+    with client.open(server.origin + '/') as response:
+        assert b'IntentOS' in response.read()
+    for name in ('ui.js', 'ui.css', 'ui-support.js'):
+        with client.open(server.origin + '/' + name) as response:
+            assert response.status == 200 and response.read()
+    server.shutdown()
+    thread.join()
+"""
 
 
 def check_metadata(artifact: Path, version: str) -> None:
@@ -98,6 +116,7 @@ def validate(dist: Path) -> None:
         run([cli, "--help"], env)
         smoke([cli], env)
         smoke([python, "-m", "intentos"], env)
+        run([python, "-c", INSTALLED_UI_CHECK], env)
 
         python, _, env = environment("mcp", f"{wheels[0]}[mcp]")
         run([python, "-c", "import importlib.metadata; assert any(e.name == 'intentos-mcp' "
@@ -109,6 +128,7 @@ def validate(dist: Path) -> None:
         python, cli, env = environment("sdist", str(sdists[0]))
         run([cli, "--help"], env)
         smoke([cli], env)
+        run([python, "-c", INSTALLED_UI_CHECK], env)
     print("Artifact metadata, hygiene, clean core/MCP/sdist installs and smoke checks passed.")
 
 

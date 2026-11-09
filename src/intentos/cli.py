@@ -61,6 +61,9 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
+    ui = subparsers.add_parser("ui", help="Open the local IntentOS graphical workbench.")
+    ui.add_argument("--no-browser", action="store_true", help="Print a one-time local URL without opening a browser.")
+
     optimize = subparsers.add_parser("optimize", help="Optimize a request for an AI tool or agent.")
     _add_intent_arguments(optimize)
     optimize.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
@@ -827,6 +830,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     _configure_output_encoding()
     args = _build_parser().parse_args(argv)
     try:
+        if args.command == "ui":
+            from .ui import serve_ui
+
+            serve_ui(open_browser=not args.no_browser)
+            return 0
         if args.command == "optimize":
             return _run_optimize(args)
         if args.command == "skill":

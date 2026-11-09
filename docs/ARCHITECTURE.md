@@ -106,11 +106,13 @@ A bounded interoperability adapter for compatible AI agents. It may expose Inten
 
 ### VS Code extension
 
-An editor-native thin client over the same core. It may visualize task type, risk, selected context, approval boundaries, model/capability recommendations, verification, and workspace proposals, and may hand prepared tasks to connected agents.
+The editor-native adapter calls the local CLI with bounded, named commands. Its Activity Bar and workbench render the result contracts, take explicitly selected source/evidence files, and require a separate exact-preview confirmation for project writes and supported Codex dispatch. It keeps Command Palette/status-bar preparation and does not implement classification, routing, governance or approval rules in JavaScript.
 
 ### Simple UI
 
-A low-friction surface for users who should not need CLI, prompt-engineering, or MCP knowledge. It should use outcome-first language and progressive disclosure of advanced details.
+`intentos ui` serves bundled HTML/CSS/JavaScript from a Python standard-library HTTP server bound to loopback. Its basic Prepare/Project review invokes the existing Python core. Advanced named actions call the installed CLI's supported contracts, with explicit uploaded evidence and temporary artifacts; the UI has no general command or filesystem endpoint. A one-time local session URL, cookie, Origin and CSRF checks, bounded inputs, digest-bound approvals and source revision checks protect the local workflow. The browser adds presentation only, with outcome-first language and progressive disclosure.
+
+The two independent packages bundle the same `ui-support.js` presentation helpers and conservative evidence examples; a contract test keeps the mirrored assets identical. This shares labels and result presentation, not classifier, router or approval logic. Browser drafts remain in tab/panel memory. Cached results lose approval tokens/digests before restoration; active approvals still use the core's exact-preview checks. The VS Code adapter reads only the explicitly chosen generated handoff output for its readable preview and exports an example only through a native save dialog.
 
 ## Extensibility
 
