@@ -67,14 +67,14 @@ Current surfaces:
 - **CLI** — portable use from the terminal and scripts.
 - **Python API** — programmatic access for integrations and automation.
 - **MCP adapter** — optional local stdio connection exposing one bounded `prepare_task` tool.
-- **VS Code extension** — the published `0.1.1` release provides Prepare → Review → Copy. The development candidate adds an Activity Bar workbench for the existing project, governance, delegation, recovery and outcome workflows.
+- **VS Code extension** — the published `0.1.1` release provides Prepare → Review → Copy. The unreleased `0.2.0` candidate adds an Activity Bar workbench for the existing project, governance, delegation, recovery and outcome workflows.
 - **Agent Skills** — portable, reusable `SKILL.md` guidance.
 
-Additional source-candidate surface:
+Accepted, not-yet-published Core `1.1.0` surface:
 
-- **Local Simple UI (development candidate)** — `intentos ui` opens an outcome-first local browser interface for Prepare → Review → Copy and guided access to the existing F01–F10 operations. See [the UI guide](docs/SIMPLE_UI.md).
+- **Local Simple UI (Core `1.1.0` release candidate)** — `intentos ui` opens an outcome-first local browser interface for Prepare → Review → Copy and guided access to the existing F01–F10 operations. See [the UI guide](docs/SIMPLE_UI.md).
 
-The new graphical scope was explicitly owner authorized after the accepted F01–F10 core source freeze; the combined UI candidate still needs its own exact-SHA acceptance. Neither interface silently runs an agent.
+The owner-approved graphical scope was integrated by [PR #66](https://github.com/milad-seify/IntentOS/pull/66), accepted at `862c5be0b15125c9f7e3f0ff24de2580fad39a51` with [post-merge CI 7/7](https://github.com/milad-seify/IntentOS/actions/runs/42633513115). Neither Core 1.1.0 nor extension 0.2.0 is published; neither interface silently runs an agent. Neither interface silently runs an agent.
 
 Advanced controls should use **progressive disclosure**: everyday users see simple outcome-first actions, while experts can inspect and control context, risk, policy, routing, cost, approvals, and verification.
 
@@ -95,6 +95,10 @@ intentos optimize "Refactor the parser" --target codex
 ```
 
 The Python distribution is named `intentos-engineering`; its import package and CLI remain `intentos`. A clean public installation of version 1.0.1 was verified.
+
+### Core 1.1.0 source candidate (not yet on PyPI)
+
+After installing from the accepted checkout, launch the local graphical UI with `intentos ui`, or use `intentos ui --no-browser` for a one-time local link. Do not expose the link or loopback server through a proxy. The extension `0.2.0` candidate requires the Core `1.1.0` CLI; public versions remain Core `1.0.1` and extension `0.1.1` until independently published.
 
 ### Development checkout
 

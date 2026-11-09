@@ -33,6 +33,12 @@ The workflow published the exact verified VSIX artifact, with digest `sha256:1ae
 
 The release adds a visible `$(sparkle) IntentOS` status-bar launcher, the approved extension icon at `integrations/vscode/assets/icon.png`, and a genuine Review screenshot at `integrations/vscode/assets/review-ready.png`. The existing Command Palette path remains available, and the product boundary remains Prepare → Review → Copy; this release does not add agent execution or automatic context integration.
 
+## 0.2.0 — unpublished release-preparation candidate
+
+The Activity Bar Workbench and F01–F10 graphical access were source-accepted in [PR #66](https://github.com/milad-seify/IntentOS/pull/66), merged at `862c5be0b15125c9f7e3f0ff24de2580fad39a51` with [post-merge CI 7/7](https://github.com/milad-seify/IntentOS/actions/runs/42633513115). The extension manifest is prepared for `0.2.0`, but the **public Marketplace version remains `0.1.1`**. See [candidate release notes](RELEASE_NOTES_VSCODE_0.2.0.md).
+
+The advanced Workbench needs independently installed and verified Core `1.1.0`; publish Core first. Before extension publication, check reviewed version metadata, exact-head CI, installed VSIX/Extension Host, and the existing protected `vscode-marketplace` environment with reviewer/tag restrictions. A separately authorized immutable `vscode-v0.2.0` tag may then trigger OIDC exact-artifact publication; verify digest and public install. This preparation PR does not authorize a tag, publishing or Phase 8.
+
 ## Trusted Publishing configuration
 
 Keep Marketplace identity distinct from GitHub ownership when maintaining the publisher's Trusted Publishing policy:

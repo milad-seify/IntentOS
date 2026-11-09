@@ -2,15 +2,17 @@
 
 ## Current phase
 
-**PRE-RELEASE UI/UX COMPLETION — IMPLEMENTATION CANDIDATE.** F01–F10 core source was accepted and frozen at `8b9b49fc82a5f038dcd36577e3037f697a5c0819` after [PR #65](https://github.com/milad-seify/IntentOS/pull/65) merged and seven post-merge CI jobs passed. [D-032](DECISIONS.md) records that exact historical scope. The owner then authorized [D-033](DECISIONS.md): graphical access through VS Code and a local-first Simple UI before publication and Phase 8. This new integrated candidate is **not yet accepted or frozen**; it needs its own exact-SHA verification and owner review.
+**RELEASE PREPARATION — SOURCE ACCEPTED, PACKAGES NOT PUBLISHED.** F01–F10 Core source was accepted at `8b9b49fc82a5f038dcd36577e3037f697a5c0819` under D-032. The D-033 graphical scope passed real-browser and VS Code checks; [PR #66](https://github.com/milad-seify/IntentOS/pull/66) was Squash Merged into `main` at `862c5be0b15125c9f7e3f0ff24de2580fad39a51`. [Exact post-merge main CI 42633513115](https://github.com/milad-seify/IntentOS/actions/runs/42633513115) passed 7/7. Owner integrated pre-validation acceptance was recorded in the [PR #66 closeout](https://github.com/milad-seify/IntentOS/pull/66#issuecomment-6742471559).
 
-Existing **published** releases remain Core `1.0.1` and VS Code `0.1.1`; source metadata is Core `1.1.0`, **not published**. The current development branch adds editor and local browser access without changing the published artifacts. Operational Phase 8A/8B/8C and owner-led Idea-to-Production dogfooding remain **DEFERRED / NOT STARTED**, with their criteria unchanged.
+**Versions:** Core `1.1.0` and extension `0.2.0` are release candidates, not yet published. Public releases remain Core `1.0.1` and extension `0.1.1`. Release-preparation metadata and docs require a fresh PR CI and post-merge verification. No new tags, GitHub Release, PyPI or Marketplace publication are authorized by preparation alone.
+
+Phase 8A/8B/8C and owner-led Idea-to-Production Dogfooding remain **NOT STARTED**, requiring separate authorization and genuine external evidence.
 
 ## Post-Phase-7 development program
 
 - **Current direction:** [D-031](DECISIONS.md) and [DELIVERY_PROGRAM.md](DELIVERY_PROGRAM.md) require all F01–F10 outcomes. Earlier B2/C1/D1 deferrals and the early Freeze proposal are historical decisions superseded for this delivery scope.
-- **Current implementation:** F01–F10 source and CLI access were accepted in PR #65. The current UI branch adapts those operations to an editor workbench and a standalone loopback browser interface. Its new integration and security checks are developer verification, not operational Phase 8 evidence. Codex dispatch still requires explicit approval; agent completion is not verification, and other agents remain manual handoffs.
-- **Historical evidence:** Stage E readiness, [B2-OBS-001](B2_CONTINUITY_OBSERVATION_001.md) and PR #65's accepted source freeze remain accurate for their respective revisions. None establishes acceptance of the new integrated UI candidate.
+- **Current implementation:** F01–F10 source and CLI access were accepted in PR #65. PR #66 integrated those operations in an editor workbench and standalone loopback browser UI. Source acceptance is recorded on the merged SHA; developer tests are not operational Phase 8 evidence. Codex dispatch still requires explicit approval; agent completion is not verification, and other agents remain manual handoffs.
+- **Historical evidence:** Stage E readiness, [B2-OBS-001](B2_CONTINUITY_OBSERVATION_001.md) and PR #65's accepted source freeze remain accurate for their respective revisions. The new integrated source acceptance is independently recorded in PR #66's closeout; the older evidence remains pinned to its original source revisions.
 - **Deferred activity:** operational Phase 8A/8B/8C and owner-led Idea-to-Production dogfooding await complete implementation, one final integrated acceptance, and separately authorized execution.
 
 ## Implemented

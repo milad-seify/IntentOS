@@ -2,7 +2,7 @@
 
 IntentOS Core 1.0.1 is the current PyPI release as `intentos-engineering`. The [`v1.0.1` tag and GitHub Release](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.1) are published, the [Trusted Publishing workflow succeeded](https://github.com/milad-seify/IntentOS/actions/runs/41685995740), and a clean external public installation was verified. Version 1.0.0 and its [original release](https://github.com/milad-seify/IntentOS/releases/tag/v1.0.0) remain preserved. This document retains the release controls for future versions.
 
-**Unpublished next-version candidate (2026-11-05):** F01–F10 source changes are staged as **Core `1.1.0`**, a backward-compatible minor release candidate adding CLI capabilities while retaining stable Python/MCP/VS Code v1 contracts. [D-033](DECISIONS.md) separately authorizes a local Simple UI and editor graphical access before publication. The new integrated revision requires fresh exact-SHA source acceptance, installed wheel/sdist UI launch and interactive checks, plus a separate VSIX/version decision. **No v1.1.0 tag, package publication or GitHub Release is authorized by this planning note.** The public current Core is still `1.0.1`.
+**Unpublished next-version candidate (2026-11-09):** Core `1.1.0` includes F01–F10 and the Simple UI. The owner accepted the integrated source after [PR #66](https://github.com/milad-seify/IntentOS/pull/66) merged at `862c5be0b15125c9f7e3f0ff24de2580fad39a51`; [post-merge main CI](https://github.com/milad-seify/IntentOS/actions/runs/42633513115) passed 7/7. Extension `0.2.0` is independently prepared and requires Core 1.1.0. Release-preparation revisions need fresh exact-SHA CI and publication still requires separate authorization. **No tag, new package or GitHub Release is authorized by this planning note.** Current public Core remains `1.0.1`.
 
 ## Patch 1.0.1 publication (completed)
 
@@ -50,6 +50,15 @@ The action is pinned to `7245906fb61fa33a13554f9d5fb856fe61758086`, verified aga
 10. In a new virtual environment outside the checkout, run `python -m pip install intentos-engineering`, then `intentos --help`, `intentos optimize "Write a short announcement" --target chatgpt --json`, and the equivalent `python -m intentos` invocation. Verify installed metadata reports version `1.0.0`.
 11. In another clean environment, run `python -m pip install "intentos-engineering[mcp]"`, then the repository's `tests/mcp_smoke.py` and `tests/mcp_stdio_parity.py` using that environment's Python and PATH. These exercise the installed `intentos-mcp` entry point.
 12. After successful PyPI verification, create the GitHub Release from the same `v1.0.0` tag using [RELEASE_NOTES_1.0.0.md](RELEASE_NOTES_1.0.0.md). This was completed; the release notes are the published announcement.
+
+## Core 1.1.0 pre-publication checklist (not authorization)
+
+1. Review and merge the release-preparation PR only after exact-head CI succeeds; require exact post-merge `main` CI and matching `pyproject.toml` / `v1.1.0` identity validation.
+2. Verify the protected `pypi` GitHub environment has required reviewer approval, allowed release-tag deployments and tag immutability. If these settings are unreadable, require explicit maintainer verification; do not assume protection.
+3. Before publication, validate wheel/sdist clean installs and installed `intentos ui` and optional MCP flows. The release workflow must publish the same digest-verified artifacts it builds.
+4. Only after separate owner approval, create and push a single annotated `v1.1.0` tag on the verified release commit and approve the protected Trusted Publishing deployment.
+5. Verify actual PyPI 1.1.0 metadata, artifact digests, and clean public CLI/UI/MCP installs; only then create the corresponding GitHub Release using [Core notes](RELEASE_NOTES_1.1.0.md).
+6. Separately approve and publish extension 0.2.0 after public Core 1.1.0 verification.
 
 ## Future releases
 
