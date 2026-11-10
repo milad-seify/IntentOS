@@ -24,15 +24,15 @@ intentos --help
 4. Choose **Copy Prepared Task**.
 5. Paste the prepared task into Codex, ChatGPT, Claude, Gemini, Cursor, or another AI tool.
 
-The status bar and Command Palette remain available for keyboard-oriented use. The currently published Marketplace `0.1.1` release contains this basic flow. Version `0.2.0` is a release candidate, not yet available on the Marketplace.
+The status bar and Command Palette remain available for keyboard-oriented use. Version `0.2.0` preserves this basic flow and adds a guided Workbench.
 
 ![IntentOS Review showing a ready Codex task, risk, approval boundaries, verification, and Copy Prepared Task](assets/review-ready.png)
 
 The basic flow does not send the task to an AI tool or execute it.
 
-## Workbench (0.2.0 release candidate)
+## Workbench (0.2.0)
 
-The `0.2.0` source candidate adds an **IntentOS** Activity Bar entry. Choose **Open workbench** to get a larger native-themed view:
+Version `0.2.0` adds an **IntentOS** Activity Bar entry. Choose **Open workbench** to get a larger native-themed view:
 
 - **Start:** prepare, clarify, review risk/context/approvals/verification and copy the result.
 - **Project:** review explicitly selected project sources and their provenance.
@@ -41,7 +41,7 @@ The `0.2.0` source candidate adds an **IntentOS** Activity Bar entry. Choose **O
 - **Recover:** create or review a checkpoint against selected context and external operation evidence.
 - **Outcomes:** record, compare and learn from caller-supplied evidence.
 
-These screens require the Core `1.1.0` CLI; public Core `1.0.1` lacks advanced commands. Publish and independently verify Core `1.1.0` before releasing extension `0.2.0`. Files are selected explicitly with the VS Code picker. Project writes and Codex dispatch require an exact CLI preview and a separate modal approval. An agent turn is never proof of a verified result. See [the UI contract](../../docs/UX.md) and [graphical coverage matrix](../../docs/SIMPLE_UI.md).
+These screens require IntentOS Core `1.1.0` or later, installed separately and available through the configured `intentos` executable. The extension does not install Core automatically. Files are selected explicitly with the VS Code picker. Project writes and Codex dispatch require an exact CLI preview and a separate modal approval. An agent turn is never proof of a verified result. See [the UI contract](../../docs/UX.md) and [graphical coverage matrix](../../docs/SIMPLE_UI.md).
 
 Drafts and chosen files remain only in this workbench panel's memory while you navigate. Close the panel or choose **Clear session drafts** to remove them. A previous review is labeled and requires a new preview before approval. Errors appear beside the action and receive keyboard focus; controls recover after failure. **File format and example** explains the advanced evidence inputs and can save a conservative JSON starting point through a native save dialog. Replace its placeholders with real evidence; it supplies no approval or observed outcome. Portable handoffs show readable instructions with Copy as well as the saved packet, and exact technical results stay expandable.
 
@@ -59,7 +59,7 @@ Drafts and chosen files remain only in this workbench panel's memory while you n
 
 - The extension invokes the local IntentOS CLI. It has no telemetry or hosted backend.
 - It does not automatically crawl repository files or collect project context.
-- Basic preparation does not require AI-provider credentials. The candidate workbench supports only the existing approval-bound Codex dispatch and manual handoff for other targets.
+- Basic preparation does not require AI-provider credentials. The advanced workbench supports only the existing approval-bound Codex dispatch and manual handoff for other targets.
 - It has no MCP client, telemetry or hosted backend.
 
 ## Development
