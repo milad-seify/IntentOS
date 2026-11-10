@@ -124,7 +124,7 @@ assert(!html.includes('https://'));
 
         self.assertEqual(
             (manifest["publisher"], manifest["name"], manifest["displayName"], manifest["version"]),
-            ("milad-seyfi", "intentos-vscode", "IntentOS", "0.1.1"),
+            ("milad-seyfi", "intentos-vscode", "IntentOS", "0.2.0"),
         )
         self.assertNotIn("private", manifest)
         self.assertEqual(manifest["license"], "MIT")
