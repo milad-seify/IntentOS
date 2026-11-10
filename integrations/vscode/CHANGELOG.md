@@ -1,6 +1,6 @@
 # Change Log
 
-## 0.2.0 — Unpublished release candidate
+## 0.2.0
 
 - Add the Activity Bar IntentOS Workbench for Start, Project, Govern, Delegate, Recover and Outcomes using the shared Core.
 - Provide guided access to F01–F10 project review, approval-bound governance, routing, portable handoff, checkpoints and outcomes.
